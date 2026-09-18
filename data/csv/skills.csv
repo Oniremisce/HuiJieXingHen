@@ -1,7 +1,7 @@
 id,name,type,power,energy_cost,cutscene_id
-skill_mech_s1,过载脉冲,small,35,0,
-skill_mech_ult,协议·湮灭炮击,ult,120,100,cut_mech_ult
-skill_arcane_s1,元素箭,small,30,0,
-skill_arcane_ult,大源回响·星陨,ult,115,100,cut_arcane_ult
-skill_xian_s1,流云剑诀,small,32,0,
-skill_xian_ult,天道·万剑归宗,ult,110,100,cut_xian_ult
+skill_mech_s1,过载脉冲,small,1.2,1,
+skill_mech_ult,协议·湮灭炮击,ult,2.5,3,cut_mech_ult
+skill_arcane_s1,元素箭,small,1.2,1,
+skill_arcane_ult,大源回响·星陨,ult,2.5,3,cut_arcane_ult
+skill_xian_s1,流云剑诀,small,1.2,1,
+skill_xian_ult,天道·万剑归宗,ult,2.5,3,cut_xian_ult

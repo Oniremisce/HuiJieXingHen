@@ -135,7 +135,7 @@ class SkillData extends BaseRow:
 	var id: String = ""
 	var name: String = ""
 	var type: String = ""
-	var power: int = 0
+	var power: float = 0.0
 	var energy_cost: int = 0
 	var cutscene_id: String = ""
 
@@ -144,13 +144,13 @@ class SkillData extends BaseRow:
 		d.id = BaseRow.field_str(row, "id")
 		d.name = BaseRow.field_str(row, "name")
 		d.type = BaseRow.field_str(row, "type")
-		d.power = BaseRow.field_int(row, "power")
+		d.power = BaseRow.field_float(row, "power")
 		d.energy_cost = BaseRow.field_int(row, "energy_cost")
 		d.cutscene_id = BaseRow.field_str(row, "cutscene_id")
 		return d
 
 	func _to_string() -> String:
-		return "SkillData{id=%s, name=%s, type=%s, power=%d, energy_cost=%d, cutscene_id=%s}" % [
+		return "SkillData{id=%s, name=%s, type=%s, power=%.2f, energy_cost=%d, cutscene_id=%s}" % [
 			id, name, type, power, energy_cost, cutscene_id,
 		]
 
