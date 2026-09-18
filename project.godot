@@ -20,6 +20,8 @@ config/icon="res://icon.svg"
 MCPRuntimeServer="*res://addons/godot_mcp_toolkit/runtime/mcp_runtime_server.gd"
 Dialogic="*uid://ds2q0uclmolvu"
 DataManager="*uid://dhkkxbvd8pcwy"
+EventBus="*res://scripts/core/EventBus.gd"
+GameState="*res://scripts/core/GameState.gd"
 
 [dialogic]
 
