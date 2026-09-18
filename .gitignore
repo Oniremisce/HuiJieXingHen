@@ -1,0 +1,20 @@
+# Godot 4 缓存目录
+.godot/
+
+# 导入元数据（推进表 §2.7 约定不入库）
+*.import
+
+# 导出产物
+build/
+export/
+*.exe
+*.pck
+*.zip
+
+# 编辑器/IDE 本地配置
+.cursor/
+.vscode/
+
+# 系统文件
+Thumbs.db
+.DS_Store
