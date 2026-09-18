@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="汇界星痕"
-run/main_scene="res://scenes/main/Main.tscn"
+run/main_scene="res://scenes/map/CampMap.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

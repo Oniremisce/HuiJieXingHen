@@ -1,0 +1,30 @@
+[gd_resource type="TileSet" format=3]
+
+[ext_resource type="Texture2D" uid="uid://bxaiqorposexv" path="res://assets/maps/tilesets/ground.png" id="1_svk8h"]
+[ext_resource type="Texture2D" uid="uid://d24faq5kxvuqu" path="res://assets/maps/tilesets/obstacle.png" id="2_o2opk"]
+[ext_resource type="Texture2D" uid="uid://cbb4hhkpqpofi" path="res://assets/maps/tilesets/plaza.png" id="3_plaza"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_grass"]
+texture = ExtResource("1_svk8h")
+texture_region_size = Vector2i(64, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_obstacle"]
+texture = ExtResource("2_o2opk")
+texture_region_size = Vector2i(64, 32)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, -16, 32, 0, 0, 16, -32, 0)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_plaza"]
+texture = ExtResource("3_plaza")
+texture_region_size = Vector2i(64, 32)
+0:0/0 = 0
+
+[resource]
+tile_shape = 1
+tile_layout = 4
+tile_size = Vector2i(64, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_grass")
+sources/1 = SubResource("TileSetAtlasSource_obstacle")
+sources/2 = SubResource("TileSetAtlasSource_plaza")
