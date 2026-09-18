@@ -2,6 +2,7 @@
 
 [ext_resource type="TileSet" path="res://assets/maps/tilesets/test_tileset.tres" id="1_31hdg"]
 [ext_resource type="PackedScene" path="res://scenes/map/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/map/Interactable.tscn" id="3_inter"]
 
 [node name="TestMap" type="Node2D" unique_id=1446528490]
 y_sort_enabled = true
@@ -56,3 +57,29 @@ polygon = PackedVector2Array(-10, 0, 10, 0, 10, -28, -10, -28)
 
 [node name="Player" parent="." unique_id=24122051 instance=ExtResource("2_player")]
 position = Vector2(896, 64)
+
+[node name="NPC1" type="Node2D" parent="."]
+position = Vector2(672, 80)
+metadata/npc_id = "npc_test_01"
+
+[node name="Body" type="Polygon2D" parent="NPC1"]
+color = Color(0.3, 0.85, 0.4, 1)
+polygon = PackedVector2Array(-10, 0, 10, 0, 10, -40, -10, -40)
+
+[node name="Interactable" parent="NPC1" instance=ExtResource("3_inter")]
+npc_id = "npc_test_01"
+display_name = "测试NPC甲"
+action_type = "talk"
+
+[node name="NPC2" type="Node2D" parent="."]
+position = Vector2(672, 16)
+metadata/npc_id = "npc_test_02"
+
+[node name="Body" type="Polygon2D" parent="NPC2"]
+color = Color(0.7, 0.4, 0.95, 1)
+polygon = PackedVector2Array(-10, 0, 10, 0, 10, -40, -10, -40)
+
+[node name="Interactable" parent="NPC2" instance=ExtResource("3_inter")]
+npc_id = "npc_test_02"
+display_name = "测试NPC乙"
+action_type = "talk"
