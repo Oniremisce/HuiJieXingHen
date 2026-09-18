@@ -1,0 +1,5 @@
+quest_id,step,step_name,requirement,target,reward,next_step
+heartbond_01,1,开启对话,meet_awakened_mech_01,npc_mech_01,sand_50,2
+heartbond_01,2,赠礼,gift_mech_01,gift_sand_core,sand_100,3
+heartbond_01,3,共同战斗,win_battle_with_mech_01,battle_corrosion_beast,sand_150,4
+heartbond_01,4,完成对话,talk_after_battle_mech_01,npc_mech_01,recruit_awakened_mech_01,

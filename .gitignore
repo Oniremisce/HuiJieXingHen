@@ -2,7 +2,9 @@
 .godot/
 
 # 导入元数据（推进表 §2.7 约定不入库）
+# 例外：data/csv 的 CSV 用 keep 导入（避免被 Godot 误导入为翻译资源），该配置需入库
 *.import
+!data/csv/*.import
 
 # 导出产物
 build/

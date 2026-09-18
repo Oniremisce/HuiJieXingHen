@@ -1,0 +1,7 @@
+entry_id,name,kind,gold,weight
+entry_starlink_01,星缘令,starlink_token,true,0.5
+entry_cg_mech_01,角色CG·机律觉醒者,cg,true,1.5
+entry_cg_arcane_01,角色CG·秘法觉醒者,cg,true,1.5
+entry_cg_xian_01,角色CG·玄门觉醒者,cg,true,1.5
+entry_material_01,星砂材料包,material,false,40
+entry_stellium_01,随机星髓,stellium,false,55

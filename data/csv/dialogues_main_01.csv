@@ -1,0 +1,3 @@
+timeline_id,order,speaker_id,emotion,text,set_flag,flag_condition,choice_a,choice_b
+main_01,1,awakened_mech_01,normal,"你好，观测者。欢迎来到机律联邦的界隙观测站。",flag_meet_mech_01,,"主动搭话","安静观察"
+main_01,2,awakened_mech_01,happy,"今天的光谱数据也很漂亮，一切都在正常运转。",,,,

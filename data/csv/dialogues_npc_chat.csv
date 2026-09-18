@@ -1,0 +1,3 @@
+timeline_id,order,speaker_id,emotion,text,set_flag,flag_condition,choice_a,choice_b
+npc_chat_01,1,awakened_mech_01,normal,"观测站的能源读数有一点点漂移，我去校准一下。",,,,
+npc_chat_01,2,awakened_arcane_01,normal,"秘法评议会今天也在维持结界，辛苦了，观测者。",,,,

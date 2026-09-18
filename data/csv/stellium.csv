@@ -1,0 +1,4 @@
+id,name,main_stat,sub_stats,set_id
+stellium_mech_01,星髓·机律初阶,atk,"atk+2,hp+20",set_mech_01
+stellium_arcane_01,星髓·秘法初阶,spd,"crit+3,spd+2",set_arcane_01
+stellium_xian_01,星髓·玄门初阶,hp,"def+2,spd+2",set_xian_01

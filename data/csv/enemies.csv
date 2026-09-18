@@ -1,0 +1,2 @@
+id,name,hp,atk,def,spd,ai_pattern,drop_sand
+corrosion_beast,灾蚀兽,300,22,8,6,basic,50

@@ -1,0 +1,4 @@
+id,name,faction,system,hp,atk,def,spd,skill_small,skill_ult,portrait_id,sprite_id
+awakened_mech_01,待定,机律联邦,机律,120,18,10,9,skill_mech_s1,skill_mech_ult,portrait_mech_01,sprite_mech_01
+awakened_arcane_01,待定,秘法评议会,秘法,100,22,8,11,skill_arcane_s1,skill_arcane_ult,portrait_arcane_01,sprite_arcane_01
+awakened_xian_01,待定,太微仙盟,玄门,140,15,12,8,skill_xian_s1,skill_xian_ult,portrait_xian_01,sprite_xian_01
