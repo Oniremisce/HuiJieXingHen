@@ -33,7 +33,9 @@ UISystem="*res://scripts/core/UISystem.gd"
 
 [dialogic]
 
-directories/dch_directory={}
+directories/dch_directory={
+"test_npc": "res://dialogues/characters/test_npc.dch"
+}
 directories/dtl_directory={}
 layout/style_directory={}
 text/letter_speed=0.01

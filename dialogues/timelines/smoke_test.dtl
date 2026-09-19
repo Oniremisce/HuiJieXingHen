@@ -1,0 +1,4 @@
+join test_npc (normal) center
+test_npc (normal): 你好，异乡人。我是星痕冒烟测试员，负责验证对话窗与立绘占位。
+test_npc (happy): 你看，现在表情已切换为 happy，立绘占位也换成了暖色。
+test_npc: 三句台词播放完毕，冒烟测试到此结束。
