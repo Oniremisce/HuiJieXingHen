@@ -13,6 +13,8 @@ extends EditorScript
 ## 生成规则（Dialogic 2 官方 Timeline Text Syntax）：
 ##   - order 决定行序（数值升序，同 order 按 CSV 行序稳定排序）
 ##   - speaker 首次出现 → join <speaker> [(emotion)] center（TextEvent 不会自动上台）
+##   - speaker 切换（A→B）→ 先 leave <A> 再 join <B>（同台单人制；旁白不改变台上状态；
+##     同 speaker 连续台词只换表情不重复 join）
 ##   - 说话行：speaker+emotion → "<speaker> (<emotion>): <text>"；
 ##     仅 speaker → "<speaker>: <text>"；speaker 空 → 纯旁白行 "<text>"
 ##   - set_flag 非空 → 该行后追加 [signal arg="set_flag:<spec>"]（DialogicBridge→GameState 写 flag）
@@ -125,6 +127,7 @@ static func _validate_characters(tl_rows: Array) -> String:
 ## 组装单个 timeline 的 .dtl 文本（\n 行尾，末尾一个换行）
 static func _build_timeline_text(tl_rows: Array) -> String:
 	var joined := {}
+	var on_stage := ""  # 当前台上角色（T4.3：speaker 切换时 leave 旧角色）
 	var out := PackedStringArray()
 	for row in tl_rows:
 		var speaker := str(row.get("speaker_id", "")).strip_edges()
@@ -138,12 +141,18 @@ static func _build_timeline_text(tl_rows: Array) -> String:
 		if not cond.is_empty():
 			out.append("if " + _condition_expression(cond) + ":")
 			indent = "\t"
-		if not speaker.is_empty() and not joined.has(speaker):
-			if emotion.is_empty():
-				out.append(indent + "join " + speaker + " center")
-			else:
-				out.append(indent + "join " + speaker + " (" + emotion + ") center")
-			joined[speaker] = true
+		if not speaker.is_empty():
+			if on_stage != speaker:
+				if not on_stage.is_empty():
+					out.append(indent + "leave " + on_stage)
+					joined.erase(on_stage)
+				if not joined.has(speaker):
+					if emotion.is_empty():
+						out.append(indent + "join " + speaker + " center")
+					else:
+						out.append(indent + "join " + speaker + " (" + emotion + ") center")
+					joined[speaker] = true
+				on_stage = speaker
 		out.append(indent + _text_line(speaker, emotion, text))
 		if not set_flag.is_empty():
 			out.append(indent + '[signal arg="set_flag:' + set_flag + '"]')

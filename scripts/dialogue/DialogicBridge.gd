@@ -33,6 +33,9 @@ func _ready() -> void:
 	dialogic.signal_event.connect(_on_dialogic_signal)
 	dialogic.timeline_started.connect(_on_timeline_started)
 	dialogic.timeline_ended.connect(_on_timeline_ended)
+	# T4.3：世界暂停（PauseManager）期间对话照常播放——Dialogic 根设 ALWAYS
+	# （layout 节点在 start_timeline 中单独设置；子节点 INHERIT 随根生效）
+	dialogic.process_mode = Node.PROCESS_MODE_ALWAYS
 	var dtl_dir: Dictionary = _DRU.get_directory("dtl")
 	print("[DialogicBridge] ready: timelines=%s" % [str(dtl_dir.keys())])
 
@@ -42,13 +45,19 @@ func start_timeline(timeline_id: String) -> Variant:
 	_current_timeline_id = timeline_id
 	_fill_directories()  # 新转换的 .dtl 无需重启即可播放
 	var dialogic := get_node("/root/Dialogic")
+	dialogic.process_mode = Node.PROCESS_MODE_ALWAYS  # 每次播放前兜底
+	var layout: Variant = null
 	if _DRU.get_directory("dtl").has(timeline_id):
-		return dialogic.start(timeline_id)
-	var path := TIMELINE_DIR + "/" + timeline_id + ".dtl"
-	if FileAccess.file_exists(path):
-		return dialogic.start(path)
-	push_error("[DialogicBridge] 未知 timeline_id：%s（无对应 .dtl）" % timeline_id)
-	return null
+		layout = dialogic.start(timeline_id)
+	elif FileAccess.file_exists(TIMELINE_DIR + "/" + timeline_id + ".dtl"):
+		layout = dialogic.start(TIMELINE_DIR + "/" + timeline_id + ".dtl")
+	else:
+		push_error("[DialogicBridge] 未知 timeline_id：%s（无对应 .dtl）" % timeline_id)
+		return null
+	# start() 返回 layout 节点（挂 /root 下，不随 Dialogic 根继承）→ 单独设 ALWAYS
+	if layout is Node:
+		(layout as Node).process_mode = Node.PROCESS_MODE_ALWAYS
+	return layout
 
 
 ## ------------------------------------------------------------

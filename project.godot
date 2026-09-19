@@ -35,9 +35,15 @@ DialogicBridge="*res://scripts/dialogue/DialogicBridge.gd"
 [dialogic]
 
 directories/dch_directory={
+"awakened_arcane_01": "res://dialogues/characters/awakened_arcane_01.dch",
+"awakened_mech_01": "res://dialogues/characters/awakened_mech_01.dch",
+"awakened_xian_01": "res://dialogues/characters/awakened_xian_01.dch",
 "test_npc": "res://dialogues/characters/test_npc.dch"
 }
 directories/dtl_directory={
+"main_01": "res://dialogues/timelines/main_01.dtl",
+"npc_chat_01": "res://dialogues/timelines/npc_chat_01.dtl",
+"smoke_bridge": "res://dialogues/timelines/smoke_bridge.dtl",
 "smoke_test": "res://dialogues/timelines/smoke_test.dtl"
 }
 layout/style_directory={}

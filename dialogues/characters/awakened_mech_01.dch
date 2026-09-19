@@ -1,0 +1,40 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.35, 0.62, 0.78, 1),
+&"custom_info": {},
+&"default_portrait": "normal",
+&"description": "机律联邦·界隙观测员（阵营=机律）",
+&"display_name": "诺菈·星枢",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"angry": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_mech_01_angry.png"
+},
+"scene": ""
+},
+"happy": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_mech_01_happy.png"
+},
+"scene": ""
+},
+"normal": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_mech_01_normal.png"
+},
+"scene": ""
+},
+"sad": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_mech_01_sad.png"
+},
+"scene": ""
+}
+},
+&"scale": 1.0
+}

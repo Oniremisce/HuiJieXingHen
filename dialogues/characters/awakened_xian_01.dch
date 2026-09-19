@@ -1,0 +1,40 @@
+{
+"@path": "res://addons/dialogic/Resources/character.gd",
+"@subpath": NodePath(""),
+&"_translation_id": "",
+&"color": Color(0.35, 0.75, 0.58, 1),
+&"custom_info": {},
+&"default_portrait": "normal",
+&"description": "太微仙盟·游方修士（阵营=玄门）",
+&"display_name": "洛清弦",
+&"mirror": false,
+&"nicknames": [],
+&"offset": Vector2(0, 0),
+&"portraits": {
+"angry": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_xian_01_angry.png"
+},
+"scene": ""
+},
+"happy": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_xian_01_happy.png"
+},
+"scene": ""
+},
+"normal": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_xian_01_normal.png"
+},
+"scene": ""
+},
+"sad": {
+"export_overrides": {
+"image": "res://assets/portraits/awakened_xian_01_sad.png"
+},
+"scene": ""
+}
+},
+&"scale": 1.0
+}
