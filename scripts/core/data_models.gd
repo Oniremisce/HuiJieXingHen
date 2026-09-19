@@ -129,6 +129,8 @@ class CharacterData extends BaseRow:
 
 ## ------------------------------------------------------------
 ## 技能数据（skills.csv 一行）；type ∈ small|ult
+## 战斗为大招充能制（战斗系统 §3：小技能无消耗、大招需充能满），
+## 无耗能字段；power = 倍率（damage = max(1, atk*power - def)）
 ## ------------------------------------------------------------
 class SkillData extends BaseRow:
 
@@ -136,7 +138,6 @@ class SkillData extends BaseRow:
 	var name: String = ""
 	var type: String = ""
 	var power: float = 0.0
-	var energy_cost: int = 0
 	var cutscene_id: String = ""
 
 	static func from_csv_row(row: Dictionary) -> SkillData:
@@ -145,18 +146,18 @@ class SkillData extends BaseRow:
 		d.name = BaseRow.field_str(row, "name")
 		d.type = BaseRow.field_str(row, "type")
 		d.power = BaseRow.field_float(row, "power")
-		d.energy_cost = BaseRow.field_int(row, "energy_cost")
 		d.cutscene_id = BaseRow.field_str(row, "cutscene_id")
 		return d
 
 	func _to_string() -> String:
-		return "SkillData{id=%s, name=%s, type=%s, power=%.2f, energy_cost=%d, cutscene_id=%s}" % [
-			id, name, type, power, energy_cost, cutscene_id,
+		return "SkillData{id=%s, name=%s, type=%s, power=%.2f, cutscene_id=%s}" % [
+			id, name, type, power, cutscene_id,
 		]
 
 
 ## ------------------------------------------------------------
 ## 敌人数据（enemies.csv 一行）；drop_sand = 掉落星砂数量
+## skill_small/skill_ult → skills.csv 敌人技能行（战斗系统 §3：敌人同有小技能/大招）
 ## ------------------------------------------------------------
 class EnemyData extends BaseRow:
 
@@ -168,6 +169,8 @@ class EnemyData extends BaseRow:
 	var spd: int = 0
 	var ai_pattern: String = ""
 	var drop_sand: int = 0
+	var skill_small: String = ""
+	var skill_ult: String = ""
 
 	static func from_csv_row(row: Dictionary) -> EnemyData:
 		var d := EnemyData.new()
@@ -179,38 +182,54 @@ class EnemyData extends BaseRow:
 		d.spd = BaseRow.field_int(row, "spd")
 		d.ai_pattern = BaseRow.field_str(row, "ai_pattern")
 		d.drop_sand = BaseRow.field_int(row, "drop_sand")
+		d.skill_small = BaseRow.field_str(row, "skill_small")
+		d.skill_ult = BaseRow.field_str(row, "skill_ult")
 		return d
 
 	func _to_string() -> String:
-		return "EnemyData{id=%s, name=%s, hp=%d, atk=%d, def=%d, spd=%d, ai_pattern=%s, drop_sand=%d}" % [
-			id, name, hp, atk, def, spd, ai_pattern, drop_sand,
+		return "EnemyData{id=%s, name=%s, hp=%d, atk=%d, def=%d, spd=%d, ai_pattern=%s, drop_sand=%d, skill_small=%s, skill_ult=%s}" % [
+			id, name, hp, atk, def, spd, ai_pattern, drop_sand, skill_small, skill_ult,
 		]
 
 
 ## ------------------------------------------------------------
-## 星髓数据（stellium.csv 一行）；MVP 仅入抽卡池，
-## main_stat/sub_stats 保留原始字符串，具体词条解析留待装备系统
+## 星髓数据（stellium.csv 一行）；套装×槽位制（星髓系统.md §2~§4），无稀有度
+## (set_id, slot) 唯一确定星髓类型；slot 1-3 主词条固定（atk/def/hp），
+## slot 4-6 主词条为随机池：main_stat 与 main_base/main_max 均为 `|` 分隔串，
+## 三者按位一一对应（如 crit|crit_dmg|pct_atk 与 5|8|6 / 12|20|15）。
+## 百分比词条（pct_*/crit/crit_dmg/charge）数值单位 = 百分点（6 即 +6%）；
+## set_2_bonus/set_3_bonus 格式 "attr:value;attr:value"（cond_dmg 值形如 hp>70%,50）
 ## ------------------------------------------------------------
 class StelliumData extends BaseRow:
 
 	var id: String = ""
 	var name: String = ""
-	var main_stat: String = ""
-	var sub_stats: String = ""
 	var set_id: String = ""
+	var set_name: String = ""
+	var slot: int = 0
+	var main_stat: String = ""
+	var main_base: String = ""
+	var main_max: String = ""
+	var set_2_bonus: String = ""
+	var set_3_bonus: String = ""
 
 	static func from_csv_row(row: Dictionary) -> StelliumData:
 		var d := StelliumData.new()
 		d.id = BaseRow.field_str(row, "id")
 		d.name = BaseRow.field_str(row, "name")
-		d.main_stat = BaseRow.field_str(row, "main_stat")
-		d.sub_stats = BaseRow.field_str(row, "sub_stats")
 		d.set_id = BaseRow.field_str(row, "set_id")
+		d.set_name = BaseRow.field_str(row, "set_name")
+		d.slot = BaseRow.field_int(row, "slot")
+		d.main_stat = BaseRow.field_str(row, "main_stat")
+		d.main_base = BaseRow.field_str(row, "main_base")
+		d.main_max = BaseRow.field_str(row, "main_max")
+		d.set_2_bonus = BaseRow.field_str(row, "set_2_bonus")
+		d.set_3_bonus = BaseRow.field_str(row, "set_3_bonus")
 		return d
 
 	func _to_string() -> String:
-		return "StelliumData{id=%s, name=%s, main_stat=%s, sub_stats=%s, set_id=%s}" % [
-			id, name, main_stat, sub_stats, set_id,
+		return "StelliumData{id=%s, name=%s, set_id=%s, set_name=%s, slot=%d, main_stat=%s, main_base=%s, main_max=%s, set_2_bonus=%s, set_3_bonus=%s}" % [
+			id, name, set_id, set_name, slot, main_stat, main_base, main_max, set_2_bonus, set_3_bonus,
 		]
 
 

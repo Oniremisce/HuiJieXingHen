@@ -55,31 +55,61 @@ func _init() -> void:
 	_check(c2.spd == 7)
 	_check(c2.skill_small == "" and c2.skill_ult == "" and c2.portrait_id == "" and c2.sprite_id == "")
 
-	# [3] SkillData
+	# [3] SkillData（T2.8：大招充能制，无 energy_cost 字段；power=倍率）
 	var s := DM.SkillData.from_csv_row({
 		"id": "skill_mech_s1", "name": "脉冲斩", "type": "small",
-		"power": "35", "energy_cost": "0", "cutscene_id": "cut_mech_s1",
+		"power": "1.2", "cutscene_id": "",
 	})
 	print("[3] 技能: ", s)
 	_check(s.id == "skill_mech_s1" and s.name == "脉冲斩" and s.type == "small")
-	_check(s.power == 35 and s.energy_cost == 0 and s.cutscene_id == "cut_mech_s1")
+	_check(s.power == 1.2 and s.cutscene_id == "")
+	_check(not ("energy_cost" in s))
 
-	# [4] EnemyData
+	# [4] EnemyData（T2.8：扩 skill_small/skill_ult 双技能字段，关联 skills.csv enemy_ 前缀行）
 	var e := DM.EnemyData.from_csv_row({
-		"id": "corrosion_beast", "name": "灾蚀兽", "hp": "300", "atk": "22",
-		"def": "8", "spd": "6", "ai_pattern": "basic", "drop_sand": "50",
+		"id": "corrosion_beast", "name": "灾蚀兽", "hp": "150", "atk": "10",
+		"def": "6", "spd": "8", "ai_pattern": "simple", "drop_sand": "30",
+		"skill_small": "enemy_beast_small", "skill_ult": "enemy_beast_ult",
 	})
 	print("[4] 敌人: ", e)
-	_check(e.hp == 300 and e.atk == 22 and e.def == 8 and e.spd == 6)
-	_check(e.ai_pattern == "basic" and e.drop_sand == 50)
+	_check(e.hp == 150 and e.atk == 10 and e.def == 6 and e.spd == 8)
+	_check(e.ai_pattern == "simple" and e.drop_sand == 30)
+	_check(e.skill_small == "enemy_beast_small" and e.skill_ult == "enemy_beast_ult")
 
-	# [5] StelliumData
-	var st := DM.StelliumData.from_csv_row({
-		"id": "stellium_01", "name": "占位套装·机律", "main_stat": "atk",
-		"sub_stats": "spd+2;hp+20", "set_id": "set_mech_01",
+	# [4b] EnemyData：缺键容错 → 双技能缺省空串
+	var e2 := DM.EnemyData.from_csv_row({"id": "e_x", "hp": "abc"})
+	print("[4b] 敌人容错行: ", e2)
+	_check(e2.hp == 0 and e2.skill_small == "" and e2.skill_ult == "")
+
+	# [5] StelliumData（T2.8：套装×槽位制，slot 1-3 固定 / 4-6 随机池，无稀有度）
+	var st_fixed := DM.StelliumData.from_csv_row({
+		"id": "set1_slot1", "name": "攻击星髓", "set_id": "set1", "set_name": "套装1",
+		"slot": "1", "main_stat": "atk", "main_base": "30", "main_max": "75",
+		"set_2_bonus": "crit:15", "set_3_bonus": "cond_dmg:hp>70%,50",
 	})
-	print("[5] 星髓: ", st)
-	_check(st.main_stat == "atk" and st.sub_stats == "spd+2;hp+20" and st.set_id == "set_mech_01")
+	print("[5] 星髓固定主词条行: ", st_fixed)
+	_check(st_fixed.set_id == "set1" and st_fixed.set_name == "套装1" and st_fixed.slot == 1)
+	_check(st_fixed.main_stat == "atk" and st_fixed.main_base == "30" and st_fixed.main_max == "75")
+	_check(st_fixed.set_2_bonus == "crit:15" and st_fixed.set_3_bonus == "cond_dmg:hp>70%,50")
+
+	# [5b] slot 1-6 逐槽断言：1-3 固定词条 / 4-6 池串一一对应
+	var slot_specs := [
+		{"slot": "2", "stat": "def", "base": "25", "max": "60"},
+		{"slot": "3", "stat": "hp", "base": "180", "max": "450"},
+		{"slot": "4", "stat": "pct_atk|pct_def|pct_hp", "base": "6|6|6", "max": "15|15|15"},
+		{"slot": "5", "stat": "crit|crit_dmg|pct_atk", "base": "5|8|6", "max": "12|20|15"},
+		{"slot": "6", "stat": "charge|spd", "base": "6|8", "max": "15|20"},
+	]
+	for spec in slot_specs:
+		var st := DM.StelliumData.from_csv_row({
+			"id": "set2_slot" + spec["slot"], "name": "星髓" + spec["slot"],
+			"set_id": "set2", "set_name": "套装2", "slot": spec["slot"],
+			"main_stat": spec["stat"], "main_base": spec["base"], "main_max": spec["max"],
+			"set_2_bonus": "crit_dmg:15", "set_3_bonus": "cond_dmg:hp<50%,50",
+		})
+		print("[5b] 星髓 slot", spec["slot"], ": ", st)
+		_check(st.slot == int(spec["slot"]) and st.main_stat == spec["stat"])
+		_check(st.main_base == spec["base"] and st.main_max == spec["max"])
 
 	# [6] SummonEntryData（gold=金卡布尔，weight=浮点权重）
 	var se := DM.SummonEntryData.from_csv_row({
