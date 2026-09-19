@@ -72,7 +72,7 @@ func _draw() -> void:
 	for _e in ms.get_current_scene_exits():
 		pass
 
-	# 主角（体系色待定 → 白色三角箭头，指向朝向）
+	# 主角（体系待定 → 玩家黄 #FFEB4D，美术01 T2.3 规范基线）
 	var player := get_tree().current_scene.get_node_or_null("Player")
 	if player != null:
 		var pos := _to_view(player.global_position, tml)
@@ -115,5 +115,5 @@ func _draw_arrow(center: Vector2) -> void:
 	var pts := PackedVector2Array([
 		center + Vector2(0, -9), center + Vector2(7, 7), center + Vector2(0, 3), center + Vector2(-7, 7),
 	])
-	draw_colored_polygon(pts, Color(0.95, 0.97, 1.0))
+	draw_colored_polygon(pts, Color("FFEB4D"))
 	draw_polyline(_closed(pts), Color(0.1, 0.12, 0.16), 1.0)

@@ -45,8 +45,13 @@ func load_frames(f: SpriteFrames) -> void:
 	if _anim_sprite == null:
 		_anim_sprite = AnimatedSprite2D.new()
 		_anim_sprite.name = "AnimSprite"
+		# T2.6：帧 48×48，足底对齐节点原点 → offset=(0,-24) 中心向上
+		_anim_sprite.offset = Vector2(0.0, -24.0)
 		add_child(_anim_sprite)
 	_anim_sprite.sprite_frames = f
+	# 隐藏占位色块（Player 的 VisualRoot/Sprite），让 AnimatedSprite2D 独占显示
+	if _placeholder != null:
+		_placeholder.visible = false
 	_apply_frames()
 
 

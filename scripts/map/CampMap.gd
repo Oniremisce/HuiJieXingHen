@@ -23,6 +23,7 @@ const FLAG_ITEM_CRYSTAL := "inv_star_sand_crystal"  # 骨架 flag，T6.1 迁移 
 func _ready() -> void:
 	_event_bus.interact_requested.connect(_on_interact_requested)
 	_fill_npc_names()
+	_load_player_frames()
 	print("[CampMap] ready: npcs=3 trigger=1 pickup=1 shrine=1")
 	# T2.5 主角命名：首次进入营地弹命名面板（新档 flags 空 → 触发；
 	# 读档已有 hero_named flag / 已命名则不弹；deferred 避开场景切换帧）
@@ -45,6 +46,24 @@ func _fill_npc_names() -> void:
 		var tag := npc.get_node_or_null("NameTag/Label")
 		if tag != null:
 			tag.set("text", cd.name)
+
+
+## T2.6 帧条接入：Player 角色自动挂 CharacterAnimator.load_frames
+## 主角目前固定机律觉醒者（awakened_mech_01）；帧规格 idle 192×48=4 帧 / walk 384×48=8 帧
+func _load_player_frames() -> void:
+	var player := get_node_or_null("Player")
+	if player == null:
+		return
+	var anim := player.get_node_or_null("CharacterAnimator")
+	if anim == null:
+		return
+	var frames: SpriteFrames = ArtProvider.build_sprite_frames_for("awakened_mech_01")
+	if frames == null:
+		push_warning("[CampMap] 角色帧条构建失败")
+		return
+	anim.load_frames(frames)
+	anim.set_dir(2)  # 默认朝南 s=2 作为 idle 立绘首帧
+	print("[CampMap] Player 帧条已挂载（idle_<dir>/walk_<dir> 共 %d 动画）" % frames.get_animation_names().size())
 
 
 ## 命名触发（MVP 简化：CampMap 首次进入判定一次）

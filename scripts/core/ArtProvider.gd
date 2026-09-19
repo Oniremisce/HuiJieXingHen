@@ -33,13 +33,48 @@ func _ready() -> void:
 ## ------------------------------------------------------------
 
 ## 地图角色外观：真实帧条路径存在则加载，否则「体系色色块+名字」占位
+## T2.6 裁决①：哨兵改 _idle_e.png（首方向，与动画命名 `<state>_<dir>` 一致，
+## 消除与南向帧条 _idle_s.png 同名冲突风险）
 func get_character_sprite(id: String) -> Texture2D:
-	var real := "res://assets/sprites/characters/%s_idle_s.png" % id
+	var real := "res://assets/sprites/characters/%s_idle_e.png" % id
 	if ResourceLoader.exists(real):
 		return load(real)
 	if _tex_cache.has("sprite_" + id):
 		return _tex_cache["sprite_" + id]
 	return _solid_block(get_system_color(id), Vector2i(64, 96))
+
+
+## T2.6 帧条接入辅助：按角色 id 构建完整 SpriteFrames（8 方向 × idle/walk）
+## 帧规格（美术01 T2.6 基线）：每方向独立横条——idle 192×48=4 帧、walk 384×48=8 帧，
+## 单帧 48×48；动画名 "<state>_<dir>"（如 idle_e / walk_ne）。
+## 返回 null 表示资源不齐备（哨兵都不存在则不尝试）。
+func build_sprite_frames_for(character_id: String) -> SpriteFrames:
+	var sf := SpriteFrames.new()
+	var frame_px := Vector2i(48, 48)
+	var directions := ["e", "se", "s", "sw", "w", "nw", "n", "ne"]
+	var added := 0
+	for d in directions:
+		for state in ["idle", "walk"]:
+			var path := "res://assets/sprites/characters/%s_%s_%s.png" % [character_id, state, d]
+			if not ResourceLoader.exists(path):
+				continue
+			var strip: Texture2D = load(path)
+			var img := strip.get_image()
+			if img == null:
+				continue
+			var tex_size := img.get_size()
+			var cols := int(tex_size.x / frame_px.x)
+			var anim_name := "%s_%s" % [state, d]
+			sf.add_animation(anim_name)
+			for c in range(cols):
+				var atlas := AtlasTexture.new()
+				atlas.atlas = strip
+				atlas.region = Rect2(c * frame_px.x, 0, frame_px.x, frame_px.y)
+				sf.add_frame(anim_name, atlas)
+				added += 1
+			sf.set_animation_speed(anim_name, 12.0 if state == "walk" else 6.0)
+	print("[ArtProvider] build_sprite_frames_for(%s) 完成：%d 帧 / %d 动画" % [character_id, added, sf.get_animation_names().size()])
+	return sf
 
 
 ## 对话/战斗立绘：真实路径 assets/portraits/<id>_<emotion>.png 优先
