@@ -11,8 +11,19 @@ extends Node
 var star_sand: int = 0
 ## 星缘令（唤星抽取消耗品）
 var starlink_tokens: int = 0
+## 主角名（T2.5 命名面板写入；存档序列化项，SaveManager 桥接；
+## 默认占位「异乡人」，重开新档由命名面板重新写入）
+var hero_name: String = "异乡人"
 ## 剧情 flag 字典（key: String，value: bool/int/String 等任意 Variant）
 var flags: Dictionary = {}
+
+
+## 写入主角名并广播（T2.5 命名面板/读档应用统一入口）
+func set_hero_name(name: String) -> void:
+	if hero_name == name:
+		return
+	hero_name = name
+	get_node("/root/EventBus").hero_name_changed.emit(name)
 
 
 ## ------------------------------------------------------------

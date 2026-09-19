@@ -27,7 +27,8 @@ const SAVE_VERSION := 1
 const PROTAGONIST_DEFAULT := "异乡人"
 const AUTO_SLOTS: Array[String] = ["auto", "auto_1", "auto_2", "auto_3"]
 
-## 主角命名（T5.x 命名 UI 接管；存档序列化项）
+## 主角命名（T2.5 起唯一真相 = GameState.hero_name，本层仅存档桥接；
+## 读取时在 _apply 回写 GameState 并广播 hero_name_changed）
 var protagonist_name: String = PROTAGONIST_DEFAULT
 ## 抽卡保底计数（T6.3 唤星系统接管；存档序列化项）
 var pity_counter: int = 0
@@ -124,7 +125,7 @@ func _collect() -> Dictionary:
 		"shrines": {"lit_shrines": _shrine_system.get_lit_shrines()},
 		"map": {"unlocked_regions": _map_system.get_unlocked_regions()},
 		"gacha": {"pity_counter": pity_counter},
-		"protagonist": {"name": protagonist_name},
+		"protagonist": {"name": _game_state.hero_name},
 	}
 
 
@@ -164,6 +165,7 @@ func _apply(data: Dictionary) -> void:
 	var gc: Dictionary = data.get("gacha", {})
 	pity_counter = int(gc.get("pity_counter", 0))
 	protagonist_name = str(data.get("protagonist", {}).get("name", PROTAGONIST_DEFAULT))
+	_game_state.set_hero_name(protagonist_name)
 	# heart_bond / inventory / quests：对应系统落地后扩展应用（T5.x/T6.x）
 
 

@@ -4,7 +4,8 @@
 ## 三项：存档（SaveManager.save_game("manual")）/ 恢复状态（ShrineSystem.
 ## restore_all）/ 查看此区域提示（MapSystem 区域信息占位文案）。
 ## 打开 → PauseManager.pause_game("shrine_menu") + EventBus.ui_open；
-## 关闭反向 + ui_closed；Esc 关闭。复用 MapUI 先例。
+## 关闭反向 + ui_closed。T2.5 起 open/close 由 UISystem 面板栈调度，
+## Esc 层级导航统一归 UISystem（本面板不再自行处理）。
 ## process_mode=ALWAYS：世界暂停时面板自身与子按钮仍可交互。
 ## =============================================================
 extends CanvasLayer
@@ -22,6 +23,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	_build_ui()
+	get_node("/root/UISystem").register_panel("shrine_menu", self)
 
 
 func open() -> void:
@@ -43,12 +45,6 @@ func close() -> void:
 	get_node("/root/PauseManager").resume_game("shrine_menu")
 	get_node("/root/EventBus").ui_closed.emit("shrine_menu")
 	print("[ShrineMenu] close")
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if is_open and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
 
 
 # ---------------------------------------------------------------

@@ -47,3 +47,6 @@ signal shrine_lit(shrine_id: String)
 
 ## 玩家进入神像恢复光环（T2.4 Shrine 发出；任务/音效等消费）
 signal shrine_entered_radius(shrine_id: String)
+
+## 主角命名变更（T2.5 命名面板/读档发出；HUD 左上名、对话立绘标注等消费）
+signal hero_name_changed(hero_name: String)

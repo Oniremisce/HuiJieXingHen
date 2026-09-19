@@ -100,6 +100,11 @@ func _print_report() -> void:
 func get_character(id: String) -> DM.CharacterData:
 	return _lookup(_characters, id, "character")
 
+
+## 全部角色 id（T2.5 角色列表遍历用；CSV 增行自动纳入）
+func get_character_ids() -> Array:
+	return _characters.keys()
+
 func get_skill(id: String) -> DM.SkillData:
 	return _lookup(_skills, id, "skill")
 
@@ -119,6 +124,11 @@ func get_quest(quest_id: String) -> Array:
 		return _quests[quest_id]
 	push_warning("[DataManager] 未找到任务 \"%s\"" % quest_id)
 	return []
+
+
+## 全部任务 id（T2.5 任务面板遍历用；CSV 增任务自动纳入）
+func get_quest_ids() -> Array:
+	return _quests.keys()
 
 ## 指定任务的某一步
 func get_quest_step(quest_id: String, step: int) -> DM.QuestData:

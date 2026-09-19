@@ -11,11 +11,11 @@ extends CanvasLayer
 
 const _Minimap := preload("res://scripts/ui/Minimap.gd")
 
-const PLAYER_NAME := "异乡人"   # 主角名占位（剧情文案定名后替换）
-const KEYS_HINT_TEXT := "B 背包   C 角色   G 技能   J 任务   M 地图   Esc 关闭/菜单"
+const KEYS_HINT_TEXT := "B 背包   C 角色   G 唤星   J 任务   M 地图   Esc 回退/菜单"
 const QUEST_PLACEHOLDER := "任务：暂无追踪目标"
 const KEYS_TIP_DURATION := 8.0  # 按键提示条停留时长（秒）
 
+var _name_label: Label
 var _party_box: HBoxContainer
 var _hint_label: Label
 var _keys_bar: Label
@@ -28,8 +28,15 @@ func _ready() -> void:
 	_build_ui()
 	var bus := get_node("/root/EventBus")
 	bus.party_changed.connect(_on_party_changed)
+	bus.hero_name_changed.connect(_on_hero_name_changed)
 	# 初始编队（存档读档后 party_changed 亦会驱动）
 	_on_party_changed(get_node("/root/Party").get_members())
+	# 主角名：GameState 唯一真相（T2.5 命名面板/读档驱动刷新）
+	_name_label.text = str(get_node("/root/GameState").hero_name)
+
+
+func _on_hero_name_changed(hero_name: String) -> void:
+	_name_label.text = hero_name
 
 
 func _process(delta: float) -> void:
@@ -56,12 +63,13 @@ func _build_ui() -> void:
 
 	var name_label := Label.new()
 	name_label.name = "PlayerName"
-	name_label.text = PLAYER_NAME
+	name_label.text = "异乡人"
 	name_label.add_theme_font_size_override("font_size", 18)
 	name_label.add_theme_color_override("font_color", Color(0.95, 0.96, 1.0))
 	name_label.add_theme_color_override("font_outline_color", Color(0.08, 0.1, 0.14))
 	name_label.add_theme_constant_override("outline_size", 4)
 	top_left.add_child(name_label)
+	_name_label = name_label
 
 	_party_box = HBoxContainer.new()
 	_party_box.name = "PartyPortraits"
@@ -121,13 +129,9 @@ func _on_party_changed(party_list: Array) -> void:
 		_party_box.remove_child(c)
 		c.queue_free()
 	var art := get_node("/root/ArtProvider")
-	var dm := get_node("/root/DataManager")
 	for id: String in party_list:
-		var portrait_id := id
-		var data = dm.get_character(id)
-		if data != null:
-			portrait_id = data.portrait_id
-		var tex: Texture2D = art.get_portrait(portrait_id)
+		# ArtProvider 契约：get_portrait 入参=角色 id（预热缓存/体系色均按角色 id 查）
+		var tex: Texture2D = art.get_portrait(id)
 		var tr := TextureRect.new()
 		tr.name = "Portrait_%s" % id
 		tr.texture = tex

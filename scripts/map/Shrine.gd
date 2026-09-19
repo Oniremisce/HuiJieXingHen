@@ -95,7 +95,8 @@ func _on_interact_requested(node: Node) -> void:
 	if not _shrine_system.is_shrine_lit(shrine_id):
 		_start_light_flow()
 	else:
-		_menu.call("open")
+		# T2.5：面板开关统一走 UISystem 面板栈（Esc 逐层回退由其调度）
+		get_node("/root/UISystem").open_panel("shrine_menu")
 
 
 ## 点亮流程：演出 1s → 区块解锁 → 首亮星砂 +100 → 自动档 → shrine_lit

@@ -22,7 +22,19 @@ const FLAG_ITEM_CRYSTAL := "inv_star_sand_crystal"  # 骨架 flag，T6.1 迁移 
 
 func _ready() -> void:
 	_event_bus.interact_requested.connect(_on_interact_requested)
-	print("[CampMap] ready: npcs=3 trigger=1 pickup=1")
+	print("[CampMap] ready: npcs=3 trigger=1 pickup=1 shrine=1")
+	# T2.5 主角命名：首次进入营地弹命名面板（新档 flags 空 → 触发；
+	# 读档已有 hero_named flag / 已命名则不弹；deferred 避开场景切换帧）
+	_maybe_prompt_rename.call_deferred()
+
+
+## 命名触发（MVP 简化：CampMap 首次进入判定一次）
+func _maybe_prompt_rename() -> void:
+	var gs := get_node("/root/GameState")
+	if gs.has_flag("hero_named"):
+		return
+	get_node("/root/UISystem").open_panel("rename")
+	print("[CampMap] 首次进入营地 -> 弹出主角命名面板")
 
 func _on_interact_requested(node: Node) -> void:
 	if node.has_meta("main_trigger"):

@@ -38,21 +38,31 @@ func _ready() -> void:
 	visible = false
 	_ensure_input_action()
 	_build_ui()
+	# UISystem 在 Autoload 序列尾部（MapSystem 之后）：启动期尚未入树，
+	# 延迟到帧末注册；用户操作期（M 键/主页出发）时序已无问题
+	if get_node_or_null("/root/UISystem") == null:
+		_register_to_ui_system.call_deferred()
+	else:
+		get_node("/root/UISystem").register_panel("map_ui", self)
+
+
+func _register_to_ui_system() -> void:
+	get_node("/root/UISystem").register_panel("map_ui", self)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# M 键 toggle（T2.3 保留）；Esc 统一归 UISystem 面板栈（T2.5），此处不再处理
 	if event.is_action_pressed(ACTION_TOGGLE):
-		if is_open:
-			close()
-		else:
-			open()
+		get_node("/root/UISystem").toggle_panel("map_ui")
 		get_viewport().set_input_as_handled()
-	elif is_open and event.is_action_pressed(ACTION_CANCEL):
-		if _confirm.visible:
-			_close_confirm()
-		else:
-			close()
-		get_viewport().set_input_as_handled()
+
+
+## UISystem.handle_esc 回调：确认框打开时先关确认框（消费本次 Esc，不关面板）
+func _consume_esc() -> bool:
+	if _confirm != null and _confirm.visible:
+		_close_confirm()
+		return true
+	return false
 
 
 # ---------------------------------------------------------------
