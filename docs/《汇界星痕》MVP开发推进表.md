@@ -41,7 +41,7 @@
 - **数据模型**：`scripts/core/data_models.gd` 内部类，引用统一 `const DM := preload("res://scripts/core/data_models.gd")`（不依赖全局 class_name）。
 - **EventBus 已注册 8 信号**：interact_requested / dialogue_started / dialogue_finished / battle_started / battle_finished / quest_updated / summon_completed / character_recruited；GameState：star_sand/starlink_tokens/flags + dialogue_signal_bridge 骨架。
 - **地图**：TestMap（24×24 等距 DIAMOND_RIGHT，tile 64×32）、CampMap（主场景）；玩家 Player.tscn（八方向 + Camera2D 平滑跟随 + limit 钳制）；Interactable 组件（Area2D r=60、action `interact`=E+空格、R3 最近者仲裁、`interact_requested(self)`）。
-- **数值口径**：power=倍率制（float）；energy_cost 已作废（T2.8 删除，战斗改充能条制，见 docs/系统规则/战斗系统.md §3）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
+- **数值口径**：power=倍率制（float）；战斗为大招充能制（无耗能字段，见 docs/系统规则/战斗系统.md §3，skills.csv 的 energy_cost 列由 T2.8 移除）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
 
 ### 2.3 技术选型与规范
 
@@ -58,7 +58,7 @@
 ### 2.4 核心数据模型
 
 - **CharacterData**：`id/name/faction/system/hp/atk/def/spd/skill_small/skill_ult/portrait_id/sprite_id`（预留 `starmarrow_slots`=6、`sprite_idle_8dir`/`sprite_walk_8dir`）
-- **SkillData**：`id/name/type/power(float)/cutscene_id`（energy_cost 已作废删除，T2.8 执行；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
+- **SkillData**：`id/name/type/power(float)/cutscene_id`（无 energy_cost 字段，T2.8 执行移除；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
 - **EnemyData**：`id/name/hp/atk/def/spd/skill_small/skill_ult/ai_pattern/drop_sand`（双技能列 T3.1 执行）
 - **StelliumData**：`id/name/set_id/set_name/slot(1-6)/main_stat/main_base/main_max/set_2_bonus/set_3_bonus`（无稀有度；实例字段 lv/sub_unlocked/equipped_by 在 Inventory.starmarrow 逐枚实例，T2.8 执行）
 - **SummonEntryData**：`entry_id/name/kind/gold/weight`
@@ -397,18 +397,18 @@ graph TD
 【完整指令 · 粘贴给 Agent】
 
 ```
-任务：T2.8 星髓槽位制数据重构 + energy_cost 作废
-目标：按 docs/系统规则/星髓系统.md 重构 stellium.csv 与 StelliumData（套装×槽位制、无稀有度）；按 docs/系统规则/战斗系统.md §9.1 C2 删除 skills.csv energy_cost 列。
+任务：T2.8 星髓槽位制数据重构与技能耗能列移除
+目标：按 docs/系统规则/星髓系统.md 重构 stellium.csv 与 StelliumData（套装×槽位制、无稀有度）；按 docs/系统规则/战斗系统.md §3/§8 移除 skills.csv energy_cost 列。
 前置：T0.3、T2.1 已过。
 
 执行步骤：
 1. stellium.csv 列头改为：id,name,set_id,set_name,slot,main_stat,main_base,main_max,set_2_bonus,set_3_bonus
-   - （set_id, slot）唯一确定星髓类型；2 套 × 6 槽 = **12 行**，现骨架 3 行（机律/秘法/玄门套装）废弃重写
+   - （set_id, slot）唯一确定星髓类型；2 套 × 6 槽 = **12 行**，现骨架 3 行重写
    - 1~3 号位 main_stat 固定（atk/def/hp）；4~6 号位 main_stat 为随机池（`|` 分隔，如 pct_atk|pct_def|pct_hp，main_base/main_max 与池一一对应；5 号位 crit|crit_dmg|pct_atk、6 号位 charge|spd）
    - set_2_bonus/set_3_bonus 格式 "attr:value;attr:value"：套装1=crit:15% / cond_dmg:hp>70%,50%；套装2=crit_dmg:15% / cond_dmg:hp<50%,50%
-   - **无 rarity 列**（MVP 无稀有度，星髓规则 §8.1 C2）
+   - **无 rarity 列**（MVP 无稀有度，星髓系统.md §3/§7.2）
 2. 适配 scripts/core/data_models.gd 的 StelliumData：字段=新列头全集 + from_csv_row 解析（缺省容错：数值 0、字符串空）。
-3. skills.csv **删除 energy_cost 列**，SkillData 同步删除 energy_cost 字段（能量点制作废，战斗改充能条制；power 倍率不变）。
+3. skills.csv **删除 energy_cost 列**，SkillData 同步删除 energy_cost 字段（战斗为大招充能制、无耗能字段，见战斗系统.md §3；power 倍率不变）。
 4. 更新 tools/smoke_test_data_models.gd：星髓断言为新结构（含 slot 1-6）；删除 energy_cost 相关断言。
 5. MCP 运行确认 stellium=12、skills=6 加载无坏行；str() 打印各一行验证。
 6. 台账登记：data_models.gd 与 skills.csv 均为跨岗改动（系统程序辖区），在系统程序交接班表追加一行（StelliumData/SkillData 结构变更，T3.3/T6.5 消费新字段）。
@@ -418,7 +418,7 @@ graph TD
 - [ ] skills.csv 无 energy_cost 列，SkillData 无该字段，冒烟测试通过
 - [ ] 跨岗登记完成
 
-提交：git commit -m "T2.8: 星髓槽位制数据重构与energy_cost作废" 并 push。
+提交：git commit -m "T2.8: 星髓槽位制数据重构与技能耗能列移除" 并 push。
 ```
 
 ### P3 战斗系统
@@ -442,7 +442,7 @@ graph TD
 执行步骤：
 1. skills.csv 增敌人技能两行（占位数值）：enemy_beast_small（type=small，power≈1.0）、enemy_beast_ult（type=ult，power≈1.8）；id 前缀 enemy_ 区分角色技能。
 2. enemies.csv：id=corrosion_beast，name=灾蚀兽，hp≈150、atk≈10、def≈6、spd≈8（占位可调），**skill_small=enemy_beast_small、skill_ult=enemy_beast_ult**，ai_pattern=simple，drop_sand=30。
-   - ai\_pattern 口径（战斗系统 §9.1 C6 裁定）：MVP 恒 simple=充能未满用小技能、充满放大招；列保留为后续行为模式扩展位。
+   - ai\_pattern 口径（战斗系统 §8）：MVP 恒 simple=充能未满用小技能、充满放大招；列保留为后续行为模式扩展位。
 3. MCP 运行确认 enemies=1、skills=8；get_enemy 字段完整、双技能 id 可关联到 skills.csv 行。
 
 验收：
@@ -458,7 +458,7 @@ graph TD
 任务：T3.2 战斗状态机（跑速条制）
 目标：按 docs/系统规则/战斗系统.md §2 实现跑速条制状态机：init → 速度条模拟循环 → 胜负判定；每步输出日志。
 前置：T2.1、T3.1 已通过。
-权威依据：docs/系统规则/战斗系统.md（§2 跑速条制、§9.1 裁定清单）；实现与旧表述冲突时以规则文档为准。
+权威依据：docs/系统规则/战斗系统.md §2（跑速条制）。
 
 执行步骤：
 1. BattleManager.gd：状态枚举 intro/running/action/win/lose；init(party_ids, enemy_ids) 从 DataManager 取数据构造 BattleUnit 列表。
@@ -483,11 +483,11 @@ graph TD
 任务：T3.3 指令系统（充能制）
 目标：BattleUnit（HP/充能条）+ 两种指令（小技能/大招）+ 目标选择；按 docs/系统规则/战斗系统.md §3 实现。
 前置：T3.2 已通过。
-权威依据：docs/系统规则/战斗系统.md §3（充能制）与 §9.1 裁定清单；SkillData 已无 energy_cost（T2.8）。
+权威依据：docs/系统规则/战斗系统.md §3（充能制）；SkillData 已无 energy_cost（T2.8）。
 
 执行步骤：
 1. BattleUnit.gd：hp/max_hp、charge/charge_max（默认 100）、charge_free（默认 false，机制预留，三觉醒者恒 false）、take_damage、is_alive、技能数据（SkillData 小技能/大招各一）。
-2. 充能积累（§3 裁定数值）：**小技能命中 +20 / 受到伤害 +15 / 自身回合激活开始 +10**；clamp 到 charge_max；释放大招后 charge=0。
+2. 充能积累（§3 数值）：**小技能命中 +20 / 受到伤害 +15 / 自身回合激活开始 +10**；clamp 到 charge_max；释放大招后 charge=0。
 3. BattleCommand.gd：枚举 SKILL/ULT（无独立普攻，小技能即每轮可用基础攻击）；校验：小技能恒可用、大招需 charge==charge_max 或 charge_free=true（图标三态：未满灰/满亮闪/释放中）；不满足返回原因。
 4. 目标选择：MVP「自动选第一个存活目标 + 手动确认」。
 5. MCP 冒烟：脚本调用指令，验证伤害应用、充能积累三途径与重置、目标死亡处理。
@@ -533,7 +533,7 @@ graph TD
 任务：T3.5 队伍机制（共振合击/汇流充能拉条/混元增幅）
 目标：按 docs/系统规则/战斗系统.md §4 实现三态效果；判定逻辑沿用 Party.team_systems()（T2.2 交付，接口不变）。
 前置：T3.4 已通过。
-权威依据：docs/系统规则/战斗系统.md §4 + §9.1 裁定清单（C10~C15）；旧被动加成（atk+10% 等）已作废，勿实现。
+权威依据：docs/系统规则/战斗系统.md §4。
 
 执行步骤：
 1. PartyBonus.gd：进战斗时取 team_systems() 判定（has_all_three→混元 / all_same→共振 / 两系→汇流，互斥，判定顺序固定）：
@@ -559,7 +559,7 @@ graph TD
 任务：T3.6 战斗演出占位（立绘常驻+CG 层）
 目标：按 docs/系统规则/战斗系统.md §7 布局：右下角立绘常驻+小技能动态立绘切换、大招全屏 CG、合击 CG 演出层；演出期间跑条暂停、可跳过。
 前置：T3.4 已通过。
-权威依据：docs/系统规则/战斗系统.md §7 与 §9.1 C3；替代原「小技能半身立绘全屏占位」布局。
+权威依据：docs/系统规则/战斗系统.md §7。
 
 执行步骤：
 1. BattleCutscene.tscn（CanvasLayer）：右下角 PortraitRect（常驻，TextureRect 色块+角色名）/ UltCGRect（全屏，技能名大字）/ ComboCGRect（全屏，合击技名大字）/ SkipHint；AnimationPlayer 色块占位动画。
