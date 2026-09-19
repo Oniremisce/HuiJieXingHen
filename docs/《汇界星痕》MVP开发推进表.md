@@ -135,14 +135,41 @@ graph TD
 
 > T2.1 遗留修补已登记：A1（名牌）、A2（冒烟断言）→ T2.7；A4（StelliumData 套装制）→ T2.8。
 
-### 进行中：T2.2 队伍系统（架构对齐补充）
+### T2.2 队伍系统
 
-原卡指令（Party 单例：3 人编队、companion 同行槽、team_systems() 组合查询）维持不变，系统程序04 执行时**追加以下要求**：
+| 字段 | 内容 |
+| --- | --- |
+| 目标 | 3 人编队 + 同行临时槽位 + 体系组合判定 + party_changed 信号 |
+| 产出 | `scripts/core/Party.gd`（Autoload） |
+| 依赖 | T2.1 |
+| 主责 | 系统程序◎、系统策划○（队伍规则确认） |
+| 预估 | 1~2 轮 |
 
-1. Party 数据变更（add_member/remove_member/set_companion/clear_companion）后统一发 `EventBus.party_changed(party_list)`（EventBus 需先注册该信号）。
-2. 同行槽只占编队数据，不生成任何地图实体/跟随者（架构 §1.3 已拍板：同行槽不生成地图实体）。
-3. team_systems() 基于角色体系（characters.csv system 列），与星髓无关；星髓 6 槽是角色装备槽，归 T6.5，与本卡解耦。
-4. 验收追加：party_changed 信号可被 get_node("/root/EventBus") 侧验证（占位 print 日志即可）。
+【完整指令 · 粘贴给 Agent】
+
+```
+任务：T2.2 队伍系统
+目标：实现 Party 单例：3 人编队、同行临时槽位、体系组合查询（供战斗共振/汇流/混元判定）、party_changed 信号。
+前置：T2.1 已通过。队伍规则以系统策划01 队伍规则文档为准（若未就绪，按以下默认规则实现，后续对齐）。
+
+执行步骤：
+1. Party.gd（Autoload）：members: Array[String]（角色 id，上限 3）、companion_id: String（同行角色 id，占用 1 个编队位置）。
+2. API：add_member(id) / remove_member(id) / is_full() / has_member(id) / set_companion(id) / clear_companion() / get_members()。
+3. party_changed 信号：Party 数据变更（add_member/remove_member/set_companion/clear_companion）后统一发 EventBus.party_changed(party_list)（EventBus 需先注册该信号；party_list 为当前编队 id 数组，含同行）。
+4. 同行槽只占编队数据，不生成任何地图实体/跟随者（架构 §1.3：地图仅主角移动，同行角色无地图实体）。
+5. 体系组合查询 team_systems() -> Dictionary：{systems: Array, all_same: bool, has_all_three: bool}（three = 机律/秘法/玄门齐全）；基于角色体系（characters.csv system 列），与星髓无关；星髓 6 槽是角色装备槽，归 T6.5，与本卡解耦。
+6. 用 MCP 编辑器内执行脚本测试三种编组：全同体系 → all_same=true；三系齐 → has_all_three=true；两系 → 两者皆 false。
+
+产出：Party.gd（Autoload）。
+
+验收（全部通过）：
+- [ ] 增删/满员/查询 API 行为正确，上限 3
+- [ ] 同行角色占用槽位可设置/清除
+- [ ] 三种编组的体系组合判定正确
+- [ ] party_changed 信号在每次数据变更后发出（get_node("/root/EventBus") 侧验证，占位 print 日志即可）
+
+提交：git commit -m "T2.2: 队伍系统" 并 push。
+```
 
 ### P2 后续卡（视觉框架 / 神像存档 / UI 面板 / 修补）
 
