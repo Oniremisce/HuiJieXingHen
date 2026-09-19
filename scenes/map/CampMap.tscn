@@ -156,12 +156,11 @@ offset_bottom = -32.0
 theme_override_colors/font_color = Color(0.9608, 0.9608, 0.9608, 1)
 theme_override_colors/font_outline_color = Color(0.1255, 0.1412, 0.1804, 1)
 theme_override_constants/outline_size = 4
-text = "待定"
+text = ""
 horizontal_alignment = 1
 
 [node name="Interactable" parent="NPC_Mech" instance=ExtResource("3_inter")]
 npc_id = "awakened_mech_01"
-display_name = "待定"
 action_type = "talk"
 
 [node name="NPC_Arcane" type="Node2D" parent="." groups=["quest_npc"]]
@@ -187,12 +186,11 @@ offset_bottom = -32.0
 theme_override_colors/font_color = Color(0.9608, 0.9608, 0.9608, 1)
 theme_override_colors/font_outline_color = Color(0.1255, 0.1412, 0.1804, 1)
 theme_override_constants/outline_size = 4
-text = "待定"
+text = ""
 horizontal_alignment = 1
 
 [node name="Interactable" parent="NPC_Arcane" instance=ExtResource("3_inter")]
 npc_id = "awakened_arcane_01"
-display_name = "待定"
 action_type = "talk"
 
 [node name="NPC_Xian" type="Node2D" parent="." groups=["quest_npc"]]
@@ -218,12 +216,11 @@ offset_bottom = -32.0
 theme_override_colors/font_color = Color(0.9608, 0.9608, 0.9608, 1)
 theme_override_colors/font_outline_color = Color(0.1255, 0.1412, 0.1804, 1)
 theme_override_constants/outline_size = 4
-text = "待定"
+text = ""
 horizontal_alignment = 1
 
 [node name="Interactable" parent="NPC_Xian" instance=ExtResource("3_inter")]
 npc_id = "awakened_xian_01"
-display_name = "待定"
 action_type = "talk"
 
 [node name="StarSandCrystal" type="Node2D" parent="."]

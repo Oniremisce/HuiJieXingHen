@@ -15,10 +15,10 @@ var _failed := false
 func _init() -> void:
 	print("=== T0.2 数据模型冒烟测试开始 ===")
 
-	# [1] CharacterData：正常行
+	# [1] CharacterData：正常行（T2.7 A2：name 用正式名，断言防回退到空/「待定」）
 	var c := DM.CharacterData.from_csv_row({
 		"id": "awakened_mech_01",
-		"name": "待定",
+		"name": "诺菈·星枢",
 		"faction": "机律联邦",
 		"system": "机律",
 		"hp": "120",
@@ -32,7 +32,7 @@ func _init() -> void:
 	})
 	print("[1] 角色正常行: ", c)
 	_check(c.id == "awakened_mech_01")
-	_check(c.name == "待定")
+	_check(c.name != "" and c.name != "待定")  # T2.7 A2 防回退
 	_check(c.faction == "机律联邦" and c.system == "机律")
 	_check(c.hp == 120 and c.atk == 18 and c.def == 10 and c.spd == 9)
 	_check(c.skill_small == "skill_mech_s1" and c.skill_ult == "skill_mech_ult")
