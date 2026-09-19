@@ -33,7 +33,7 @@ func _ready() -> void:
 	bus.interact_requested.emit(fake_npc)
 	bus.dialogue_started.emit("main_01")
 	bus.quest_updated.emit("heartbond_01", 1)
-	bus.battle_started.emit(["corrosion_beast"])
+	bus.battle_started.emit(["awakened_mech_01"], ["corrosion_beast"], {})
 	bus.battle_finished.emit({"outcome": "win", "rounds": 3})
 	bus.summon_completed.emit({"entry_id": "entry_starlink_01", "name": "星缘令", "kind": "starlink_token", "gold": true})
 	bus.character_recruited.emit("awakened_mech_01")
@@ -96,8 +96,8 @@ func _on_dialogue_started(timeline_id: String) -> void:
 func _on_dialogue_finished(timeline_id: String) -> void:
 	print("[场景B] 收到 dialogue_finished：timeline=%s" % timeline_id)
 
-func _on_battle_started(enemy_ids: Array) -> void:
-	print("[场景B] 收到 battle_started：enemies=%s" % str(enemy_ids))
+func _on_battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary) -> void:
+	print("[场景B] 收到 battle_started：party=%s enemies=%s context=%s" % [str(party_ids), str(enemy_ids), str(context)])
 
 func _on_battle_finished(result: Dictionary) -> void:
 	print("[场景B] 收到 battle_finished：%s" % str(result))

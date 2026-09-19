@@ -14,9 +14,11 @@ signal interact_requested(node: Node)
 signal dialogue_started(timeline_id: String)
 signal dialogue_finished(timeline_id: String)
 
-## 战斗开始（敌人 id 列表，如 ["corrosion_beast"]）
-signal battle_started(enemy_ids: Array)
-## 战斗结束（结果字典，如 {"outcome": "win", "rounds": 3}）
+## 战斗开始（T3.7 扩展三参：party_ids=我方编队 id、enemy_ids=敌人 id 列表、
+## context=任务透传字典（quest_id 等，T5.3 QuestRunner 消费）；战斗程序辖区）
+signal battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary)
+## 战斗结束（结果字典：{"outcome": "win"/"lose"/"timeout"/"aborted", "rounds",
+## "context", "star_sand_gained"}；每场战斗结束发一次，重试场次各自发）
 signal battle_finished(result: Dictionary)
 
 ## 心契任务步骤推进（quest_id 对应 quests.csv，step 为新步骤编号）
