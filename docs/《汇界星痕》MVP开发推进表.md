@@ -57,8 +57,8 @@
 
 ### 2.4 核心数据模型
 
-- **CharacterData**：`id/name/faction/system/hp/atk/def/spd/skill_small/skill_ult/portrait_id/sprite_id`（预留 `starmarrow_slots`=6、`sprite_idle_8dir`/`sprite_walk_8dir`）
-- **SkillData**：`id/name/type/power(float)/cutscene_id`（无 energy_cost 字段，T2.8 执行移除；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
+- **CharacterData**：`id/name/faction/system/hp/atk/def/spd/skill_small/skill_ult/portrait_id/sprite_id/background`（background=T2.9 新增，缺省空；字段契约见 `docs/系统规则/角色系统.md` §2；预留 `starmarrow_slots`=6、`sprite_idle_8dir`/`sprite_walk_8dir`）
+- **SkillData**：`id/name/type/power(float)/effect/cutscene_id`（effect=T2.9 新增预留列，空=纯伤害；target_scope 列由 T3.10 落位；无 energy_cost 字段；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
 - **EnemyData**：`id/name/hp/atk/def/spd/skill_small/skill_ult/ai_pattern/drop_sand`（双技能列 T3.1 执行）
 - **StelliumData**：`id/name/set_id/set_name/slot(1-6)/main_stat/main_base/main_max/set_2_bonus/set_3_bonus`（无稀有度；实例字段 lv/sub_unlocked/equipped_by 在 Inventory.starmarrow 逐枚实例，T2.8 执行）
 - **SummonEntryData**：`entry_id/name/kind/gold/weight`
@@ -86,7 +86,7 @@
 | --- | --- | --- | --- | --- |
 | P0 | 项目骨架与工具链 | T0.1~T0.4 | ✅ 完成 | — |
 | P1 | 等距地图与移动 | T1.1~T1.6 | ✅ 完成 | P0 |
-| P2 | 角色数据、队伍与底层系统框架 | T2.1~T2.8 | ✅ 完成 | P0（与 P1 并行） |
+| P2 | 角色数据、队伍与底层系统框架 | T2.1~T2.8 ✅；补充卡 T2.9→T2.10（角色系统） | 补充待启动 | P0（与 P1 并行） |
 | P3 | 战斗系统 | T3.1~T3.7 ✅；返工卡 T3.8→T3.9→T3.10（战斗系统修订） | 返工待启动 | P2（T2.1/T2.2） |
 | P4 | Dialogic 剧情演出 | T4.1~T4.3 ✅、T4.4 待放行评估 | 进行中 | P1、P2 |
 | P5 | 心契任务 | T5.1~T5.4 | 待启动 | P3、P4 |
@@ -109,7 +109,7 @@ graph TD
     T2.4 --> P6
 ```
 
-**并行建议**：T0.1~T3.7、T4.1~T4.3 已交付（见 §4 已完成卡一览）；**战斗系统修订返工卡 T3.8→T3.9→T3.10 待启动**（战斗程序01 主责，规则唯一口径=docs/系统规则/战斗系统.md）；T4.4 待放行评估（CampMap 冲突已解除）；P5 启动判定：T5.1 前置（T4.3）已过可启用。
+**并行建议**：T0.1~T3.7、T4.1~T4.3 已交付（见 §4 已完成卡一览）；**待启动**：战斗系统修订返工卡 T3.8→T3.9→T3.10（战斗程序01 主责，口径=docs/系统规则/战斗系统.md）、角色系统补充卡 T2.9→T2.10（系统程序主责，口径=docs/系统规则/角色系统.md）。**并行约束**：T2.9 与 T3.10 有 skills.csv/SkillData 同文件冲突（effect 与 target_scope），T2.9 完成前 T3.10 不得开工；T2.9/T2.10 与 T3.8 无交集可并行。T4.4 待放行评估；P5 启动判定：T5.1 前置（T4.3）已过可启用。
 
 ***
 
@@ -436,7 +436,81 @@ graph TD
 - [ ] skills.csv 无 energy_cost 列，SkillData 无该字段，冒烟测试通过
 - [ ] 跨岗登记完成
 
-提交：git commit -m "T2.8: 星髓槽位制数据重构与技能耗能列移除" 并 push。
+提交：git commit -m "T2.8: 星髓槽位制数据修订" 并 push。
+```
+
+### P2 补充卡（角色系统）
+
+> 承接 `docs/系统规则/角色系统.md`（角色设定唯一口径：§2 字段契约 / §3 技能形式 / §5 三角色定稿 / §6 新增接口 / §7 设计器）。**T2.9 完成前 T3.10 不得开工**（skills.csv 与 SkillData 同文件冲突：effect 与 target_scope 两列分属两卡）。
+
+#### T2.9 角色系统数据落地与三角色迁移
+
+| 字段 | 内容 |
+| --- | --- |
+| 目标 | 角色系统.md §2/§3 数据契约落地：characters.csv 增 background 列、skills.csv 增 effect 预留列、数据模型扩字段、三角色迁移 |
+| 产出 | 数据契约扩字段 + 三角色 background 迁移 |
+| 依赖 | T2.8（已过） |
+| 主责 | 系统程序◎、数值策划○（列规范）、剧情文案策划○（background 文案） |
+| 预估 | 1 轮 |
+
+【完整指令 · 粘贴给 Agent】
+
+```
+任务：T2.9 角色系统数据落地与三角色迁移
+目标：按 docs/系统规则/角色系统.md §2/§3 落地角色数据契约并完成现有三角色迁移。
+前置：T2.8 已通过；必读角色系统.md §2/§3/§5。
+
+执行步骤：
+1. characters.csv 新增 **background 列**（一句话背景，缺省空容错）；剧情文案策划 ○ 按角色系统.md §5 人设基线填三角色 background（与 dialogues_main_01 口径一致：诺菈·星枢=机律观测员/艾蕾雅=秘法结界师/洛清弦=玄门修行者）。
+2. skills.csv 新增 **effect 预留列**（全部留空=纯伤害；缺省空容错）；target_scope 列归 T3.10，本卡不动。
+3. CharacterData 扩 background、SkillData 扩 effect（String 缺省空）；tools/smoke_test_data_models.gd 断言同步扩（含新增列缺省空不破坏解析的容错用例）。
+4. headless 冒烟：三角色加载、background/effect 回读断言；既有全部冒烟回归 EXIT=0。
+5. MCP：角色详情面板展示 background（有占位文本位则接入，无则日志断言）。
+
+产出：background/effect 列、CharacterData/SkillData 扩字段、三角色 background 文案。
+
+验收（全部通过）：
+- [ ] 三角色 background 非空且与角色系统.md §5 基线一致
+- [ ] effect 列全空解析正常；缺列旧数据容错不崩
+- [ ] 数据冒烟断言全过；既有冒烟回归 EXIT=0
+- [ ] 角色详情面板/日志可见 background（截图或日志）
+
+提交：git commit -m "T2.9: 角色系统数据落地与三角色迁移" 并 push。
+```
+
+#### T2.10 角色设计器
+
+| 字段 | 内容 |
+| --- | --- |
+| 目标 | 角色系统.md §7：tools/character_designer.gd（校验+冒烟+报告），支撑按 §6 接口零代码新增角色 |
+| 产出 | character_designer.gd |
+| 依赖 | T2.9（已过） |
+| 主责 | 系统程序◎、数值策划○（校验规则确认） |
+| 预估 | 1 轮 |
+
+【完整指令 · 粘贴给 Agent】
+
+```
+任务：T2.10 角色设计器
+目标：按 docs/系统规则/角色系统.md §7 实现 tools/character_designer.gd（headless 可跑）。
+前置：T2.9 已通过；必读角色系统.md §2/§3/§6/§7。
+
+执行步骤：
+1. 校验器：characters.csv / skills.csv 全行检查——列数、枚举值（system/type）、id 规则（awakened_<体系>_<序号>、skill_<体系>_<s1|ult>）、引用存在（skill_small/skill_ult 在 skills.csv 中存在、cutscene_id 符合 cut_<体系>_ult 约定、portrait/sprite 资源文件存在）；FAIL 明细含文件+行号。
+2. 冒烟：DataManager 加载断言（角色数、各角色字段回读）+ ArtProvider 取占位资源非空。
+3. 报告：逐项 PASS/FAIL 输出，EXIT=0/1。
+4. 端到端验证：临时新增测试角色（characters.csv+skills.csv 各一行+占位立绘/精灵资源）→ 设计器 PASS → 游戏加载断言（角色数 +1、字段回读、角色列表 UI 可见）→ 验证后删除测试数据（git 状态恢复干净）。
+5. 故意注入坏数据（缺列/坏枚举/坏引用）各一例，验证 FAIL 正确命中并定位。
+
+产出：tools/character_designer.gd。
+
+验收（全部通过）：
+- [ ] 测试角色经设计器 PASS 后游戏内零代码生效（角色列表可见，截图）
+- [ ] 三类坏数据各被正确 FAIL 且定位到行（日志）
+- [ ] 正常三角色校验/冒烟全 PASS（EXIT=0）
+- [ ] 测试数据删除后仓库与 CSV 恢复原状
+
+提交：git commit -m "T2.10: 角色设计器" 并 push。
 ```
 
 ### P3 战斗系统
@@ -1281,7 +1355,7 @@ assets/
 | --- | --- | --- | --- |
 | 1 | P0 骨架 | T0.1~T0.4 | ✅ 完成 |
 | 2 | P1 地图 ∥ P2 | T1.1~T1.6 ✅；T2.1~T2.8 全部 ✅（T3.1 提前交付 ✅） | ✅ 完成 |
-| 3 | P3 战斗 ∥ P4 剧情 | T3.1~T3.7 ✅、T4.1~T4.3 ✅；**返工卡 T3.8→T3.9→T3.10 待启动**；T4.4 待放行评估 | 进行中（返工待启动） |
+| 3 | P3 战斗 ∥ P4 剧情 | T3.1~T3.7 ✅、T4.1~T4.3 ✅；**待启动**：返工卡 T3.8→T3.9→T3.10、P2 补充卡 T2.9→T2.10（角色系统）；T4.4 待放行评估 | 进行中（返工/补充待启动） |
 | 4 | P5 心契 | T5.1→T5.2→T5.3→T5.4 | 待启动 |
 | 5 | P6 唤星 | T6.1→T6.2→T6.3/T6.4∥T6.5 | 待启动 |
 | 6 | P7 整合验收 | T7.1→T7.2∥T7.3→T7.4 | 待启动 |
