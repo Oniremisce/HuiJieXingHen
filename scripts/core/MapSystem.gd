@@ -64,6 +64,7 @@ const PORTALS := {
 var unlocked_regions: Array[String] = []
 
 var _outline_cache: Dictionary = {}  # scene_path -> Array[PackedVector2Array]（地图局部坐标）
+var _blocked_cache: Dictionary = {}  # scene_path -> Array[Vector2i]（阻挡格）
 var _hud: CanvasLayer = null
 var _map_ui: CanvasLayer = null
 
@@ -157,6 +158,24 @@ func get_outline_loops() -> Array:
 		_outline_cache[key] = extract_outline_loops(tml)
 		print("[MapSystem] 箱庭线框已生成：%s loops=%d" % [key, _outline_cache[key].size()])
 	return _outline_cache[key]
+
+
+## 当前场景阻挡格（TileData 带碰撞多边形的格子，地图格坐标；
+## 墙壁/障碍 = 人物不可通行处，箱庭图行动边界可视化数据源）
+func get_blocked_cells() -> Array[Vector2i]:
+	var tml := get_ground_layer()
+	if tml == null or get_tree().current_scene == null:
+		return []
+	var key: String = get_tree().current_scene.scene_file_path
+	if not _blocked_cache.has(key):
+		var cells: Array[Vector2i] = []
+		for c: Vector2i in tml.get_used_cells():
+			var td: TileData = tml.get_cell_tile_data(c)
+			if td != null and td.get_collision_polygons_count(0) > 0:
+				cells.append(c)
+		_blocked_cache[key] = cells
+		print("[MapSystem] 阻挡格已生成：%s count=%d" % [key, cells.size()])
+	return _blocked_cache[key]
 
 
 ## 当前场景的神像点位列表：[{id, name, lit, pos}]（pos 为全局坐标）

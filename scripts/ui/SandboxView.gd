@@ -4,8 +4,8 @@
 ## 架构 §2.3：半透明暗底（MapUI 面板底）+ 可行走区描边线框 +
 ## 标注层：主角体系色箭头（体系待定暂用白）/ 任务 NPC 金色菱形
 ##（组 quest_npc）/ 神像亮暗圆点 / 出口（MVP 预留）。
-## 数据源：MapSystem.get_outline_loops / get_current_scene_shrines /
-## get_current_scene_exits；fit_transform 等比映射到面板内区。
+## 数据源：MapSystem.get_outline_loops / get_blocked_cells（阻挡格=行动边界）/
+## get_current_scene_shrines / get_current_scene_exits；fit_transform 等比映射到面板内区。
 ## =============================================================
 extends Node2D
 
@@ -39,6 +39,18 @@ func _draw() -> void:
 		draw_polyline(pts, Color(0.85, 0.9, 1.0, 0.7), 1.5)
 
 	var tml: TileMapLayer = ms.get_ground_layer()
+
+	# 阻挡格（墙壁/障碍 = 人物不可通行处）：暗色菱形 + 描边，行动边界可视化
+	for c: Vector2i in ms.get_blocked_cells():
+		var center: Vector2 = tml.map_to_local(c)
+		var quad := PackedVector2Array([
+			_xform * (center + Vector2(0, -16)), _xform * (center + Vector2(32, 0)),
+			_xform * (center + Vector2(0, 16)), _xform * (center + Vector2(-32, 0)),
+		])
+		draw_colored_polygon(quad, Color(0.16, 0.19, 0.24, 0.9))
+		var ring := quad.duplicate()
+		ring.append(quad[0])
+		draw_polyline(ring, Color(0.52, 0.58, 0.68, 0.9), 1.0)
 
 	# 神像（亮=金色圆+外环 / 暗=灰色圆）
 	for s: Dictionary in ms.get_current_scene_shrines():
