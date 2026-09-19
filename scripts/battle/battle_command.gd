@@ -23,14 +23,17 @@ extends RefCounted
 
 enum Kind { SKILL, ULT }
 
+const DMG := preload("res://scripts/battle/damage_calc.gd")  # T3.4 伤害结算
+
 ## 指令校验：返回 ""（可执行）或原因字符串（不修改任何状态）
 static func validate(actor, kind: int) -> String:
 	if kind == Kind.ULT and not actor.can_use_ult():
 		return "充能未满(%d/%d)" % [int(actor.charge), int(actor.charge_max)]
 	return ""
 
-## 执行指令：校验 → 目标选择 → 占位伤害结算 → 充能变化 → 结构化结果
-static func execute(units: Array, actor, kind: int, target = null) -> Dictionary:
+## 执行指令：校验 → 目标选择 → 伤害结算（T3.4 DamageCalc）→ 充能变化 → 结构化结果
+## force_crit：-1 随机 / 0 恒不暴 / 1 恒暴（冒烟确定性通道，生产不传）
+static func execute(units: Array, actor, kind: int, target = null, force_crit := -1) -> Dictionary:
 	var reason := validate(actor, kind)
 	if reason != "":
 		return {"ok": false, "reason": reason, "kind": _kind_name(kind), "damage": 0}
@@ -42,15 +45,16 @@ static func execute(units: Array, actor, kind: int, target = null) -> Dictionary
 	if target == null:
 		return {"ok": false, "reason": "无存活敌方目标", "kind": _kind_name(kind), "damage": 0}
 	var skill: Variant = actor.skill_ult if kind == Kind.ULT else actor.skill_small
-	# 占位伤害公式（T3.4 替换正式 DamageCalc）
-	var dmg := int(max(1.0, float(actor.atk) * float(skill.power) - float(target.def)))
+	# 正式伤害结算（T3.4 DamageCalc：增伤乘区+暴击，替换 T3.2b 占位公式）
+	var dc: Dictionary = DMG.calc(actor, skill, target, force_crit)
+	var dmg := int(dc["damage"])
 	target.take_damage(dmg)  # 扣血 + 受击充能 +15（BattleUnit）
 	if kind == Kind.ULT:
 		actor.consume_ult()          # 大招释放后 charge=0（§3）
 	else:
 		actor.charge_on_small_hit()  # 小技能命中 +20（§3）
 	return {"ok": true, "reason": "", "kind": _kind_name(kind), "skill": skill,
-		"actor": actor, "target": target, "damage": dmg,
+		"actor": actor, "target": target, "damage": dmg, "crit": bool(dc["crit"]),
 		"actor_charge": int(actor.charge), "target_hp": int(target.hp),
 		"target_alive": bool(target.is_alive())}
 

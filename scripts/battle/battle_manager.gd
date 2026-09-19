@@ -36,6 +36,7 @@ var round_num := 0
 var units: Array = []         # BU.BattleUnit，编队序（我方在前）
 var round_orders: Array = []  # 每回合出手序快照 Array[Array[int]]
 var command_provider: Callable = Callable()  # 人工指令 func(unit) -> [kind, target]
+var force_crit := -1  # 暴击强制：-1 随机 / 0 恒不暴 / 1 恒暴（冒烟确定性通道，生产不设）
 var _dm: Variant = null
 
 func _init(dm, party_ids: Array, enemy_ids: Array) -> void:
@@ -87,17 +88,18 @@ func run_to_end(max_rounds := 6) -> String:
 func _take_turn(u) -> void:
 	u.charge_on_turn_start()  # 自身回合激活开始 +10（§3）
 	var cmd: Array = _resolve_command(u)
-	var res: Dictionary = BC.execute(units, u, int(cmd[0]), cmd[1])
+	var res: Dictionary = BC.execute(units, u, int(cmd[0]), cmd[1], force_crit)
 	if not bool(res["ok"]):
 		print("[BATTLE] R%d %s 指令被拒（%s），降级小技能" % [round_num, u.name, str(res["reason"])])
-		res = BC.execute(units, u, BC.Kind.SKILL, null)
+		res = BC.execute(units, u, BC.Kind.SKILL, null, force_crit)
 	_check_end()
 	if not bool(res["ok"]):
 		print("[BATTLE] R%d %s 出手失败（%s）" % [round_num, u.name, str(res["reason"])])
 		return  # 敌方全灭等无目标场景；胜负面数已结算
-	print("[BATTLE] R%d 行动者=%s bar=100 %s[%s power=%.2f] → 目标=%s 伤害=%d | %s | %s" % [
+	print("[BATTLE] R%d 行动者=%s bar=100 %s[%s power=%.2f] → 目标=%s 伤害=%d%s | %s | %s" % [
 		round_num, u.name, str(res["kind"]), str(res["skill"].id),
 		float(res["skill"].power), str(res["target"].name), int(res["damage"]),
+		"（暴击！）" if bool(res.get("crit", false)) else "",
 		str(u), str(res["target"])])
 
 ## 指令来源：command_provider 优先（人工路径），否则 ai_pattern=simple 自动。
