@@ -132,7 +132,7 @@ polygon = PackedVector2Array(-6, -24, 6, -24, 6, 0, -6, 0)
 color = Color(0.2431, 0.6078, 0.3098, 1)
 polygon = PackedVector2Array(0, -64, 24, -44, 0, -24, -24, -44)
 
-[node name="NPC_Mech" type="Node2D" parent="."]
+[node name="NPC_Mech" type="Node2D" parent="." groups=["quest_npc"]]
 position = Vector2(608, 16)
 metadata/npc_id = "awakened_mech_01"
 
@@ -163,7 +163,7 @@ npc_id = "awakened_mech_01"
 display_name = "待定"
 action_type = "talk"
 
-[node name="NPC_Arcane" type="Node2D" parent="."]
+[node name="NPC_Arcane" type="Node2D" parent="." groups=["quest_npc"]]
 position = Vector2(800, -48)
 metadata/npc_id = "awakened_arcane_01"
 
@@ -194,7 +194,7 @@ npc_id = "awakened_arcane_01"
 display_name = "待定"
 action_type = "talk"
 
-[node name="NPC_Xian" type="Node2D" parent="."]
+[node name="NPC_Xian" type="Node2D" parent="." groups=["quest_npc"]]
 position = Vector2(800, 80)
 metadata/npc_id = "awakened_xian_01"
 

@@ -10,6 +10,9 @@
 ## =============================================================
 extends Area2D
 
+const _CharacterAnimator := preload("res://scripts/map/CharacterAnimator.gd")
+const _OcclusionOutline := preload("res://scripts/map/OcclusionOutline.gd")
+
 const ACTION_INTERACT := "interact"
 const INTERACTABLE_GROUP := "interactable"
 const PLAYER_LAYER_BIT := 2  # T1.3 约定：玩家 collision_layer=2
@@ -22,6 +25,7 @@ const PLAYER_LAYER_BIT := 2  # T1.3 约定：玩家 collision_layer=2
 @export var action_type: String = "talk"
 
 var _player: Node2D = null
+var _visual_queued := false  # deferred 添加防重复排队
 
 @onready var _hint_root: Node2D = $HintRoot
 @onready var _hint_label: Label = $HintRoot/Label
@@ -30,10 +34,33 @@ var _player: Node2D = null
 func _ready() -> void:
 	add_to_group(INTERACTABLE_GROUP)
 	_ensure_input_action()
+	_ensure_visual_helpers()
 	_refresh_hint_text()
 	_hint_root.visible = false
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+
+
+## T2.3：向宿主实体根（本节点所属 NPC 的 Node2D 根）自动安装遮挡描边
+## 与八向动画占位组件（无需改 .tscn）。宿主不是 Node2D 或就是当前场景根
+## （即 Interactable 直接挂在场景下、无实体根，如纯触发点）时跳过。
+## 注意：场景实例化期间父节点尚在构建子级，直接 add_child 会被拒
+## （Parent node is busy setting up children）→ 必须 call_deferred。
+func _ensure_visual_helpers() -> void:
+	var host := get_parent()
+	if host == null or not (host is Node2D):
+		return
+	if host == get_tree().current_scene:
+		return
+	if _visual_queued or host.has_node("OcclusionOutline"):
+		return
+	_visual_queued = true
+	var ol := _OcclusionOutline.new()
+	ol.name = "OcclusionOutline"
+	host.add_child.call_deferred(ol)
+	var an := _CharacterAnimator.new()
+	an.name = "CharacterAnimator"
+	host.add_child.call_deferred(an)
 
 ## 兜底注册 interact action（同 PlayerController._ensure_input_actions 模式）：
 ## project.godot 已绑定 E/空格 physical_keycode，但编辑器覆写磁盘配置时

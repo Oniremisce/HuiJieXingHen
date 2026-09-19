@@ -31,3 +31,12 @@ signal character_recruited(character_id: String)
 ## 编队数据变更（T2.2 Party 发出；party_list = 编队角色 id 快照，
 ## 同行者本就 ∈ members 不重复计入；仅确有变更时发一次，规则见 docs/系统规则/队伍系统.md §3）
 signal party_changed(party_list: Array)
+
+## 地图区块解锁（T2.3 MapSystem 发出；神像点亮 / 剧情事件直调 unlock_region），
+## 世界大地图、存档系统（T2.4）消费
+signal map_region_unlocked(region_id: String)
+
+## UI 面板打开/关闭（T2.3 MapUI 起统一走此对信号；panel_name 如 "map_sandbox"），
+## 暂停管理器、音效等消费；T2.5 各面板接入后统一此出口
+signal ui_open(panel_name: String)
+signal ui_closed(panel_name: String)
