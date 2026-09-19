@@ -28,15 +28,18 @@ const BC := preload("res://scripts/battle/battle_command.gd")
 var _failed := false
 
 func _init() -> void:
+	_run.call_deferred()  # T3.6 起 run_to_end 为 coroutine：call_deferred 绕过静态检查，主循环帧驱动
+
+func _run() -> void:
 	var dm = DMS.new()
 	dm._load_all()  # headless --script 不触发 autoload _ready，需手动同步加载
 	print("=== T3.2/T3.3 战斗冒烟开始 ===")
-	_case_win(dm)
-	_case_lose(dm)
-	_case_timeout(dm)
-	_case_command_charge(dm)
-	_case_dead_target(dm)
-	_case_wipeout_win(dm)
+	await _case_win(dm)
+	await _case_lose(dm)
+	await _case_timeout(dm)
+	await _case_command_charge(dm)
+	await _case_dead_target(dm)
+	await _case_wipeout_win(dm)
 	if _failed:
 		print("=== 战斗冒烟结束：存在失败项 ===")
 		quit(1)
@@ -49,7 +52,7 @@ func _case_win(dm) -> void:
 	bm.force_crit = 0  # T3.4 暴击确定性：回归恒不暴（数值=T3.3 无暴击轨迹）
 	bm.units[1].max_hp = 40  # 占位削弱兽血量：保证占位伤害 6 轮内分胜负（不改 CSV）
 	bm.units[1].hp = 40
-	var result: String = bm.run_to_end(6)
+	var result: String = await bm.run_to_end(6)
 	print("[SMOKE] 用例一: result=%s rounds=%d orders=%s | %s | %s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[0]), str(bm.units[1])])
 	_check(result == "win" and bm.round_num == 3)
@@ -62,7 +65,7 @@ func _case_lose(dm) -> void:
 	bm.force_crit = 0
 	bm.units[0].max_hp = 12  # 反转占位血量：我方 6 轮内被打空 → lose
 	bm.units[0].hp = 12
-	var result: String = bm.run_to_end(6)
+	var result: String = await bm.run_to_end(6)
 	print("[SMOKE] 用例二: result=%s rounds=%d orders=%s | %s | %s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[0]), str(bm.units[1])])
 	_check(result == "lose" and bm.round_num == 5)
@@ -75,7 +78,7 @@ func _case_timeout(dm) -> void:
 	bm.force_crit = 0
 	bm.units[1].max_hp = 999  # 占位高血量：6 轮内双方均无法击破 → 触发轮数上限
 	bm.units[1].hp = 999
-	var result: String = bm.run_to_end(6)
+	var result: String = await bm.run_to_end(6)
 	print("[SMOKE] 用例三: result=%s rounds=%d orders=%s | %s | %s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[0]), str(bm.units[1])])
 	_check(result == "timeout")  # 6 轮上限强制结束，无死锁（胜负语义待制作人裁定）
@@ -83,7 +86,8 @@ func _case_timeout(dm) -> void:
 	var bm0 = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"])  # 用例三b：max_rounds=0=无上限
 	bm0.units[1].max_hp = 40
 	bm0.units[1].hp = 40
-	_check(bm0.run_to_end(0) == "win" and bm0.round_num == 3)  # 0 若被误当 0 轮上限会 timeout
+	var r0: String = await bm0.run_to_end(0)
+	_check(r0 == "win" and bm0.round_num == 3)  # 0 若被误当 0 轮上限会 timeout
 
 func _case_command_charge(dm) -> void:  # 用例四：指令校验+大招归零+充能三途径
 	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"])
@@ -127,7 +131,7 @@ func _case_wipeout_win(dm) -> void:  # 用例六：人工指令路径 + 敌方�
 		bm.units[i].hp = 8
 	bm.command_provider = func(unit): return [BC.Kind.SKILL, null]  # 人工指令注入（T3.7 UI 接入点）
 	bm.force_crit = 0
-	var result: String = bm.run_to_end(6)
+	var result: String = await bm.run_to_end(6)
 	print("[SMOKE] 用例六: result=%s rounds=%d orders=%s" % [result, bm.round_num, str(bm.round_orders)])
 	_check(result == "win" and bm.round_num == 2)
 	_check(str(bm.round_orders) == "[[0, 1, 2], [0, 1, 2]]")

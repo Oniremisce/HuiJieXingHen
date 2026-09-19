@@ -28,12 +28,15 @@ var _failed := false
 var _n := 0
 
 func _init() -> void:
+	_run.call_deferred()  # T3.6 起 run_to_end/run_pull 为 coroutine：主循环帧驱动
+
+func _run() -> void:
 	var dm = DMS.new()
 	dm._load_all()  # headless --script 手动同步加载
 	print("=== T3.5 队伍机制冒烟开始 ===")
-	_case_hunyuan(dm)
-	_case_resonance(dm)
-	_case_confluence(dm)
+	await _case_hunyuan(dm)
+	await _case_resonance(dm)
+	await _case_confluence(dm)
 	if _failed:
 		print("=== T3.5 冒烟结束：存在失败项 ===")
 		quit(1)
@@ -62,7 +65,7 @@ func _case_resonance(dm) -> void:
 	bm.force_crit = 0
 	for i in [0, 1, 2]:
 		bm.units[i].charge = 100
-	var result: String = bm.run_to_end(1)  # 1 轮窗口：锁合击数值（69-34=35；若误含兽 atk 则 25）
+	var result: String = await bm.run_to_end(1)  # 1 轮窗口：锁合击数值（69-34=35；若误含兽 atk 则 25）
 	print("[SMOKE] 用例B: result=%s rounds=%d orders=%s | 兽=%s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[3])])
 	_check(result == "timeout" and bm.round_num == 1)
@@ -97,7 +100,7 @@ func _case_confluence(dm) -> void:
 	bm.units[3].hp = 999
 	for i in [0, 1, 2]:
 		bm.units[i].charge = 100
-	var result: String = bm.run_to_end(1)
+	var result: String = await bm.run_to_end(1)
 	print("[SMOKE] 用例C1: result=%s rounds=%d orders=%s | 兽=%s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[3])])
 	_check(result == "timeout" and str(bm.round_orders) == "[[1, 0, 2, 3]]")
@@ -110,7 +113,7 @@ func _case_confluence(dm) -> void:
 	bm2.units[3].hp = 999
 	bm2.units[0].charge = 100
 	var acted: Array = [false, true, true, false]  # arcane/xian 本轮已出手
-	bm2.bonus.run_pull(bm2, bm2.units[1], acted)  # arcane 触发（t_now=arrival(12)=9）
+	await bm2.bonus.run_pull(bm2, bm2.units[1], acted)  # arcane 触发（t_now=arrival(12)=9）
 	print("[SMOKE] 用例C2: acted=%s mech=%s 兽=%s" % [str(acted), str(bm2.units[0]), str(bm2.units[3])])
 	_check(bool(acted[0]) and bm2.units[0].charge == 30)  # 拉条出手 ULT→retain30
 	_check(bm2.units[3].hp == 975)  # 999-24（仅 mech；arcane/xian 已出手不重复出手）
