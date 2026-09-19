@@ -13,8 +13,8 @@
 [sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_trigger"]
 points = PackedVector2Array(0, -48, 80, 0, 0, 48, -80, 0)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_battle"]
-size = Vector2(75, 55)
+[sub_resource type="ConvexPolygonShape2D" id="RectangleShape2D_battle"]
+points = PackedVector2Array(-32, 0, 0, -16, 32, 0, 0, 16)
 
 [node name="CampMap" type="Node2D"]
 y_sort_enabled = true
@@ -272,7 +272,7 @@ position = Vector2(480, -112)
 script = ExtResource("7_mqt")
 
 [node name="BattleTrigger" type="Area2D" parent="."]
-position = Vector2(960, 32)
+position = Vector2(1024, 192)
 collision_layer = 0
 collision_mask = 2
 monitorable = false
@@ -283,8 +283,8 @@ shape = SubResource("RectangleShape2D_battle")
 
 [node name="DebugVisual" type="Polygon2D" parent="BattleTrigger"]
 z_index = -1
-color = Color(1, 0.3, 0.25, 0.33)
-polygon = PackedVector2Array(-37.5, -27.5, 37.5, -27.5, 37.5, 27.5, -37.5, 27.5)
+color = Color(0.2, 0.9, 0.3, 0.4)
+polygon = PackedVector2Array(-32, 0, 0, -16, 32, 0, 0, 16)
 
 [node name="BattleController" type="Node" parent="."]
 script = ExtResource("9_bc")
