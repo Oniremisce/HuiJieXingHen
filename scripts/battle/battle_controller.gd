@@ -60,8 +60,11 @@ func _on_battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary)
 			for eid in enemy_ids:
 				var e: Variant = dm.get_enemy(String(eid))
 				sand += int(e.drop_sand) if e != null else 0
+		# T3.7 协作修正（系统程序05）：契约定稿四字段——补 star_sand_gained
+		# （lose/timeout/aborted 场 sand 恒 0：仅 win 分支累加且即 break）
 		get_node("/root/EventBus").battle_finished.emit({
-			"outcome": outcome, "rounds": rounds, "context": _context})
+			"outcome": outcome, "rounds": rounds, "context": _context,
+			"star_sand_gained": sand})
 		if outcome == "win":
 			break
 		_layer.show_retry()
