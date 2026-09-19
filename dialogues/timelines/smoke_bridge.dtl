@@ -1,0 +1,8 @@
+join test_npc (normal) center
+test_npc (normal): 桥接验证：本句播放后将写入旗标 smoke_bridge_test。
+[signal arg="set_flag:smoke_bridge_test=1"]
+if GameState.get_flag('smoke_bridge_test', 0) == 1:
+	test_npc (happy): 旗标已写入。看到本句说明条件行已生效。
+if GameState.get_flag('smoke_never', 0) == 1:
+	test_npc (normal): 本句条件永不成立，应被跳过（看不到本句即验证通过）。
+	[signal arg="set_flag:smoke_never_written=1"]

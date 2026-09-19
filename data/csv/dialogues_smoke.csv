@@ -1,0 +1,7 @@
+timeline_id,order,speaker_id,emotion,text,set_flag,flag_condition,choice_a,choice_b
+smoke_test,1,test_npc,normal,"你好，异乡人。我是星痕冒烟测试员，负责验证对话窗与立绘占位。",,,,
+smoke_test,2,test_npc,happy,"你看，现在表情已切换为 happy，立绘占位也换成了暖色。",,,,
+smoke_test,3,test_npc,,"三句台词播放完毕，冒烟测试到此结束。",,,,
+smoke_bridge,1,test_npc,normal,"桥接验证：本句播放后将写入旗标 smoke_bridge_test。","smoke_bridge_test=1",,,
+smoke_bridge,2,test_npc,happy,"旗标已写入。看到本句说明条件行已生效。",,"smoke_bridge_test=1",,
+smoke_bridge,3,test_npc,normal,"本句条件永不成立，应被跳过（看不到本句即验证通过）。","smoke_never_written=1","smoke_never=1",,

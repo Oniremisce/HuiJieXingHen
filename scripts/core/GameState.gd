@@ -51,16 +51,31 @@ func add_sand(amount: int) -> void:
 
 
 ## ------------------------------------------------------------
-## Dialogic 信号桥接接口（T4.2 实现，本卡仅骨架）
+## Dialogic 信号桥接接口（T4.2 落地；DialogicBridge 统一调用）
 ## ------------------------------------------------------------
-## Dialogic 的 signal_event 触发后，由桥接层（T4.2 的 DialogicBridge）统一调用：
-##   event_name：Dialogic signal_event 中的自定义信号名，如 "quest_advance"
-##   data：信号附带参数字典，如 {"quest_id": "heartbond_01", "step": 1}
-## 约定分发规则（T4.2 落地）：
-##   quest_advance → GameState 写剧情 flag + EventBus.quest_updated 广播
+## Dialogic 的 signal_event 触发后，由桥接层（scripts/dialogue/DialogicBridge.gd）
+## 解析协议后统一调用本方法：
+##   event_name：Dialogic signal 事件中的自定义信号名
+##   data：信号附带参数字典
+## 分发规则：
+##   set_flag（data={"flag", "value"}）→ GameState 写剧情 flag
+##   quest_advance（data={"quest_id", "step"}）→ 写剧情 flag + EventBus.quest_updated 广播
 ##   其余剧情事件（battle_request/recruit_request 等）按 P3/P6 需要扩展
-## 本卡骨架只回显参数做联调验证，不产生任何状态变更。
 func dialogue_signal_bridge(event_name: String, data: Dictionary) -> void:
-	print("[GameState] dialogue_signal_bridge（骨架）：event=%s, data=%s（T4.2 接入 Dialogic signal_event）" % [
-		event_name, data,
-	])
+	match event_name:
+		"set_flag":
+			var flag_name := str(data.get("flag", ""))
+			if flag_name.is_empty():
+				push_warning("[GameState] dialogue_signal_bridge：set_flag 缺少 flag 名（data=%s）" % [data])
+				return
+			var value: Variant = data.get("value", true)
+			set_flag(flag_name, value)
+			print("[GameState] set_flag %s=%s（对话桥接）" % [flag_name, str(flags[flag_name])])
+		"quest_advance":
+			var quest_id := str(data.get("quest_id", ""))
+			var step := int(data.get("step", 0))
+			set_flag("quest_%s_step" % quest_id, step)
+			get_node("/root/EventBus").quest_updated.emit(quest_id, step)
+			print("[GameState] quest_advance %s→step %d（对话桥接，quest_updated 已广播）" % [quest_id, step])
+		_:
+			push_warning("[GameState] dialogue_signal_bridge：未注册事件 '%s'（data=%s）" % [event_name, data])

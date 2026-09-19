@@ -16,4 +16,4 @@ offset_top = 16.0
 offset_right = 700.0
 offset_bottom = 44.0
 theme_override_font_sizes/font_size = 18
-text = "按 1 键开始 Dialogic 冒烟播放，点击/空格推进台词"
+text = "按 1 播放 smoke_test，按 2 播放 smoke_bridge；点击/空格推进台词"

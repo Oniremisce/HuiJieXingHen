@@ -30,13 +30,16 @@ MapSystem="*res://scripts/core/MapSystem.gd"
 ShrineSystem="*res://scripts/core/ShrineSystem.gd"
 SaveManager="*res://scripts/core/SaveManager.gd"
 UISystem="*res://scripts/core/UISystem.gd"
+DialogicBridge="*res://scripts/dialogue/DialogicBridge.gd"
 
 [dialogic]
 
 directories/dch_directory={
 "test_npc": "res://dialogues/characters/test_npc.dch"
 }
-directories/dtl_directory={}
+directories/dtl_directory={
+"smoke_test": "res://dialogues/timelines/smoke_test.dtl"
+}
 layout/style_directory={}
 text/letter_speed=0.01
 text/initial_text_reveal_skippable=true
