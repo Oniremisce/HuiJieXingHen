@@ -36,6 +36,7 @@ var spd := 0
 var charge := 0
 var charge_max := 100
 var charge_free := false
+var ult_charge_retain := 0.0  # 大招后 charge 保留比例（0=归零 §3；汇流编组 BM 设 0.3 §4.2）
 var skill_small: Variant = null  # DM.SkillData
 var skill_ult: Variant = null    # DM.SkillData
 var alive := true
@@ -82,9 +83,9 @@ func charge_on_small_hit() -> void:
 func charge_on_damaged() -> void:
 	charge = mini(charge + CHARGE_DAMAGED, charge_max)
 
-## 释放大招后充能归零（§3）；charge_free 单位照常归零
+## 释放大招后充能：默认归零（§3）；汇流编组保留上限×30%（§4.2，BM 按体系设 retain）
 func consume_ult() -> void:
-	charge = 0
+	charge = int(charge_max * ult_charge_retain)
 
 ## 大招是否可释放（§3：充能满或 charge_free）；数据层图标三态查询用
 func can_use_ult() -> bool:

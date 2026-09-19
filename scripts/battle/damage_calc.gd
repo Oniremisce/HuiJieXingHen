@@ -57,15 +57,16 @@ static func calc(attacker, skill, target, force_crit := -1, bonus_override: Dict
 	return {"damage": int(dmg), "crit": is_crit, "crit_rate": crit_rate,
 		"crit_mult": crit_mult, "cond": cond}
 
-## 合击技伤害入口（§4.1，T3.5 消费）；party 传全队，内部仅计存活者
+## 合击技伤害入口（§4.1，T3.5 消费）；party 可传全队，内部只取与 target 敌对
+## （is_ally 相异）的存活者——合击为我方机制（§4.4.4 敌人无体系），死亡不计入求和
 static func combo_calc(party: Array, power: float, target, force_crit := -1, bonus_override: Dictionary = {}) -> Dictionary:
 	var atk_sum := 0.0
 	var crit_sum := 0.0
 	var cond_specs: Array = []
 	var alive_count := 0
 	for u in party:
-		if not u.is_alive():
-			continue  # 已死亡角色不计入求和（§4.1）
+		if not u.is_alive() or bool(u.is_ally) == bool(target.is_ally):
+			continue  # 死亡角色/非攻击方（同阵营）不计入求和（§4.1）
 		alive_count += 1
 		atk_sum += float(u.atk)
 		var b: Dictionary = get_stellium_bonus(str(u.id))
