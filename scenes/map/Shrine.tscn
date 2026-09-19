@@ -1,0 +1,57 @@
+[gd_scene load_steps=4 format=4]
+
+[ext_resource type="Script" path="res://scripts/map/Shrine.gd" id="1_shrine"]
+[ext_resource type="PackedScene" path="res://scenes/map/Interactable.tscn" id="2_inter"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_halo"]
+radius = 96.0
+
+[node name="Shrine" type="Node2D"]
+script = ExtResource("1_shrine")
+
+[node name="Base" type="Polygon2D" parent="."]
+color = Color(0.36, 0.4, 0.5, 1)
+polygon = PackedVector2Array(-26, 0, 26, 0, 18, -14, -18, -14)
+
+[node name="Stele" type="Polygon2D" parent="."]
+color = Color(0.52, 0.58, 0.68, 1)
+polygon = PackedVector2Array(-14, -14, 14, -14, 14, -84, -14, -84)
+
+[node name="Gem" type="Polygon2D" parent="."]
+color = Color(0.42, 0.47, 0.55, 1)
+polygon = PackedVector2Array(0, -116, 16, -92, 0, -78, -16, -92)
+
+[node name="Pillar" type="Polygon2D" parent="."]
+modulate = Color(1, 1, 1, 0)
+visible = false
+color = Color(1, 0.95, 0.7, 0.5)
+polygon = PackedVector2Array(-9, -10, 9, -10, 9, -140, -9, -140)
+
+[node name="Particles" type="CPUParticles2D" parent="."]
+position = Vector2(0, -60)
+emitting = false
+amount = 32
+lifetime = 1.0
+one_shot = true
+explosiveness = 0.9
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -60)
+initial_velocity_min = 40.0
+initial_velocity_max = 110.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.9, 0.5, 0.9)
+
+[node name="HaloArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HaloArea"]
+shape = SubResource("CircleShape2D_halo")
+
+[node name="Interactable" parent="." instance=ExtResource("2_inter")]
+npc_id = "camp_shrine_01"
+display_name = "星痕神像"
+action_type = "shrine"

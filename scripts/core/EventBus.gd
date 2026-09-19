@@ -40,3 +40,10 @@ signal map_region_unlocked(region_id: String)
 ## 暂停管理器、音效等消费；T2.5 各面板接入后统一此出口
 signal ui_open(panel_name: String)
 signal ui_closed(panel_name: String)
+
+## 神像点亮（T2.4 ShrineSystem 发出；场景内 Shrine 实体消费刷新亮态视觉、
+## 世界大地图/箱庭图据 ShrineSystem 真值重绘）
+signal shrine_lit(shrine_id: String)
+
+## 玩家进入神像恢复光环（T2.4 Shrine 发出；任务/音效等消费）
+signal shrine_entered_radius(shrine_id: String)

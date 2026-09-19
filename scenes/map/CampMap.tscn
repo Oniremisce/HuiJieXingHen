@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=4]
+[gd_scene load_steps=8 format=4]
 
 [ext_resource type="TileSet" path="res://assets/maps/tilesets/camp_tileset.tres" id="1_ts"]
 [ext_resource type="PackedScene" path="res://scenes/map/Player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/map/Interactable.tscn" id="3_inter"]
 [ext_resource type="Script" path="res://scripts/map/CampMap.gd" id="4_camp"]
 [ext_resource type="Script" path="res://scripts/map/TriggerZone.gd" id="5_tz"]
+[ext_resource type="PackedScene" path="res://scenes/map/Shrine.tscn" id="6_shrine"]
 
 [sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_trigger"]
 points = PackedVector2Array(0, -48, 80, 0, 0, 48, -80, 0)
@@ -260,3 +261,6 @@ polygon = PackedVector2Array(0, -48, 80, 0, 0, 48, -80, 0)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(1088, 160)
+
+[node name="CampShrine" parent="." instance=ExtResource("6_shrine")]
+position = Vector2(480, -112)

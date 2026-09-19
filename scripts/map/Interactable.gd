@@ -23,6 +23,11 @@ const PLAYER_LAYER_BIT := 2  # T1.3 约定：玩家 collision_layer=2
 		display_name = value
 		_refresh_hint_text()
 @export var action_type: String = "talk"
+## 提示文案覆盖（T2.4 神像复用：非空时按原文显示，不走 "{display_name} [E]" 模板）
+@export var hint_text: String = "":
+	set(value):
+		hint_text = value
+		_refresh_hint_text()
 
 var _player: Node2D = null
 var _visual_queued := false  # deferred 添加防重复排队
@@ -76,7 +81,7 @@ func _ensure_input_action() -> void:
 
 func _refresh_hint_text() -> void:
 	if _hint_label:
-		_hint_label.text = "%s [E]" % display_name
+		_hint_label.text = hint_text if hint_text != "" else "%s [E]" % display_name
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is CharacterBody2D and (body.collision_layer & PLAYER_LAYER_BIT):

@@ -198,7 +198,9 @@ func _on_dim_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_LEFT:
 				_close_confirm()
 				if view_index == 1 and _world != null:
-					var id: String = _world.call("hit_test", _world.call("get_local_mouse_position"))
+					# 用事件坐标换算（get_local_mouse_position 走真实 OS 鼠标，合成输入下不可用）；
+					# Dim 全屏位于原点 → event.position 即 viewport 坐标，CanvasLayer 无变换时=canvas 坐标
+					var id: String = _world.call("hit_test", _world.to_local(event.position))
 					if id != "":
 						_show_confirm(id)
 

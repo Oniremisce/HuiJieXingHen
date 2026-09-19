@@ -41,12 +41,15 @@ const REGIONS := {
 	},
 }
 
-## 神像注册表（MVP 假神像：lit 状态暂以所属区块解锁态代替，T2.4 神像点亮接管）；
-## cell = 箱庭图标点位（所在场景 TileMapLayer 坐标）；world_pos = 大地图设计坐标
+## 神像注册表（位置/场景/箱庭图标点位归属本层；lit 真值 T2.4 起由
+## ShrineSystem 驱动，本层 is_shrine_lit 转发，消除双真相）；
+## cell = 箱庭图标点位（所在场景 TileMapLayer 坐标）；world_pos = 大地图设计坐标；
+## spawn = 传送落点（全局坐标，Transition.transition_portal 消费）
 const SHRINES := {
-	"shrine_camp": {
+	"camp_shrine_01": {
 		"name": "营地星痕神像", "region": "region_camp", "scene": "res://scenes/map/CampMap.tscn",
-		"cell": Vector2i(14, 7), "world_pos": Vector2(250, 262),
+		"cell": Vector2i(11, 3), "world_pos": Vector2(250, 262),
+		"spawn": Vector2(480, -64),
 	},
 	"shrine_test": {
 		"name": "遗迹星痕神像", "region": "region_test", "scene": "res://scenes/map/TestMap.tscn",
@@ -99,6 +102,12 @@ func get_region_by_shrine(shrine_id: String) -> String:
 	return ""
 
 
+## 神像点亮真值（T2.4 接管：ShrineSystem 唯一真相，本层转发供地图视图使用）
+func is_shrine_lit(shrine_id: String) -> bool:
+	var ss := get_node_or_null("/root/ShrineSystem")
+	return ss.is_shrine_lit(shrine_id) if ss != null else false
+
+
 ## 已解锁区块副本（T2.4 存档读取）
 func get_unlocked_regions() -> Array[String]:
 	return unlocked_regions.duplicate()
@@ -127,7 +136,7 @@ func get_shrine_info(shrine_id: String) -> Dictionary:
 ## Transition 反查传送目标：神像 id 或泛用传送点 id → {scene, spawn}
 func get_portal_target(target_id: String) -> Dictionary:
 	if SHRINES.has(target_id):
-		return {"scene": SHRINES[target_id].scene, "spawn": null}
+		return {"scene": SHRINES[target_id].scene, "spawn": SHRINES[target_id].get("spawn")}
 	if PORTALS.has(target_id):
 		return PORTALS[target_id].duplicate()
 	return {}
@@ -193,7 +202,7 @@ func get_current_scene_shrines() -> Array:
 		var pos: Vector2 = Vector2.ZERO
 		if tml != null and s.has("cell"):
 			pos = tml.to_global(tml.map_to_local(s.cell))
-		out.append({"id": id, "name": s.name, "lit": is_region_unlocked(s.region), "pos": pos})
+		out.append({"id": id, "name": s.name, "lit": is_shrine_lit(id), "pos": pos})
 	return out
 
 

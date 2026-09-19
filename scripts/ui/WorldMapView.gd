@@ -51,11 +51,11 @@ func _draw() -> void:
 			draw_string(_font, lp, str(info.name), HORIZONTAL_ALIGNMENT_LEFT, -1, 14,
 					Color(1, 1, 1, 0.32))
 
-	# 神像
+	# 神像（亮=金色可点击；lit 真值 T2.4 起由 ShrineSystem 驱动）
 	for id: String in ms.SHRINES:
 		var s: Dictionary = ms.SHRINES[id]
 		var pos: Vector2 = _xform * (s.world_pos as Vector2)
-		var lit: bool = ms.is_region_unlocked(s.region)
+		var lit: bool = ms.is_shrine_lit(id)
 		if lit:
 			draw_circle(pos, 7.0, Color(1.0, 0.84, 0.3))
 			draw_arc(pos, 12.0, 0.0, TAU, 32, Color(1.0, 0.84, 0.3, 0.55), 1.5)
@@ -70,7 +70,7 @@ func hit_test(local: Vector2) -> String:
 	var ms := get_node("/root/MapSystem")
 	for id: String in ms.SHRINES:
 		var s: Dictionary = ms.SHRINES[id]
-		if not ms.is_region_unlocked(s.region):
+		if not ms.is_shrine_lit(id):
 			continue
 		if (_xform * (s.world_pos as Vector2)).distance_to(local) <= 16.0:
 			return id

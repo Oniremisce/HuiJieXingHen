@@ -27,6 +27,8 @@ ArtProvider="*res://scripts/core/ArtProvider.gd"
 PauseManager="*res://scripts/core/PauseManager.gd"
 Transition="*res://scripts/core/Transition.gd"
 MapSystem="*res://scripts/core/MapSystem.gd"
+ShrineSystem="*res://scripts/core/ShrineSystem.gd"
+SaveManager="*res://scripts/core/SaveManager.gd"
 
 [dialogic]
 
