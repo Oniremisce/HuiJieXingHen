@@ -22,6 +22,7 @@ Dialogic="*uid://ds2q0uclmolvu"
 DataManager="*uid://dhkkxbvd8pcwy"
 EventBus="*res://scripts/core/EventBus.gd"
 GameState="*res://scripts/core/GameState.gd"
+Party="*res://scripts/core/Party.gd"
 
 [dialogic]
 

@@ -27,3 +27,7 @@ signal summon_completed(result: Dictionary)
 
 ## 觉醒者招募入队（character_id 对应 characters.csv）
 signal character_recruited(character_id: String)
+
+## 编队数据变更（T2.2 Party 发出；party_list = 编队角色 id 快照，
+## 同行者本就 ∈ members 不重复计入；仅确有变更时发一次，规则见 docs/系统规则/队伍系统.md §3）
+signal party_changed(party_list: Array)
