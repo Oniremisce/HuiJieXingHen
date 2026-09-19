@@ -41,7 +41,7 @@
 - **数据模型**：`scripts/core/data_models.gd` 内部类，引用统一 `const DM := preload("res://scripts/core/data_models.gd")`（不依赖全局 class_name）。
 - **EventBus 已注册 8 信号**：interact_requested / dialogue_started / dialogue_finished / battle_started / battle_finished / quest_updated / summon_completed / character_recruited；GameState：star_sand/starlink_tokens/flags + dialogue_signal_bridge 骨架。
 - **地图**：TestMap（24×24 等距 DIAMOND_RIGHT，tile 64×32）、CampMap（主场景）；玩家 Player.tscn（八方向 + Camera2D 平滑跟随 + limit 钳制）；Interactable 组件（Area2D r=60、action `interact`=E+空格、R3 最近者仲裁、`interact_requested(self)`）。
-- **数值口径**：energy_cost=1(small)/3(ult)；power=倍率制（float）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
+- **数值口径**：power=倍率制（float）；energy_cost 已作废（T2.8 删除，战斗改充能条制，见 docs/系统规则/战斗系统.md §3）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
 
 ### 2.3 技术选型与规范
 
@@ -58,9 +58,9 @@
 ### 2.4 核心数据模型
 
 - **CharacterData**：`id/name/faction/system/hp/atk/def/spd/skill_small/skill_ult/portrait_id/sprite_id`（预留 `starmarrow_slots`=6、`sprite_idle_8dir`/`sprite_walk_8dir`）
-- **SkillData**：`id/name/type/power(float)/energy_cost/cutscene_id`（cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
-- **EnemyData**：`id/name/hp/atk/def/spd/ai_pattern/drop_sand`
-- **StelliumData**：`id/name/rarity/set_id/set_name/set_type(2|3)/set_2_bonus/set_3_bonus/main_stat/sub_stats/lv`
+- **SkillData**：`id/name/type/power(float)/cutscene_id`（energy_cost 已作废删除，T2.8 执行；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
+- **EnemyData**：`id/name/hp/atk/def/spd/skill_small/skill_ult/ai_pattern/drop_sand`（双技能列 T3.1 执行）
+- **StelliumData**：`id/name/set_id/set_name/slot(1-6)/main_stat/main_base/main_max/set_2_bonus/set_3_bonus`（无稀有度；实例字段 lv/sub_unlocked/equipped_by 在 Inventory.starmarrow 逐枚实例，T2.8 执行）
 - **SummonEntryData**：`entry_id/name/kind/gold/weight`
 - **QuestData**：`quest_id/step/step_name/requirement/target/reward/next_step`（quests.csv 预留 `quest_type`=main/side/bond、`priority`、`mark_color`）
 
@@ -298,14 +298,14 @@ graph TD
 
 【步骤2 角色列表 + 角色详情分页 + 星髓面板骨架】
 4. 角色列表（C）：左详情右列表；右侧纵向头像列（已获角色：头像色块+名+等级+体系色角标；未获角色不显示）；点头像→左侧详情。
-5. 角色详情页 1：高清立绘占位（色块）+四维（hp/atk/def/spd 读 CharacterData）+星缘（占位）+技能列表（读 SkillData：名/耗能/倍率）。
-6. 角色详情页 2 =星髓面板（三区骨架，数据行 T2.8/T6.5 才有，先用空态+假数据 1 条验证布局）：装备区=6 槽网格 2×3（当前角色）；持有列表=筛选（稀有度/等级/套装——星髓体系无关，无体系筛选）；养成区=升级/突破按钮占位+属性预览。本卡只做布局与空态交互，装备逻辑在 T6.5。
+5. 角色详情页 1：高清立绘占位（色块）+四维（hp/atk/def/spd 读 CharacterData）+星缘（占位）+技能列表（读 SkillData：名/倍率）。
+6. 角色详情页 2 =星髓面板（三区骨架，数据行 T2.8/T6.5 才有，先用空态+假数据 1 条验证布局）：装备区=6 槽网格 2×3（当前角色）；持有列表=筛选（**等级/套装，MVP 无稀有度**——星髓体系无关，无体系筛选）；养成区=强化按钮占位+属性预览。本卡只做布局与空态交互，装备逻辑在 T6.5。
 7. 编队操作入口：角色列表中「加入编队/移出」按钮→Party.add_member/remove_member（上限 3，满员提示）。
 
 【步骤3 任务面板 + 唤星面板 + 背包 + 设置】
 8. 任务面板（J）：全屏列表按主线/支线/心契三组（组头三色：#FFA640/#6FC9FF/#FF8FC8）；条目=任务名+当前步骤+目标进度；无任务显示空态。数据源 QuestRunner 未就绪→读 quests.csv 直接列骨架。
 9. 唤星面板（G）：星砂×100 单抽按钮（星砂不足禁用+提示）+保底进度条（pity_counter/60，占位）+结果展示区（T6.4 接演出）；本卡按钮可置灰标注「T6.2 开放」。
-10. 背包（B）：分类 Tab（道具/材料/星髓/任务品）+网格+数量徽标；详情浮层占位；数据源 Inventory 未就绪→空态（T6.1 接）。
+10. 背包（B）：分类 Tab（**道具/材料/任务品，无星髓 Tab**——星髓不入背包，查看/装备在角色面板星髓面板）+网格+数量徽标；详情浮层占位；数据源 Inventory 未就绪→空态（T6.1 接）。
 11. 设置三页：音频（BGM/音效/UI 三轨音量条）/画面（全屏窗口切换+分辨率下拉）/操作（键位表展示只读）；设置存独立档 user://settings.json（不混入进度档）。主页菜单背景选择器：设置→背景选择（氛围图/已获角色立绘占位列表），选择存设置档。
 12. 全部面板开关走 ui_open/ui_closed+暂停；键位提示条（T2.3 HUD）更新为最终键位表。
 
@@ -397,28 +397,28 @@ graph TD
 【完整指令 · 粘贴给 Agent】
 
 ```
-任务：T2.8 星髓套装制数据修订
-目标：按架构 §2.5「星髓仅提供 2 件套数值属性+3 件套效果属性，与体系无关」重构 stellium.csv 与 StelliumData。
+任务：T2.8 星髓槽位制数据重构 + energy_cost 作废
+目标：按 docs/系统规则/星髓系统.md 重构 stellium.csv 与 StelliumData（套装×槽位制、无稀有度）；按 docs/系统规则/战斗系统.md §9.1 C2 删除 skills.csv energy_cost 列。
 前置：T0.3、T2.1 已过。
 
 执行步骤：
-1. stellium.csv 列头改为：id,name,rarity,set_id,set_name,set_type,set_2_bonus,set_3_bonus,main_stat,sub_stats,lv
-   - set_type ∈ {2,3}：2=该星髓属 2 件套组件（提供数值属性 main_stat/sub_stats）；3=3 件套组件（提供效果 set_3_bonus）
-   - set_2_bonus/set_3_bonus：套装效果描述/数值（占位字符串或 JSON 片段，格式先定为 "attr:value;attr:value"）
-   - 沿用 BaseRow 按列头映射，旧列语义变化处写清注释
-2. 占位数据 6 行：2 个套装（各 1 个 2 件套组件+2 个 3 件套组件），rarity 占位 3/4/5 档，数值占位可调（正式数值 T6.5 前由你复核）。
-3. 适配 scripts/core/data_models.gd 的 StelliumData：新增 rarity/set_name/set_type/set_2_bonus/set_3_bonus/lv 字段与 from_csv_row 解析（缺省容错：数值 0、字符串空）；保留 main_stat/sub_stats。
-4. 更新 tools/smoke_test_data_models.gd 星髓断言为新字段结构。
-5. MCP 运行确认 stellium=6 加载无坏行；str() 打印一行全字段验证。
-6. 台账登记：data_models.gd 为跨岗改动（系统程序辖区），在系统程序交接班表追加一行说明「StelliumData 结构变更，T6.5 消费新字段」。
+1. stellium.csv 列头改为：id,name,set_id,set_name,slot,main_stat,main_base,main_max,set_2_bonus,set_3_bonus
+   - （set_id, slot）唯一确定星髓类型；2 套 × 6 槽 = **12 行**，现骨架 3 行（机律/秘法/玄门套装）废弃重写
+   - 1~3 号位 main_stat 固定（atk/def/hp）；4~6 号位 main_stat 为随机池（`|` 分隔，如 pct_atk|pct_def|pct_hp，main_base/main_max 与池一一对应；5 号位 crit|crit_dmg|pct_atk、6 号位 charge|spd）
+   - set_2_bonus/set_3_bonus 格式 "attr:value;attr:value"：套装1=crit:15% / cond_dmg:hp>70%,50%；套装2=crit_dmg:15% / cond_dmg:hp<50%,50%
+   - **无 rarity 列**（MVP 无稀有度，星髓规则 §8.1 C2）
+2. 适配 scripts/core/data_models.gd 的 StelliumData：字段=新列头全集 + from_csv_row 解析（缺省容错：数值 0、字符串空）。
+3. skills.csv **删除 energy_cost 列**，SkillData 同步删除 energy_cost 字段（能量点制作废，战斗改充能条制；power 倍率不变）。
+4. 更新 tools/smoke_test_data_models.gd：星髓断言为新结构（含 slot 1-6）；删除 energy_cost 相关断言。
+5. MCP 运行确认 stellium=12、skills=6 加载无坏行；str() 打印各一行验证。
+6. 台账登记：data_models.gd 与 skills.csv 均为跨岗改动（系统程序辖区），在系统程序交接班表追加一行（StelliumData/SkillData 结构变更，T3.3/T6.5 消费新字段）。
 
 验收（全部通过）：
-- [ ] stellium=6 加载无坏行，新字段类型正确
-- [ ] set_type=2 行有 main_stat、set_type=3 行有 set_3_bonus（逻辑自洽）
-- [ ] 冒烟测试更新后通过
+- [ ] stellium=12 加载无坏行，slot 覆盖 1-6，1~3 号位固定/4~6 号位池逻辑自洽
+- [ ] skills.csv 无 energy_cost 列，SkillData 无该字段，冒烟测试通过
 - [ ] 跨岗登记完成
 
-提交：git commit -m "T2.8: 星髓套装制数据修订" 并 push。
+提交：git commit -m "T2.8: 星髓槽位制数据重构与energy_cost作废" 并 push。
 ```
 
 ### P3 战斗系统
@@ -436,137 +436,145 @@ graph TD
 
 ```
 任务：T3.1 敌人占位数据（灾蚀兽）
-目标：完善 enemies.csv：灾蚀兽属性+简单 AI+星砂掉落。
+目标：完善 enemies.csv：灾蚀兽属性+双技能+星砂掉落（战斗系统 §3：敌人也有小技能/大招）。
 前置：T0.3 已通过。
 
 执行步骤：
-1. enemies.csv 一行：id=corrosion_beast，name=灾蚀兽，hp≈150、atk≈10、def≈6、spd≈8（占位可调），ai_pattern=simple（70% 普攻/30% 小技能），drop_sand=30。
-2. MCP 运行确认 enemies=1；get_enemy 返回字段完整、类型正确。
+1. skills.csv 增敌人技能两行（占位数值）：enemy_beast_small（type=small，power≈1.0）、enemy_beast_ult（type=ult，power≈1.8）；id 前缀 enemy_ 区分角色技能。
+2. enemies.csv：id=corrosion_beast，name=灾蚀兽，hp≈150、atk≈10、def≈6、spd≈8（占位可调），**skill_small=enemy_beast_small、skill_ult=enemy_beast_ult**，ai_pattern=simple，drop_sand=30。
+   - ai\_pattern 口径（战斗系统 §9.1 C6 裁定）：MVP 恒 simple=充能未满用小技能、充满放大招；列保留为后续行为模式扩展位。
+3. MCP 运行确认 enemies=1、skills=8；get_enemy 字段完整、双技能 id 可关联到 skills.csv 行。
 
 验收：
 - [ ] 加载成功，drop_sand 可被战斗结算读取（数值类型正确）
+- [ ] skill_small/skill_ult 两列关联有效
 
-提交：git commit -m "T3.1: 灾蚀兽敌人数据" 并 push。
+提交：git commit -m "T3.1: 灾蚀兽敌人数据(双技能)" 并 push。
 ```
 
 #### T3.2 战斗状态机
 
 ```
-任务：T3.2 战斗状态机
-目标：实现回合制状态机：init(players, enemies) → 回合循环 → 胜负判定；每步输出日志。
+任务：T3.2 战斗状态机（跑速条制）
+目标：按 docs/系统规则/战斗系统.md §2 实现跑速条制状态机：init → 速度条模拟循环 → 胜负判定；每步输出日志。
 前置：T2.1、T3.1 已通过。
+权威依据：docs/系统规则/战斗系统.md（§2 跑速条制、§9.1 裁定清单）；实现与旧表述冲突时以规则文档为准。
 
 执行步骤：
-1. BattleManager.gd：状态枚举 intro/player_turn/enemy_turn/win/lose；init(party_ids: Array[String], enemy_ids: Array[String]) 从 DataManager 取数据构造 BattleUnit 列表。
-2. 回合流程：回合开始 → 按 spd 排序行动 → 我方行动（等待指令，T3.3 接入）→ 敌方行动（按 ai_pattern 简单执行）→ 回合结束 → 检查胜负。
-3. 每步 print 结构化日志：[BATTLE] 回合 N / 行动者 / 目标 / 结果 / 双方 HP。
-4. 用 MCP 编辑器执行脚本做无 UI 冒烟：3 人 vs 1 兽，跑 20 回合确认无死锁、可进入 win/lose。
+1. BattleManager.gd：状态枚举 intro/running/action/win/lose；init(party_ids, enemy_ids) 从 DataManager 取数据构造 BattleUnit 列表。
+2. **速度条模拟器**（§2）：速度条上限 100；回合开始全员置 0 → 按各自 spd 前推 → 最先到达 100 者出手（平局：spd 高者优先→我方优先→编队序）→ 出手后归 0 且**本轮不再前推**（每轮限出手一次）→ 全员都出手过后本回合结束、全员归零进下一回合。演出期间后台跑条瞬间推进到出手回合、出手时跑条暂停（演出接入在 T3.6，本卡先留暂停钩子）。
+3. 敌方行动：按 ai_pattern=simple 执行（充能未满用小技能、充满放大招；充能积累同 §3 数值 +20/+15/+10）；我方行动等待指令（T3.3 接入）。
+4. 每步 print 结构化日志：[BATTLE] 回合 N / 行动者 / 速度条位置 / 目标 / 结果 / 双方 HP。
+5. MCP 无 UI 冒烟：3 人 vs 1 兽，跑 20 回合确认无死锁、可进 win/lose；出手顺序与 spd 规则可复算。
 
-产出：BattleManager.gd。
+产出：BattleManager.gd（含速度条模拟器）。
 
 验收（全部通过）：
-- [ ] 日志展示完整回合循环与 HP 变化
+- [ ] 日志展示跑速条推进与出手顺序（与 spd 平局规则一致）
+- [ ] 回合边界正确（每轮每人一次、全员出手完进下一轮）
 - [ ] 可正常进入 win / lose，无死锁
-- [ ] 胜负条件正确（全灭敌方=win；全灭我方=lose）
 
-提交：git commit -m "T3.2: 战斗状态机" 并 push。
+提交：git commit -m "T3.2: 战斗状态机(跑速条制)" 并 push。
 ```
 
 #### T3.3 指令系统
 
 ```
-任务：T3.3 指令系统
-目标：BattleUnit（HP/能量）+ 三种指令（普攻/小技能/终结技）+ 简单目标选择。
+任务：T3.3 指令系统（充能制）
+目标：BattleUnit（HP/充能条）+ 两种指令（小技能/大招）+ 目标选择；按 docs/系统规则/战斗系统.md §3 实现。
 前置：T3.2 已通过。
+权威依据：docs/系统规则/战斗系统.md §3（充能制）与 §9.1 裁定清单；SkillData 已无 energy_cost（T2.8）。
 
 执行步骤：
-1. BattleUnit.gd：hp/max_hp/energy/max_energy（上限 3，回合开始 +1）、take_damage、is_alive、技能数据（从 SkillData）。
-2. BattleCommand.gd：枚举 ATTACK/SKILL/ULT；execute 前校验：小技能需 energy≥1，终结技需 energy=3；能量不足返回不可用原因。
-3. 目标选择：简化 UI（敌人列表按钮/上下键选择），MVP 可先"自动选第一个存活目标 + 手动确认"。
-4. MCP 冒烟：脚本直接调用指令执行，验证伤害应用、能量扣除、目标死亡处理。
+1. BattleUnit.gd：hp/max_hp、charge/charge_max（默认 100）、charge_free（默认 false，机制预留，三觉醒者恒 false）、take_damage、is_alive、技能数据（SkillData 小技能/大招各一）。
+2. 充能积累（§3 裁定数值）：**小技能命中 +20 / 受到伤害 +15 / 自身回合激活开始 +10**；clamp 到 charge_max；释放大招后 charge=0。
+3. BattleCommand.gd：枚举 SKILL/ULT（无独立普攻，小技能即每轮可用基础攻击）；校验：小技能恒可用、大招需 charge==charge_max 或 charge_free=true（图标三态：未满灰/满亮闪/释放中）；不满足返回原因。
+4. 目标选择：MVP「自动选第一个存活目标 + 手动确认」。
+5. MCP 冒烟：脚本调用指令，验证伤害应用、充能积累三途径与重置、目标死亡处理。
 
 产出：BattleUnit.gd、BattleCommand.gd。
 
 验收（全部通过）：
-- [ ] 三种指令可执行，能量不足被禁用且有提示
+- [ ] 两种指令可执行；大招充能未满禁用有提示、充满可释放并归零
+- [ ] 充能积累三途径数值正确（日志可证）
 - [ ] 死亡目标被跳过，敌人全灭正确结算
-- [ ] 终结技消耗 3 能量且伤害倍率正确应用
 
-提交：git commit -m "T3.3: 指令系统" 并 push。
+提交：git commit -m "T3.3: 指令系统(充能制)" 并 push。
 ```
 
 #### T3.4 伤害与数值结算
 
 ```
-任务：T3.4 伤害与数值结算
-目标：实现伤害公式并接入战斗日志；数值全部来自 CSV。
+任务：T3.4 伤害与数值结算（增伤乘区+合击入口）
+目标：伤害公式+星髓条件增伤乘区+合击技伤害入口；数值全部来自 CSV。
 前置：T3.3 已通过。
+权威依据：docs/系统规则/战斗系统.md §4.1/§4.4、docs/系统规则/星髓系统.md §7.1。
 
 执行步骤：
-1. DamageCalc.gd：damage = max(1, atk * skill_power - def)；暴击率 10%（占位）、暴击 ×1.5；输出伤害/暴击判定结果。
-2. 把 DamageCalc 接入 BattleCommand 执行路径，日志输出：出手者/技能/伤害/是否暴击/目标剩余 HP。
-3. 用 MCP 编辑器执行脚本做 3 组手动验算：给定 atk/def/power 手算期望值，与实际结果比对一致。
-4. 数值均从 CharacterData/EnemyData/SkillData 读取，不硬编码。
+1. DamageCalc.gd：damage = max(1, (atk * skill_power - def)) * (1 + 条件增伤)；条件增伤=星髓 3 件套（目标当前 HP/max_hp >70% / <50% 判定；接口 get_stellium_bonus(character_id)，T6.5 前空实现返回 0）；暴击率 10%（占位）+暴击词条加成、暴伤 ×1.5+爆伤词条加成。
+2. **合击技伤害入口**（§4.1）：combo_damage = (存活者 atk 之和 × 100% - def) 走同一管线（含 def 减免与条件增伤乘区）；专用暴击率=三人暴击率之和÷300%、专用暴伤=**固定 300%**（不吃词条加成）；供 T3.5 调用。
+3. 接入 BattleCommand 执行路径，日志输出：出手者/技能/伤害/是否暴击/目标剩余 HP。
+4. MCP 手动验算 ≥3 组（普通/暴击/条件增伤各一组）与手算一致。
+5. 数值均从 CharacterData/EnemyData/SkillData 读取，不硬编码。
 
 产出：DamageCalc.gd。
 
 验收（全部通过）：
 - [ ] ≥3 组手算与实测一致（日志可证）
-- [ ] 伤害下限为 1
-- [ ] 数值全部来自 CSV，无硬编码
+- [ ] 增伤乘区生效；合击入口暴击率/暴伤为专用值（公式可复核）
+- [ ] 伤害下限为 1；数值全部来自 CSV
 
-提交：git commit -m "T3.4: 伤害与数值结算" 并 push。
+提交：git commit -m "T3.4: 伤害结算(增伤乘区+合击入口)" 并 push。
 ```
 
-#### T3.5 队伍机制判定（共振/汇流/混元）
+#### T3.5 队伍机制（共振合击 / 汇流充能拉条 / 混元增幅）
 
 ```
-任务：T3.5 队伍机制判定（共振/汇流/混元）
-目标：按《初期设定》实现三态互斥：共振（全同体系）/ 汇流（异体系且三系未齐）/ 混元（三系齐全，不触发前两者）。
-前置：T3.4、T2.2 已通过。
-
-认知说明：team_systems() 判定基于角色体系（characters.csv system 列），与星髓完全无关（星髓体系无关化，架构 §2.5）；三态互斥规则不变。
+任务：T3.5 队伍机制（共振合击/汇流充能拉条/混元增幅）
+目标：按 docs/系统规则/战斗系统.md §4 实现三态效果；判定逻辑沿用 Party.team_systems()（T2.2 交付，接口不变）。
+前置：T3.4 已通过。
+权威依据：docs/系统规则/战斗系统.md §4 + §9.1 裁定清单（C10~C15）；旧被动加成（atk+10% 等）已作废，勿实现。
 
 执行步骤：
-1. PartyBonus.gd：输入 Party 的 team_systems() 结果，输出当前机制类型与效果：
-   - 共振：全队 atk+10%（占位）
-   - 汇流：全队 def+10%（占位）
-   - 混元：全队 hp/max+8%、atk+5%（占位），且共振/汇流不出现
-   - 三者皆不满足：无机制
-2. 战斗开始时（BattleManager）调用判定并打印 [BONUS] 日志；效果在 DamageCalc 结算时生效。
-3. MCP 冒烟：三种编组分别开战，日志显示对应机制；混元编组确认不出现共振/汇流字样。
+1. PartyBonus.gd：进战斗时取 team_systems() 判定（has_all_three→混元 / all_same→共振 / 两系→汇流，互斥，判定顺序固定）：
+   - **混元**：全队四维 hp/atk/def/spd ×1.3（星髓并入后乘算，持续整场；不含暴击/爆伤/充能）。
+   - **共振**：监听三人大招释放计数（各 ≥1 次满足→触发合击；触发后计数重置可循环；死亡角色计数保留且不计入 atk 求和）→ 触发瞬间**不看跑条插入合击**：调 T3.4 合击入口 combo_damage → 对全体敌人结算 → 播合击 CG（调 T3.6 演出钩子）；合击不改变三人跑条位置与充能。
+   - **汇流**：单体=角色释放大招后 charge 置为上限的 30%（不归 0）；全体=三人都释放过后全员拉条 +30（≥100 者按跑条规则立即触发出手，多达标 spd 优先；本轮已出手单位拉条无效；演出中拉条延迟到演出结束后结算）。
+2. 敌人无体系效果；战斗开始打印 [BONUS] 日志标注体系类型。
+3. MCP 冒烟：三种编组分别开战——共振编组三人大招后合击触发（日志+伤害复核）；汇流编组大招后 charge=30、三人齐后拉条；混元编组四维 ×1.3 且日志无共振/汇流字样。
 
 产出：PartyBonus.gd。
 
 验收（全部通过）：
-- [ ] 三种编组分别触发共振/汇流/混元（日志可证）
-- [ ] 混元时共振/汇流不触发（互斥）
-- [ ] 加成实际作用于伤害结算（数值可复核）
+- [ ] 三种编组各触发对应效果（日志可证），互斥无交叉
+- [ ] 共振合击伤害=存活者 atk 之和×100% 走 T3.4 管线（数值可复核）
+- [ ] 汇流充能 30%/拉条 30% 数值与时机正确；混元四维增幅可证
 
-提交：git commit -m "T3.5: 队伍机制判定" 并 push。
+提交：git commit -m "T3.5: 队伍机制(合击/充能拉条/增幅)" 并 push。
 ```
 
 #### T3.6 战斗演出占位
 
 ```
-任务：T3.6 战斗演出占位
-目标：小技能切"半身立绘占位"，终结技播"专属动画占位"，演出可暂停战斗、可跳过。
+任务：T3.6 战斗演出占位（立绘常驻+CG 层）
+目标：按 docs/系统规则/战斗系统.md §7 布局：右下角立绘常驻+小技能动态立绘切换、大招全屏 CG、合击 CG 演出层；演出期间跑条暂停、可跳过。
 前置：T3.4 已通过。
+权威依据：docs/系统规则/战斗系统.md §7 与 §9.1 C3；替代原「小技能半身立绘全屏占位」布局。
 
 执行步骤：
-1. SkillCutscene.tscn：全屏层（CanvasLayer）：PortraitRect（TextureRect，当前纯色块+角色名+技能名）+ CutsceneAnimation（AnimationPlayer，当前做色块缩放/变色/闪屏占位动画）+ 跳过提示。
-2. SkillCutscene.gd：play(character_id, skill_id)；按 skill.type 分支：small → 立绘占位 0.8s；ult → 专属动画占位 2s + 大字"终结技：<技能名>"；空格跳过；播完发 finished 信号。
-3. BattleManager 接入：执行指令时暂停回合推进 → 播演出 → 继续；立绘来源走 ArtProvider.get_portrait(id, emotion)（占位）。演出播放期间建议 pause_game("cutscene")（若 T2.3 PauseManager 已就绪则接入，否则留 TODO T4.3 统一接）。
-4. MCP：运行战斗 → 触发小技能与终结技 → 截图演出画面 → 空格跳过 → 战斗继续。
+1. BattleCutscene.tscn（CanvasLayer）：右下角 PortraitRect（常驻，TextureRect 色块+角色名）/ UltCGRect（全屏，技能名大字）/ ComboCGRect（全屏，合击技名大字）/ SkipHint；AnimationPlayer 色块占位动画。
+2. BattleCutscene.gd：play_active(id)（回合激活→更新右下角立绘）/ play_skill(id, skill_id)（小技能动态立绘占位 0.8s，播毕切回常态）/ play_ult(id, skill_id)（全屏 CG 占位 2s）/ play_combo()（合击 CG 占位 2s）；空格跳过；播完发 finished 信号。
+3. BattleManager 接入：激活回合更新右下角立绘；大招/合击演出优先——演出期间跑条暂停（T3.2 钩子），演出结束恢复推进并结算拉条等延迟效果（§4.2）；立绘走 ArtProvider.get_portrait(id, emotion)（占位）。
+4. MCP：运行战斗 → 截图右下角立绘/大招全屏/合击全屏 → 空格跳过 → 战斗继续。
 
-产出：SkillCutscene.tscn、SkillCutscene.gd。
+产出：BattleCutscene.tscn、BattleCutscene.gd。
 
 验收（全部通过）：
-- [ ] 小技能/终结技演出分别触发且可结束
-- [ ] 跳过可用，演出后战斗状态正确继续
-- [ ] 演出画面含角色名与技能名，可作为占位证据
+- [ ] 三种演出（小技能切换/大招 CG/合击 CG）分别触发且可结束
+- [ ] 跳过可用；演出期间跑条暂停、结束后恢复
+- [ ] 画面含角色名/技能名/合击技名（占位证据）
 
-提交：git commit -m "T3.6: 战斗演出占位" 并 push。
+提交：git commit -m "T3.6: 战斗演出(立绘常驻+CG层)" 并 push。
 ```
 
 #### T3.7 战斗场景接入与奖励
@@ -577,7 +585,7 @@ graph TD
 前置：T3.5、T3.6、T1.5 已通过。
 
 执行步骤：
-1. Battle.tscn：战斗舞台（色块地板）+ 敌我站位（我方三人左侧、敌方右侧，色块占位）+ BattleController.gd。
+1. Battle.tscn：**复用当前地图地板**（TileMapLayer 地板层，战斗系统 §1）+ 隐藏建筑物/装饰/跑图 UI + 敌我站位（我方三人左侧、敌方右侧，Q 版色块占位）+ 战斗 UI 层 + BattleController.gd。
 2. BattleController：监听 EventBus.battle_started(party_ids, enemy_ids, context) → 加载场景 → 驱动 BattleManager；胜利 → 星砂结算入 GameState.star_sand += drop_sand（Inventory 未就绪前暂记，T6.1 统一迁移 Inventory.add_sand，代码注释标注）→ 发 battle_finished(win)；失败 → 重试提示。
 3. 地图接入：CampMap 放"战斗触发点"（或由心契任务步骤触发），触发 → battle_started（当前队伍 3 人 vs corrosion_beast）；context 参数支持传入 quest_id（供 T5.3 判定"共同战斗"步骤完成）。
 4. 场景进入/退出改走 Transition 层（T2.3）：进入战斗=transition_scene(当前地图, battle 场景)；结算回地图同走 Transition；不再裸 change_scene。
@@ -817,12 +825,12 @@ graph TD
 前置：T0.4、T3.7、T5.3 已通过。
 
 执行步骤：
-1. Inventory.gd（Autoload）：items: Dictionary（道具 id→数量，含 star_sand_crystal）、starmarrow: Dictionary（星髓持有 id→{count, lv}）、cg_collection: Array[String]。
+1. Inventory.gd（Autoload）：items: Dictionary（道具 id→数量，含 star_sand_crystal）、starmarrow: Array[Dictionary]（**星髓逐枚实例**：instance_id/set_id/slot/lv/sub_unlocked/equipped_by，各实例独立）、cg_collection: Array[String]。
 2. API：货币接口对 GameState 的包装（add_sand/spend_sand/add_token/spend_token 引导业务调 GameState）；add_item/has_item/remove_item/unlock_cg/has_cg/add_stellium/has_stellium 管道具、星髓、CG。
 3. T1.6 拾取迁移（A3）：CampMap 星砂结晶拾取从 GameState.set_flag("inv_star_sand_crystal",1) 迁移为 Inventory.add_item("star_sand_crystal",1)（节点 queue_free 保留；旧 flag 保留兼容读取一次后废弃）。
 4. T3.7 胜利星砂迁移：GameState 直记处改 Inventory.add_sand 包装（若 T3.7 用了暂记方案）。
 5. 途径接通：T3.7 胜利奖励 → add_sand；T4.3 主线完成奖励 → add_sand；T5.3 任务奖励/赠礼消耗 → add_item/remove_item；T1.6 拾取 → add_item。
-6. 背包面板（T2.5 的 B）接真数据：分类 Tab 道具/材料/星髓/任务品（星髓 Tab 列 starmarrow 持有）。
+6. 背包面板（T2.5 的 B）接真数据：分类 Tab 道具/材料/任务品（**无星髓 Tab**——starmarrow 仓库仅数据层，查看/装备走角色面板星髓面板 T6.5）。
 7. MCP 冒烟：各途径触发后数值正确；spend 不足返回 false 且不为负。
 
 产出：Inventory.gd（Autoload）。
@@ -934,24 +942,24 @@ graph TD
 目标：角色详情星髓面板（页2）从骨架变可用：装备/卸下、筛选、属性并入、养成骨架。
 前置：T2.8、T2.5、T6.1 已通过。
 
-规格（架构 §2.5）：每角色固定 6 槽（2×3）；星髓与体系无关；2 件套组件提供数值属性（main_stat/sub_stats），3 件套组件提供效果属性（set_3_bonus）；同 set_id 集齐件数触发对应档效果。
+规格（docs/系统规则/星髓系统.md）：每角色固定 6 槽（2×3），槽位一一对应不可混用；星髓与体系无关；**套装件数制**——同 set_id 计件 ≥2 激活 2 件套加成、≥3 再激活 3 件套条件增伤（6 件同套不叠加，支持 3+3/2+2+2 组合）；星髓逐枚实例（Inventory.starmarrow，各自 lv/副词条独立，同件不可多角色同穿）。
 
 执行步骤：
-1. EventBus 注册 starmarrow_changed(character_id, before, after)；装备/卸下后发射（before/after=该角色已装备星髓 id 数组快照）。
-2. 装备规则：每槽 1 件；同 1 件星髓不可同时装在多名角色（持有唯一性）；装备/卸下写 Inventory.starmarrow 状态（equipped_by 字段）。
-3. 套装判定：按当前角色 6 槽内 set_id 计件——某 set 集齐 2 件 2 件套组件→并入其 set_2_bonus 数值属性；集齐 3 件 3 件套组件→激活 set_3_bonus 效果（MVP 效果以属性面板标注+战斗 DamageCalc 可读取的加成钩子形式落地；战斗消费在 T3.4 接口上加挂，若无合适钩子则本卡输出 get_stellium_bonus(character_id)->Dictionary 供战斗侧调用，战斗接入留 T7.1 回归验证）。
+1. EventBus 注册 starmarrow_changed(character_id, before, after)；装备/卸下后发射（before/after=该角色已装备星髓实例 id 数组快照）。
+2. 装备规则：每槽 1 件、槽位与星髓 slot 一一对应；同一枚星髓实例不可同时装在多名角色（持有唯一性）；装备/卸下写实例 equipped_by 字段。
+3. 套装判定（件数制）：按当前角色 6 槽内同 set_id 计件——≥2 件激活 2 件套数值加成（crit/crit_dmg 类并入面板）；≥3 件再激活 3 件套条件增伤（战斗效果：get_stellium_bonus(character_id)->Dictionary 返回 {cond_dmg_hp_gt70 / cond_dmg_hp_lt50}，T3.4 伤害管线消费，回归验证留 T7.1）。
 4. 角色详情页 1 的四维显示=基础值+星髓加成（加成来源标注）。
-5. 持有列表筛选：稀有度/等级/套装（无体系维度）。
-6. 养成区骨架：升级（lv+1，消耗星砂占位 100/级，属性成长公式占位线性）与突破（lv 上限提升占位）；数值策划后续可只改数值不改逻辑；养成结果入档（CharacterData 养成数据）。
-7. 存档：装备状态与养成 lv 纳入 SaveManager 清单（CharacterData 已获角色字段）。
+5. 持有列表筛选：**等级/套装两维**（MVP 无稀有度，无体系维度）。
+6. 养成区：强化（lv 0→+10，消耗星髓强化材料占位；**每 +2 级觉醒 1 条副词条**——不重复、数值固定不浮动，主词条 main_base→main_max 线性成长占位）；无突破概念；养成结果入档（starmarrow 实例 lv/sub_unlocked）。
+7. 存档：星髓实例（含 lv/副词条/equipped_by）纳入 SaveManager 清单（Inventory.starmarrow）。
 8. MCP 验证。
 
 验收（全部通过）：
-- [ ] 装备/卸下 6 槽正确，唯一性约束生效（同件不可双穿）
-- [ ] 2 件套数值并入四维显示（前后对比截图）
-- [ ] 3 件套效果激活标注；get_stellium_bonus 返回正确
-- [ ] starmarrow_changed 信号可证；筛选三维度可用
-- [ ] 升级/突破占位流程可走；存档→读档后装备与 lv 恢复
+- [ ] 装备/卸下 6 槽正确，槽位对应与唯一性约束生效（同件不可双穿）
+- [ ] 2 件套数值并入四维显示（前后对比截图）；3+3 双套装并存正确
+- [ ] 3 件套条件增伤 get_stellium_bonus 返回正确
+- [ ] starmarrow_changed 信号可证；筛选等级/套装两维可用
+- [ ] 强化 0→+10 流程可走、每 +2 觉醒副词条（不重复）；存档→读档后装备与 lv 恢复
 
 提交：git commit -m "T6.5: 星髓装备与养成" 并 push。
 ```
@@ -1111,7 +1119,7 @@ assets/
 ### 5.4 场景节点规范
 
 - 占位视觉统一挂在 `VisualRoot → Sprite / Portrait / Cutscene` 下；替换资源只改 VisualRoot 内部，不动移动/战斗/对话逻辑节点。
-- 战斗演出预留 `SkillCutscene` 两个插槽：`PortraitRect`（小技能半身立绘）、`CutsceneAnimation`（终结技专属动画）。
+- 战斗演出预留 `BattleCutscene` 三类插槽：右下角 `PortraitRect`（激活/小技能动态立绘切换）、`UltCGRect`（大招全屏 CG）、`ComboCGRect`（合击全屏 CG）。
 - Dialogic 立绘占位 = Character Portrait，替换时在 Dialogic 内换资源即可，timeline 与 CSV 不动。
 
 ### 5.5 补充规范
