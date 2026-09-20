@@ -1,0 +1,4 @@
+system,hp_growth,atk_growth,def_growth,spd_growth
+mech,5,1,2,0
+arcane,3,2,0,1
+xian,4,2,1,0
