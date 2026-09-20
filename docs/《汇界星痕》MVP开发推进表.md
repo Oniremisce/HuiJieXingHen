@@ -485,7 +485,7 @@ graph TD
 提交：git commit -m "T2.9: 角色系统数据落地与三角色迁移" 并 push。
 ```
 
-#### T2.10 角色设计器 ✅ 完成（系统程序06 主责）
+#### T2.10 角色设计器 ✅ 完成（系统程序06 主责；收口小修 🚧）
 
 | 字段 | 内容 |
 | --- | --- |
@@ -518,6 +518,25 @@ graph TD
 - [ ] 测试数据删除后仓库与 CSV 恢复原状
 
 提交：git commit -m "T2.10: 角色设计器" 并 push。
+```
+
+【收口小修 · 粘贴给 Agent】（制作人04 三项裁定落地，口径见 docs/系统规则/角色系统.md §3/§7）
+
+```
+任务：T2.10 收口小修（技能 id 按角色迁移 + 设计器 WARN 档）
+你是系统程序06。制作人04 三项裁定已写入 docs/系统规则/角色系统.md §3/§5/§6/§7，先读该文档。
+裁定摘要：①技能 id 由「按体系」改为「按角色」——`skill_<体系>_<两位序号>_<s1|ult>`，序号段须与持有角色 id 一致（§3）；②target_side 与 effect 语义错配 → WARN（不改 EXIT）；③name 空 → FAIL、background 空 → WARN（§7）。
+
+执行（必须一次原子提交，不可拆批——中间态会让战斗冒烟全红）：
+1. data/csv/skills.csv 迁移 6 行 id（name/type/power/cutscene_id/三目标列一律不动）：
+   skill_mech_s1→skill_mech_01_s1、skill_mech_ult→skill_mech_01_ult、skill_arcane_s1→skill_arcane_01_s1、skill_arcane_ult→skill_arcane_01_ult、skill_xian_s1→skill_xian_01_s1、skill_xian_ult→skill_xian_01_ult。
+2. data/csv/characters.csv 同步 3 行的 skill_small/skill_ult 引用格。
+3. tools/character_designer.gd：id 正则改 `^skill_(mech|arcane|xian)_\d{2}_(s1|ult)$`；新增「技能 id 体系段+序号段 == 引用角色 id 段」校验；新增 WARN 档（不改 EXIT）：target_side↔effect 错配、background 空；name 空改判 FAIL。
+4. 冒烟断言字面量同步（只换 id 字面量，不改断言意图）：tools/smoke_test_data_models.gd、tools/smoke_test_damage_calc.gd、tools/smoke_test_cutscene.gd。
+5. headless 验证（GODOT_MCP_RUNTIME_PORT='abc'）：设计器 `通过 N 项，失败 0 项 / EXIT=0`；常驻冒烟 data_models/battle/battle_scene/party_bonus/damage_calc/cutscene 全 EXIT=0；反例验证——enemy+heal 与 background 空各打印 WARN 且 EXIT 仍 0，name 空判 FAIL。
+6. 并行注意：T3.8（战斗程序01）正在复跑冒烟，本小修落地后立即在交接班表公示新 id 清单，避免其假红。
+
+收工：commit "T2.10收口小修: 技能id按角色迁移+设计器WARN档" → push；系统程序_交接班表追加一行（新 id 清单 + WARN/FAIL 档契约）；知会数值策划01 复核、战斗程序01（T3.10/T3.11 引用新 id）。
 ```
 
 ### P3 战斗系统
