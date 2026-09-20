@@ -9,10 +9,16 @@ extends SceneTree
 
 ## preload 引用数据模型（不依赖编辑器全局类缓存扫描时机）
 const DM := preload("res://scripts/core/data_models.gd")
+const LS := preload("res://scripts/core/level_system.gd")
 
 var _failed := false
 
-func _init() -> void:
+func _initialize() -> void:
+	# autoload（DataManager/SaveManager）在 --script 模式照常加载，deferred 后即可用
+	_run.call_deferred()
+
+
+func _run() -> void:
 	print("=== T0.2 数据模型冒烟测试开始 ===")
 
 	# [1] CharacterData：正常行（T2.7 A2：name 用正式名，断言防回退到空/「待定」）
@@ -175,6 +181,85 @@ func _init() -> void:
 	_check(q.step == 1 and q.step_name == "开启对话")
 	_check(q.requirement == "meet_awakened_mech_01" and q.target == "npc_mech_01")
 	_check(q.reward == "sand_100" and q.next_step == "2")
+
+	# ===== T2.11 等级/经验/升级 =====
+	# [8] CharacterData level/exp 默认回读（1/0）+ 体系英文代号
+	var c_prog := DM.CharacterData.from_csv_row({"id": "awakened_mech_01", "name": "诺菈·星枢", "system": "科技"})
+	print("[8] 角色进度默认: ", c_prog.level, "/", c_prog.exp, " code=", c_prog.system_code())
+	_check(c_prog.level == 1 and c_prog.exp == 0)
+	_check(c_prog.system_code() == "mech")
+
+	# [9] get_combat_stat：基础 + (level-1)×成长（mech hp_growth=5）
+	var cc := DM.CharacterData.from_csv_row({"id": "awakened_mech_01", "name": "诺菈·星枢", "system": "科技", "hp": "100"})
+	cc.growth = {"hp": 5, "atk": 1, "def": 2, "spd": 0}
+	cc.level = 1
+	_check(cc.get_combat_stat("hp", cc.hp) == 100)   # Lv1 不吃成长
+	cc.level = 5
+	_check(cc.get_combat_stat("hp", cc.hp) == 120)   # 100 + (5-1)*5
+	print("[9] get_combat_stat Lv1=%d Lv5=%d" % [cc.get_combat_stat("hp", cc.hp) - 20, cc.get_combat_stat("hp", cc.hp)])
+
+	# [10] add_exp 升级边界（满前/恰满/溢出结转连续/封顶归零）
+	var lc := DM.CharacterData.from_csv_row({"id": "awakened_mech_01", "name": "诺菈·星枢", "system": "科技"})
+	LS.add_exp(lc, 99)
+	_check(lc.level == 1 and lc.exp == 99)          # 满前
+	LS.add_exp(lc, 1)
+	_check(lc.level == 2 and lc.exp == 0)           # 恰满升级
+	LS.add_exp(lc, 599)                              # Lv2→3 需200、Lv3→4 需300，合计500，剩99
+	_check(lc.level == 4 and lc.exp == 99)          # 溢出结转 + 多级连升
+	LS.add_exp(lc, 100000)
+	_check(lc.level == LS.LEVEL_CAP and lc.exp == 0)  # 封顶 Lv.10、exp 归零
+	print("[10] add_exp 边界：最终 Lv.%d / exp %d（封顶 %d）" % [lc.level, lc.exp, int(LS.LEVEL_CAP)])
+
+	# [11] DataManager 成长注入 + 进度序列化循环 + SaveManager version bump
+	var dm_node: Node = root.get_node_or_null("DataManager")
+	var sm_node: Node = root.get_node_or_null("SaveManager")
+	_check(dm_node != null)
+	_check(sm_node != null)
+	if dm_node != null and sm_node != null:
+		var ch_mech = dm_node.get_character("awakened_mech_01")
+		_check(int(ch_mech.growth.get("hp", 0)) == 5)   # DataManager 已注入 mech hp_growth=5
+		# 进度序列化→回填循环
+		dm_node.apply_character_progress({})            # 复位
+		dm_node.add_exp("awakened_mech_01", 199)        # Lv1→Lv2（耗100），剩99
+		_check(ch_mech.level == 2 and ch_mech.exp == 99)
+		var saved: Dictionary = dm_node.get_character_progress()
+		dm_node.add_exp("awakened_mech_01", 1)          # 变成 100
+		_check(ch_mech.level == 2 and ch_mech.exp == 100)
+		dm_node.apply_character_progress(saved)         # 回填
+		_check(ch_mech.level == 2 and ch_mech.exp == 99)
+		# version=1 兜底：空 progress 复位 1/0 不崩溃
+		dm_node.apply_character_progress({})
+		_check(ch_mech.level == 1 and ch_mech.exp == 0)
+
+		# 真实 SaveManager 存/读循环（version=2）
+		dm_node.add_exp("awakened_mech_01", 199)        # Lv2 exp99
+		var save_ok: bool = sm_node.save_game("smoke_t2_11", false)
+		_check(save_ok)
+		dm_node.add_exp("awakened_mech_01", 100000)     # 封顶 Lv10
+		_check(ch_mech.level == LS.LEVEL_CAP)
+		var loaded: Dictionary = sm_node.load_game("smoke_t2_11")
+		_check(not loaded.is_empty())
+		_check(int(loaded.get("version", -1)) == 2)     # SAVE_VERSION=2
+		_check(ch_mech.level == 2 and ch_mech.exp == 99)  # 读回 hold 值
+		var cp: Variant = loaded.get("character_progress", {})
+		if cp is Dictionary:
+			var entry: Variant = cp.get("awakened_mech_01", [])
+			_check(entry is Array and int(entry[0]) == 2 and int(entry[1]) == 99)
+		else:
+			_check(false)
+
+		# version=1 兼容读档：手工造 v1 档（无 character_progress）→ 不崩溃且兜底 1/0
+		var vf := FileAccess.open("user://save_smoke_v1.json", FileAccess.WRITE)
+		if vf != null:
+			vf.store_string(JSON.stringify({
+				"version": 1, "saved_at": "smoke", "game_state": {"star_sand": 0, "starlink_tokens": 0, "flags": {}},
+				"party": {"members": [], "companion_id": ""}, "shrines": {"lit_shrines": []},
+				"map": {"unlocked_regions": []}, "gacha": {"pity_counter": 0}, "protagonist": {"name": "异乡人"},
+			}))
+			vf.close()
+			var v1_loaded: Dictionary = sm_node.load_game("smoke_v1")
+			_check(not v1_loaded.is_empty())
+			_check(ch_mech.level == 1 and ch_mech.exp == 0)  # 兜底 1/0
 
 	if _failed:
 		push_error("[SmokeTest] 存在失败断言！")

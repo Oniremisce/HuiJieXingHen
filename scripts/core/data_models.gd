@@ -76,6 +76,11 @@ class CharacterData extends BaseRow:
 		"大秦帝国": "大秦帝国", "秘法评议会": "秘法评议会", "太微仙盟": "太微仙盟",
 		"mech": "大秦帝国", "arcane": "秘法评议会", "xian": "太微仙盟",
 	}
+	## 体系英文代号（稳定不变）：中文口径与英文代码互映射，供查 level_growth.csv
+	const SYSTEM_CODES := {
+		"科技": "mech", "魔法": "arcane", "仙道": "xian",
+		"mech": "mech", "arcane": "arcane", "xian": "xian",
+	}
 
 	var id: String = ""
 	var name: String = ""
@@ -90,6 +95,11 @@ class CharacterData extends BaseRow:
 	var portrait_id: String = ""
 	var sprite_id: String = ""
 	var background: String = ""  # T2.9 新增
+	# T2.11 存档字段：等级 Lv（初始 1）与经验 exp（初始 0），不入 characters.csv 静态表
+	var level: int = 1
+	var exp: int = 0
+	# T2.11 成长值缓存 {hp,atk,def,spd}：DataManager 加载 level_growth.csv 后按 system 英文代号注入
+	var growth: Dictionary = {}
 
 	static func from_csv_row(row: Dictionary) -> CharacterData:
 		var d := CharacterData.new()
@@ -123,6 +133,23 @@ class CharacterData extends BaseRow:
 			return FACTION_NAMES[key]
 		push_warning("[DataModels] CharacterData.faction 未知取值 \"%s\"（id=%s）" % [key, id])
 		return key
+
+	## 体系英文代号：mech/arcane/xian（稳定不变；供查 level_growth.csv 与代码常量）
+	func system_code() -> String:
+		var key := system.strip_edges()
+		if SYSTEM_CODES.has(key):
+			return SYSTEM_CODES[key]
+		push_warning("[DataModels] CharacterData.system 未知取值 \"%s\"（id=%s）" % [key, id])
+		return key
+
+	## 战斗属性 = CSV 基础四维 + (level-1) × 体系成长值
+	## 成长值来自 DataManager 注入的 growth 缓存 {hp,atk,def,spd}；
+	## 未注入或缺失 stat_name 键 → 成长 0（兜底不吃成长）；level 至少按 1 计。
+	func get_combat_stat(stat_name: String, base: int) -> int:
+		var g := 0
+		if growth.has(stat_name):
+			g = int(growth[stat_name])
+		return base + (maxi(level, 1) - 1) * g
 
 	func _to_string() -> String:
 		return "CharacterData{id=%s, name=%s, faction=%s, system=%s, hp=%d, atk=%d, def=%d, spd=%d, skill_small=%s, skill_ult=%s, portrait_id=%s, sprite_id=%s, background=%s}" % [

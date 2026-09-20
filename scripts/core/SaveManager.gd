@@ -8,10 +8,11 @@
 ##   has_save(slot_id) -> bool
 ## 文件：user://save_<slot>.json；手动档单覆盖（save_manual）；
 ##   自动档滚动 4 份（新档写 save_auto，旧档顺移 save_auto_1/2/3）。
-## JSON 结构（version=1）：
+## JSON 结构（version=2；version=1 兼容读档，character_progress 缺失→兜底 Lv.1/exp 0）：
 ##   { version, saved_at,
 ##     game_state: {star_sand, starlink_tokens, flags},
 ##     party: {members, companion_id},
+##     character_progress: {char_id: [level, exp]},   # T2.11 等级/经验
 ##     heart_bond: []（预留）, inventory: []（预留）, quests: {}（预留）,
 ##     shrines: {lit_shrines}, map: {unlocked_regions},
 ##     gacha: {pity_counter}（预留）, protagonist: {name}（预留） }
@@ -23,7 +24,7 @@
 ## =============================================================
 extends Node
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const PROTAGONIST_DEFAULT := "异乡人"
 const AUTO_SLOTS: Array[String] = ["auto", "auto_1", "auto_2", "auto_3"]
 
@@ -37,6 +38,7 @@ var pity_counter: int = 0
 @onready var _party: Node = get_node("/root/Party")
 @onready var _shrine_system: Node = get_node("/root/ShrineSystem")
 @onready var _map_system: Node = get_node("/root/MapSystem")
+@onready var _data_manager: Node = get_node("/root/DataManager")
 
 
 # ---------------------------------------------------------------
@@ -77,9 +79,10 @@ func load_game(slot_id: String) -> Dictionary:
 		push_warning("[SaveManager] load_game(%s)：JSON 解析失败（坏档），返回空字典" % slot_id)
 		return {}
 	var data: Dictionary = parsed
-	if int(data.get("version", -1)) != SAVE_VERSION:
-		push_warning("[SaveManager] load_game(%s)：version=%s 不兼容（期望 %d），返回空字典" % [
-			slot_id, str(data.get("version")), SAVE_VERSION])
+	var ver := int(data.get("version", -1))
+	if ver != 1 and ver != 2:
+		push_warning("[SaveManager] load_game(%s)：version=%s 不兼容（支持 1/2），返回空字典" % [
+			slot_id, str(data.get("version"))])
 		return {}
 	_apply(data)
 	print("[SaveManager] load_game(%s) 应用完成：star_sand=%d flags=%d lit=%s regions=%s" % [
@@ -119,6 +122,7 @@ func _collect() -> Dictionary:
 			"members": _json_safe(_party.get_members()),
 			"companion_id": str(_party.companion_id),
 		},
+		"character_progress": _data_manager.get_character_progress(),  # T2.11 {char_id: [level, exp]}
 		"heart_bond": [],   # 预留（T5.x 心契系统）
 		"inventory": [],    # 预留（T6.1 道具 / T6.5 星髓实例逐枚序列化）
 		"quests": {},       # 预留（T4.3 任务进度）
@@ -149,6 +153,10 @@ func _apply(data: Dictionary) -> void:
 	_party.companion_id = str(pt.get("companion_id", ""))
 	if _party.companion_id != "" and not (_party.companion_id in _party.members):
 		_party.companion_id = ""
+	# T2.11 等级/经验回填（version=2 含 character_progress；version=1 缺失 → 兜底 1/0）
+	var cp: Variant = data.get("character_progress", {})
+	var progress: Dictionary = cp if (cp is Dictionary) else {}
+	_data_manager.apply_character_progress(progress)
 	# ShrineSystem：点亮回填（新增项补发 shrine_lit 刷新场景视觉）
 	_shrine_system.deserialize(data.get("shrines", {}).get("lit_shrines", []))
 	# MapSystem：区块解锁（直接写，不逐个发信号；起始区块保底）

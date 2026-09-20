@@ -13,6 +13,7 @@
 extends UIPanelScript
 
 const UIPanelScript := preload("res://scripts/ui/UIPanel.gd")
+const LevelSystem := preload("res://scripts/core/level_system.gd")
 
 const PANEL_RECT := Rect2(76.0, 44.0, 1000.0, 560.0)
 const FAKE_STELLIUM_ID := "set1_slot1"  # 假数据 1 条（T6.5 接 Inventory 后移除）
@@ -30,6 +31,11 @@ var _portrait: TextureRect
 var _info_label: Label
 var _skill_label: Label
 var _party_btn: Button
+# T2.11 等级/经验/喂食/四维
+var _level_label: Label
+var _exp_bar: ProgressBar
+var _feed_btn: Button
+var _stat_label: Label
 
 # 页 2（星髓三区）
 var _equip_grid: GridContainer
@@ -125,10 +131,42 @@ func _build_char_page(parent: Control) -> Control:
 	_info_label = Label.new()
 	_info_label.name = "Info"
 	_info_label.position = Vector2(196.0, 0.0)
-	_info_label.size = Vector2(page.size.x - 196.0, 220.0)
+	_info_label.size = Vector2(page.size.x - 196.0, 88.0)
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info_label.add_theme_font_size_override("font_size", 15)
 	page.add_child(_info_label)
+
+	# ---- T2.11 等级 / 经验条 / 喂食 / 四维 ----
+	_level_label = Label.new()
+	_level_label.name = "Level"
+	_level_label.position = Vector2(196.0, 96.0)
+	_level_label.add_theme_font_size_override("font_size", 15)
+	_level_label.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
+	page.add_child(_level_label)
+
+	_exp_bar = ProgressBar.new()
+	_exp_bar.name = "ExpBar"
+	_exp_bar.position = Vector2(196.0, 124.0)
+	_exp_bar.size = Vector2(240.0, 16.0)
+	_exp_bar.show_percentage = true
+	page.add_child(_exp_bar)
+
+	_feed_btn = Button.new()
+	_feed_btn.name = "FeedBtn"
+	_feed_btn.text = "喂食（占位）"
+	_feed_btn.position = Vector2(446.0, 120.0)
+	_feed_btn.size = Vector2(110.0, 28.0)
+	_feed_btn.pressed.connect(_on_feed_btn)
+	page.add_child(_feed_btn)
+
+	_stat_label = Label.new()
+	_stat_label.name = "CombatStats"
+	_stat_label.position = Vector2(196.0, 152.0)
+	_stat_label.size = Vector2(page.size.x - 196.0, 66.0)
+	_stat_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_stat_label.add_theme_font_size_override("font_size", 13)
+	_stat_label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.6))
+	page.add_child(_stat_label)
 
 	var star_label := Label.new()
 	star_label.name = "StarBond"
@@ -162,9 +200,27 @@ func _refresh_char_page() -> void:
 		return
 	_portrait.texture = art.get_portrait(_char_id)
 	var col: Color = art.get_system_color(_char_id)
-	var stats := "%s：生命 %d   攻击 %d   防御 %d   速度 %d" % [ch.name, ch.hp, ch.atk, ch.def, ch.spd]
-	_info_label.text = "%s\n阵营：%s    体系：%s    等级：Lv.1（占位）\n\n%s\n\n背景：%s" % [
-		ch.name, ch.faction_name(), ch.system_name(), stats, ch.background]
+	_info_label.text = "%s\n阵营：%s    体系：%s\n\n背景：%s" % [
+		ch.name, ch.faction_name(), ch.system_name(), ch.background]
+	# T2.11 等级 / 经验条（满级隐藏经验条）
+	_level_label.text = "Lv.%d%s" % [ch.level, "（满级）" if ch.level >= LevelSystem.LEVEL_CAP else ""]
+	if ch.level >= LevelSystem.LEVEL_CAP:
+		_exp_bar.visible = false
+		_exp_bar.max_value = 1.0
+		_exp_bar.value = 1.0
+	else:
+		_exp_bar.visible = true
+		_exp_bar.max_value = float(LevelSystem.exp_needed(ch.level))
+		_exp_bar.value = float(ch.exp)
+	# T2.11 四维（战斗属性 = 基础 + (level-1)×成长） + 成长预览
+	var ghp := int(ch.growth.get("hp", 0))
+	var gatk := int(ch.growth.get("atk", 0))
+	var gdef := int(ch.growth.get("def", 0))
+	var gspd := int(ch.growth.get("spd", 0))
+	_stat_label.text = "生命 %d   攻击 %d   防御 %d   速度 %d\n每级成长：生命 +%d   攻击 +%d   防御 +%d   速度 +%d" % [
+		ch.get_combat_stat("hp", ch.hp), ch.get_combat_stat("atk", ch.atk),
+		ch.get_combat_stat("def", ch.def), ch.get_combat_stat("spd", ch.spd),
+		ghp, gatk, gdef, gspd]
 	var lines: Array[String] = []
 	for sid: String in [ch.skill_small, ch.skill_ult]:
 		var sk = dm.get_skill(sid)
@@ -346,7 +402,7 @@ func _refresh_list() -> void:
 		# ArtProvider 契约：get_portrait 入参=角色 id（预热缓存键/体系色查询均按角色 id）
 		b.icon = art.get_portrait(id)
 		b.add_theme_constant_override("icon_max_width", 40)
-		b.text = "%s   Lv.1" % str(ch.name)
+		b.text = "%s   Lv.%d" % [str(ch.name), ch.level]
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.custom_minimum_size = Vector2(264.0, 52.0)
 		var cid := id
@@ -376,6 +432,11 @@ func _switch_page(idx: int) -> void:
 	_page_index = idx
 	for i in _pages.size():
 		_pages[i].visible = i == idx
+
+
+## 喂食按钮：入口占位（T6.1 背包就绪后接 add_item + exp_value，禁硬扣数据）
+func _on_feed_btn() -> void:
+	print("[CharListPanel] 喂食入口占位（T6.1 背包就绪后接 add_item + exp_value）")
 
 
 ## 编队按钮：加入/移出（T2.2：API 返回 bool=是否变更；满员拒绝不替换）
