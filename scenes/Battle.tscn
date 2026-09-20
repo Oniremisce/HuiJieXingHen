@@ -1,69 +1,69 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cg6bjm06cxg1q"]
 
-[ext_resource type="Script" path="res://scripts/battle/battle_arena.gd" id="1_arena"]
-[ext_resource type="Script" path="res://scripts/battle/battle_speed_bar.gd" id="2_speedbar"]
-[ext_resource type="Script" path="res://scripts/battle/battle_party_row.gd" id="3_partyrow"]
+[ext_resource type="Script" uid="uid://b2h1tjmi6xs8f" path="res://scripts/battle/battle_arena.gd" id="1_arena"]
+[ext_resource type="Script" uid="uid://ci2ixkfpuq8v0" path="res://scripts/battle/battle_speed_bar.gd" id="2_speedbar"]
+[ext_resource type="Script" uid="uid://cvb4ct82i24ji" path="res://scripts/battle/battle_party_row.gd" id="3_partyrow"]
 
-[node name="Battle" type="Node2D"]
+[node name="Battle" type="Node2D" unique_id=1595342640]
 script = ExtResource("1_arena")
 
-[node name="Allies" type="Node2D" parent="."]
+[node name="Allies" type="Node2D" parent="." unique_id=959950290]
 
-[node name="Enemies" type="Node2D" parent="."]
+[node name="Enemies" type="Node2D" parent="." unique_id=204214389]
 
-[node name="FormationAnchors" type="Node2D" parent="."]
+[node name="FormationAnchors" type="Node2D" parent="." unique_id=1327206966]
 
-[node name="Ally0" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(213.12, 307.8)
+[node name="Ally0" type="Marker2D" parent="FormationAnchors" unique_id=1114555074]
+position = Vector2(255, 300)
 gizmo_extents = 40.0
 
-[node name="Ally1" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(320.8973, 326.804)
+[node name="Ally1" type="Marker2D" parent="FormationAnchors" unique_id=1720300583]
+position = Vector2(360, 355)
 gizmo_extents = 40.0
 
-[node name="Ally2" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(428.6747, 345.8081)
+[node name="Ally2" type="Marker2D" parent="FormationAnchors" unique_id=488425216]
+position = Vector2(465, 410)
 gizmo_extents = 40.0
 
-[node name="EnemyFront0" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(633.6, 272.16)
+[node name="EnemyFront0" type="Marker2D" parent="FormationAnchors" unique_id=1035292061]
+position = Vector2(440.82, 183.38)
 gizmo_extents = 40.0
 
-[node name="EnemyFront1" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(741.3774, 291.1641)
+[node name="EnemyFront1" type="Marker2D" parent="FormationAnchors" unique_id=1561823958]
+position = Vector2(547.27, 232.51)
 gizmo_extents = 40.0
 
-[node name="EnemyFront2" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(849.1548, 310.1681)
+[node name="EnemyFront2" type="Marker2D" parent="FormationAnchors" unique_id=939495744]
+position = Vector2(653.72, 281.64)
 gizmo_extents = 40.0
 
-[node name="EnemyBack0" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(645.12, 181.44)
+[node name="EnemyBack0" type="Marker2D" parent="FormationAnchors" unique_id=1165394977]
+position = Vector2(547.62, 135.02)
 gizmo_extents = 40.0
 
-[node name="EnemyBack1" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(752.8973, 200.4441)
+[node name="EnemyBack1" type="Marker2D" parent="FormationAnchors" unique_id=80923610]
+position = Vector2(654.07, 184.15)
 gizmo_extents = 40.0
 
-[node name="EnemyBack2" type="Marker2D" parent="FormationAnchors"]
-position = Vector2(860.6747, 219.4481)
+[node name="EnemyBack2" type="Marker2D" parent="FormationAnchors" unique_id=1774831971]
+position = Vector2(760.52, 233.28)
 gizmo_extents = 40.0
 
-[node name="BattleUI" type="CanvasLayer" parent="."]
+[node name="BattleUI" type="CanvasLayer" parent="." unique_id=1810071518]
 layer = 40
 
-[node name="ResultLabel" type="Label" parent="BattleUI"]
+[node name="ResultLabel" type="Label" parent="BattleUI" unique_id=735621598]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 48
 
-[node name="RetryHint" type="Label" parent="BattleUI"]
+[node name="RetryHint" type="Label" parent="BattleUI" unique_id=437822349]
 visible = false
 anchors_preset = 12
 anchor_top = 1.0
@@ -73,11 +73,12 @@ offset_top = -120.0
 offset_bottom = -80.0
 grow_horizontal = 2
 grow_vertical = 0
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 24
 theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
 
-[node name="SpeedBar" type="Control" parent="BattleUI"]
+[node name="SpeedBar" type="Control" parent="BattleUI" unique_id=695440143]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -86,7 +87,8 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("2_speedbar")
 
-[node name="PartyRow" type="Control" parent="BattleUI"]
+[node name="PartyRow" type="Control" parent="BattleUI" unique_id=840080360]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
