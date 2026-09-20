@@ -63,18 +63,18 @@ class BaseRow extends RefCounted:
 
 ## ------------------------------------------------------------
 ## 觉醒者数据（characters.csv 一行）
-## faction ∈ 机律联邦·秘法评议会·太微仙盟；system ∈ 机律|秘法|玄门
+## faction ∈ 大秦帝国·秘法评议会·太微仙盟；system ∈ 科技|魔法|仙道
 ## background = 一句话背景（角色系统.md §2；缺列/空值→""）
 ## ------------------------------------------------------------
 class CharacterData extends BaseRow:
 
 	const SYSTEM_NAMES := {
-		"机律": "机律", "秘法": "秘法", "玄门": "玄门",
-		"mech": "机律", "arcane": "秘法", "xian": "玄门",
+		"科技": "科技", "魔法": "魔法", "仙道": "仙道",
+		"mech": "科技", "arcane": "魔法", "xian": "仙道",
 	}
 	const FACTION_NAMES := {
-		"机律联邦": "机律联邦", "秘法评议会": "秘法评议会", "太微仙盟": "太微仙盟",
-		"mech": "机律联邦", "arcane": "秘法评议会", "xian": "太微仙盟",
+		"大秦帝国": "大秦帝国", "秘法评议会": "秘法评议会", "太微仙盟": "太微仙盟",
+		"mech": "大秦帝国", "arcane": "秘法评议会", "xian": "太微仙盟",
 	}
 
 	var id: String = ""
@@ -108,7 +108,7 @@ class CharacterData extends BaseRow:
 		d.background = BaseRow.field_str(row, "background")  # T2.9 缺列→""
 		return d
 
-	## 体系中文名：机律/秘法/玄门（兼容代码输入，未知值原样返回并警告）
+	## 体系中文名：科技/魔法/仙道（兼容代码输入，未知值原样返回并警告）
 	func system_name() -> String:
 		var key := system.strip_edges()
 		if SYSTEM_NAMES.has(key):
@@ -116,7 +116,7 @@ class CharacterData extends BaseRow:
 		push_warning("[DataModels] CharacterData.system 未知取值 \"%s\"（id=%s）" % [key, id])
 		return key
 
-	## 阵营中文名：机律联邦/秘法评议会/太微仙盟（兼容代码输入，未知值原样返回并警告）
+	## 阵营中文名：大秦帝国/秘法评议会/太微仙盟（兼容代码输入，未知值原样返回并警告）
 	func faction_name() -> String:
 		var key := faction.strip_edges()
 		if FACTION_NAMES.has(key):

@@ -1,32 +1,34 @@
-（占位）天光裂开一道缝隙，异乡人从坠落中醒来。
-（占位）脚下是陌生的土地，远处传来机械与法术交织的嗡鸣。
-（占位）一座营地出现在视野中——三道身影正朝这边望来。
+天穹之上，星痕横亘昼夜——那是三个世界相撞留下的伤口，永不愈合。
+异乡人从坠落中醒来。脚下是陌生的土地，钢铁的轰鸣与法术的微光交织。
+远处，一座营地灯火未熄。三道身影正朝这边望来。
 join awakened_mech_01 (normal) center
-awakened_mech_01 (normal): （占位）你好，观测者。我是诺菈·星枢，机律联邦的界隙观测员。
-awakened_mech_01 (happy): （占位）别紧张，你能平安落在这里，已经是万幸了。
-awakened_mech_01 (normal): （占位）这个世界叫汇界，由无数界域碎片拼合而成。
-awakened_mech_01 (sad): （占位）可惜它正在缓慢崩解，我们一直在寻找止住崩解的办法。
-awakened_mech_01 (happy): （占位）而你身上有星痕的力量——也许你就是转机。
-awakened_mech_01 (normal): （占位）往营地深处走吧，艾蕾雅和洛清弦也在等你。
-[signal arg="set_flag:met_awakened_mech_01=1"]
+awakened_mech_01 (normal): 你好，观测者。我是诺菈·星枢，大秦帝国派驻营地的星痕观测员。
+awakened_mech_01 (happy): 别紧张，你能平安落在这里，已经是万幸了。
+awakened_mech_01 (normal): 这个世界叫汇界——大秦、诺兰、九霄，三界在这里相撞、融合，再也分不开。
+awakened_mech_01 (sad): 可惜融合并不完整。虚熵不断渗出，灾蚀杀之不尽，我们一直在找终结灾变的办法。
+awakened_mech_01 (happy): 而你身上有星痕的力量——也许你就是转机。
+awakened_mech_01 (normal): 往营地深处走吧，艾蕾雅和洛清弦也在等你。
+[signal arg="set_flag:met_awakened_mech_01"]
 leave awakened_mech_01
 join awakened_arcane_01 (normal) center
-awakened_arcane_01 (normal): （占位）初次见面，我是艾蕾雅，秘法评议会派驻营地的咒术师。
-awakened_arcane_01 (happy): （占位）有意思，你的星痕波动和我预演过的星图完全吻合。
-awakened_arcane_01 (normal): （占位）评议会一直在观测界隙，你坠落的那道光，我们记录了整整三天。
-awakened_arcane_01 (sad): （占位）营地的补给越来越少了，崩解带走了太多资源。
-awakened_arcane_01 (angry): （占位）掠夺者还在虎视眈眈，和平从来不是理所当然的。
-awakened_arcane_01 (happy): （占位）不过现在不一样了——留下来吧，我们一起想办法。
-[signal arg="set_flag:met_awakened_arcane_01=1"]
+awakened_arcane_01 (normal): 初次见面，我是艾蕾雅，秘法评议会派驻营地的结界师。
+awakened_arcane_01 (happy): 有意思。你的星痕波动，和我预演过的星图完全吻合。
+awakened_arcane_01 (normal): 评议会一直在观测界隙。你坠落的那道光，我们记录了整整三天。
+awakened_arcane_01 (sad): 营地的补给越来越少了。长夜带走了诺兰的太阳，也带走了太多资源。
+awakened_arcane_01 (angry): 深渊造物还在界隙边缘徘徊——和平从来不是理所当然的。
+awakened_arcane_01 (sad): 抱歉，我不该一见面就说这些。只是这一路走来，太难了。
+awakened_arcane_01 (happy): 不过现在不一样了。留下来吧，我们一起想办法。
+[signal arg="set_flag:met_awakened_arcane_01"]
 leave awakened_arcane_01
 join awakened_xian_01 (normal) center
-awakened_xian_01 (normal): （占位）贫道洛清弦，太微仙盟游方至此，见过道友。
-awakened_xian_01 (happy): （占位）道友星痕气息纯净，倒是难得一见的体质。
-awakened_xian_01 (normal): （占位）仙盟讲究天人合一，界隙崩乱，皆因三界失衡。
-awakened_xian_01 (sad): （占位）旧友们散落各界，贫道已经很久没有他们的音讯了。
-awakened_xian_01 (angry): （占位）蚀痕之祸愈演愈烈，再无人出手，此界危矣。
-awakened_xian_01 (normal): （占位）道友若愿同行，贫道愿授吐纳之法，共渡此劫。
-[signal arg="set_flag:met_awakened_xian_01=1"]
-（占位）三道身影与你并肩而立，胸口的星痕微微发烫。
-（占位）目标已明——探索营地周边，变强，止住界隙崩解。
-[signal arg="set_flag:main_01_done=1"]
+awakened_xian_01 (normal): 贫道洛清弦，太微仙盟修行者，游方至此，见过道友。
+awakened_xian_01 (happy): 道友星痕气息纯净，倒是难得一见的体质。
+awakened_xian_01 (normal): 仙盟讲究天人合一。如今界隙崩乱，皆因三界法则失衡。
+awakened_xian_01 (sad): 旧友们散落三界，贫道已经很久没有他们的音讯了。
+awakened_xian_01 (angry): 灾蚀之祸愈演愈烈，法则日月也照不亮所有角落。再无人出手，此界危矣。
+awakened_xian_01 (normal): 道友若愿同行，贫道愿以剑意与符箓相助，共渡此劫。
+awakened_xian_01 (happy): 稍后贫道煮一壶灵茶，为道友接风洗尘。
+[signal arg="set_flag:met_awakened_xian_01"]
+三道身影与你并肩而立，胸口的印记与天上的星痕遥遥呼应。
+目标已明——探索营地周边，变强，终结灾蚀。
+[signal arg="set_flag:main_01_done"]

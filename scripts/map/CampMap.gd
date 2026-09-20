@@ -49,7 +49,7 @@ func _fill_npc_names() -> void:
 
 
 ## T2.6 帧条接入：Player 角色自动挂 CharacterAnimator.load_frames
-## 主角目前固定机律觉醒者（awakened_mech_01）；帧规格 idle 192×48=4 帧 / walk 384×48=8 帧
+## 主角目前固定科技觉醒者（awakened_mech_01）；帧规格 idle 192×48=4 帧 / walk 384×48=8 帧
 func _load_player_frames() -> void:
 	var player := get_node_or_null("Player")
 	if player == null:

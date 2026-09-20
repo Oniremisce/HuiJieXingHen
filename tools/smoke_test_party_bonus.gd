@@ -5,7 +5,7 @@ extends SceneTree
 ## 手算预计算（force_crit=0 确定性；数值全部 CSV；混元 ×1.3 取 int 截断=占位⑥）：
 ## 用例A 混元（真实 Party.team_systems 消费 + 注入开战）：mech 100/12/10/10
 ##   → ×1.3 → hp130/atk15(15.6 截断)/def13/spd13；小技能 max(1,15×1.2-6)=12
-## 用例B 共振（注入全机律；CSV 三角色三系各一无同系编组，见交接班表）：
+## 用例B 共振（注入全科技；CSV 三角色三系各一无同系编组，见交接班表）：
 ##   3v1 兽 hp=1000（T2.9 新数值需要更高 hp 才能扛住三 ULT+合击）、三人 charge 覆写 100 → R1 order=[1,0,2,3]（spd12/10/9/8
 ##   → tick9/10/12/13）：arcane ULT444→556、mech ULT30→526、xian ULT26→500、
 ##   计数满合击 500-34=(12+15+13)×100%-6 → 兽 466 → timeout（合击不占轮次/不改充能）；
@@ -52,7 +52,7 @@ func _case_hunyuan(dm) -> void:
 	var pb = PB.new()
 	pb.setup_from_party(party)  # 生产入口：消费 Party.team_systems()（接口勿改名）
 	_check(pb.mode == "混元")
-	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["机律", "秘法", "玄门"])
+	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["科技", "魔法", "仙道"])
 	bm.force_crit = 0
 	print("[SMOKE] 用例A: mode=%s mech=%s" % [str(bm.bonus.mode), str(bm.units[0])])
 	_check(bm.bonus.mode == "混元")
@@ -61,7 +61,7 @@ func _case_hunyuan(dm) -> void:
 	_check(int(r1["damage"]) == 24)  # T2.9 新 mech_s1 power=2.0 → 混元 atk15×2.0-def6=24
 
 func _case_resonance(dm) -> void:
-	var bm = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["机律", "机律", "机律"])
+	var bm = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["科技", "科技", "科技"])
 	bm.force_crit = 0
 	bm.units[3].max_hp = 1000  # T2.9 新 power 整体上调，增 hp 保持 timeout 测试意图
 	bm.units[3].hp = 1000
@@ -75,7 +75,7 @@ func _case_resonance(dm) -> void:
 	_check(bm.units[3].hp == 466)  # T2.9 新数值：1000-444-30-26-34=466
 	_check(bm.units[2].charge == 0)  # 共振 retain=0：ULT 后归零，合击不改充能
 	var pb = PB.new()
-	pb.setup_systems(["机律", "机律", "机律"])
+	pb.setup_systems(["科技", "科技", "科技"])
 	var us: Array = []
 	for pid in ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"]:
 		var u = BU.new()
@@ -91,13 +91,13 @@ func _case_resonance(dm) -> void:
 	_check(e1 == "" and e2 == "" and e3 == "combo" and e4 == "" and e5 == "" and e6 == "combo")
 
 func _case_confluence(dm) -> void:
-	# C1 真实两系混编（3v1 注入 ["机律","秘法","机律"]）：三人 charge=100 →
+	# C1 真实两系混编（3v1 注入 ["科技","魔法","科技"]）：三人 charge=100 →
 	# R1 三 ULT（arcane9/mech10/xian12 tick 先于兽13）→ 81 伤 → 计数满自动拉条
 	# （无未出手我方 → 无达标）→ charge=上限×30%=30×3
-	var bm = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["机律", "秘法", "机律"])
+	var bm = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["科技", "魔法", "科技"])
 	bm.force_crit = 0
 	print("[SMOKE] 用例C1: mode=%s systems=%s" % [str(bm.bonus.mode), str(bm.bonus.systems)])
-	_check(bm.bonus.mode == "汇流" and bm.bonus.systems == ["机律", "秘法", "机律"])
+	_check(bm.bonus.mode == "汇流" and bm.bonus.systems == ["科技", "魔法", "科技"])
 	bm.units[3].max_hp = 999
 	bm.units[3].hp = 999
 	for i in [0, 1, 2]:
@@ -109,7 +109,7 @@ func _case_confluence(dm) -> void:
 	_check(bm.units[0].charge == 45 and bm.units[1].charge == 30 and bm.units[2].charge == 30)  # retain=30%；mech 被兽小技能命中受击+15→45
 	_check(bm.units[3].hp == 499)  # T2.9 新数值：999-(444+30+26)
 	# C2 run_pull 直调：达标者立即出手（ULT→retain30）、已出手单位无效（§4.2）
-	var bm2 = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["机律", "秘法", "机律"])
+	var bm2 = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["科技", "魔法", "科技"])
 	bm2.force_crit = 0
 	bm2.units[3].max_hp = 999
 	bm2.units[3].hp = 999

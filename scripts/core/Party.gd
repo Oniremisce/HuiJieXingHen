@@ -20,7 +20,7 @@ const DM := preload("res://scripts/core/data_models.gd")
 ## 编队上限（规则 §1）
 const MAX_MEMBERS := 3
 ## 体系全集 = characters.csv system 列合法值；三系各 ≥1 人即 has_all_three
-const ALL_SYSTEMS: Array[String] = ["机律", "秘法", "玄门"]
+const ALL_SYSTEMS: Array[String] = ["科技", "魔法", "仙道"]
 
 ## 编队角色 id 数组（有序，上限 3；存档序列化项之一，规则 §6 #7）
 var members: Array[String] = []
@@ -106,7 +106,7 @@ func get_members() -> Array[String]:
 ## - systems：members 各角色 system 值（按编队序，可含重复），实时查
 ##   characters.csv（不缓存副本，CSV 是唯一真相）；
 ## - all_same：非空且全员同体系（单人队 true，纯数据事实）；
-## - has_all_three：机律/秘法/玄门三系各 ≥1 人；
+## - has_all_three：科技/魔法/仙道三系各 ≥1 人；
 ## - 空编队 → {[], false, false}；member 查不到 → 跳过统计并告警（规则 §4）。
 func team_systems() -> Dictionary:
 	var systems: Array = []

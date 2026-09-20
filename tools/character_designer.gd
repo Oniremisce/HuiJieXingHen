@@ -10,7 +10,7 @@
 ##   仅替换「校验」读取的 CSV 目录（坏数据注入 / CI 回归用，不改仓库数据）；
 ##   覆盖模式下冒烟段跳过（DataManager 恒读 res://data/csv，两份数据非同一源）。
 ## 校验口径（与制作人04 预裁定、角色系统.md §3/§7 一致）：
-##   ① 体系映射 机律=mech / 秘法=arcane / 玄门=xian：id 只认英文体系段
+##   ① 体系映射 科技=mech / 魔法=arcane / 仙道=xian：id 只认英文体系段
 ##      awakened_<mech|arcane|xian>_<两位序号>；characters.system 列按中文三值
 ##      白名单单独校验，两者不通兑（不可用英文校验中文列，反之亦然）。
 ##   ② skills.csv 中 enemy_ 前缀行不套 skill_<体系>_<序号>_<s1|ult> 规则：仅校验
@@ -47,8 +47,8 @@ const SKILL_COLUMNS: Array[String] = [
 ]
 
 ## 体系映射表（预裁定①）
-const SYSTEM_CN := ["机律", "秘法", "玄门"]
-const SYSTEM_CN_TO_EN := {"机律": "mech", "秘法": "arcane", "玄门": "xian"}
+const SYSTEM_CN := ["科技", "魔法", "仙道"]
+const SYSTEM_CN_TO_EN := {"科技": "mech", "魔法": "arcane", "仙道": "xian"}
 
 ## 枚举白名单（target_side/target_scope/effect 的空值按 §3 缺省回退，不算错）
 const TYPE_WHITELIST := ["small", "ult"]

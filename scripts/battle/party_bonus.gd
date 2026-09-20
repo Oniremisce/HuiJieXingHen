@@ -65,7 +65,7 @@ func setup_systems(systems_arr: Array) -> void:
 			if s != systems_arr[0]:
 				all_same = false
 	if has_three:
-		for s in ["机律", "秘法", "玄门"]:
+		for s in ["科技", "魔法", "仙道"]:
 			if not s in systems_arr:
 				has_three = false
 	setup_ts({"systems": systems_arr, "all_same": all_same, "has_all_three": has_three})

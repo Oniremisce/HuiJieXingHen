@@ -59,7 +59,7 @@ func _run() -> void:
 
 ## 场景1：假演出调用序列（时序：active 每回合首、ult/skill 按指令分流、先于结算）
 func _case_sequence(dm) -> void:
-	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["机律"])
+	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["科技"])
 	bm.force_crit = 0
 	var fake = FakeCutscene.new()
 	bm.cutscene = fake
@@ -85,14 +85,14 @@ func _case_pause_parity(dm) -> void:
 		b.units[0].charge = 100
 		b.units[1].max_hp = 100  # T2.9 同步新数值
 		b.units[1].hp = 100
-	var bmA = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["机律"])
+	var bmA = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["科技"])
 	conf.call(bmA)
 	var fake = FakeCutscene.new()
 	fake.pause_frames = 6
 	fake.tree = self
 	bmA.cutscene = fake
 	var rA: String = await bmA.run_to_end(6)
-	var bmB = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["机律"])
+	var bmB = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"], ["科技"])
 	conf.call(bmB)
 	bmB.force_crit = 0
 	var rB: String = await bmB.run_to_end(6)  # cutscene=null 直通（await no-op 立即完成）

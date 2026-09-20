@@ -1,2 +1,2 @@
 id,name,hp,atk,def,spd,ai_pattern,drop_sand,skill_small,skill_ult
-corrosion_beast,灾蚀兽,150,10,6,8,simple,30,enemy_beast_small,enemy_beast_ult
+corrosion_beast,蚀兽,150,10,6,8,simple,30,enemy_beast_small,enemy_beast_ult

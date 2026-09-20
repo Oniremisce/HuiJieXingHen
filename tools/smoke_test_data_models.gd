@@ -19,8 +19,8 @@ func _init() -> void:
 	var c := DM.CharacterData.from_csv_row({
 		"id": "awakened_mech_01",
 		"name": "诺菈·星枢",
-		"faction": "机律联邦",
-		"system": "机律",
+		"faction": "大秦帝国",
+		"system": "科技",
 		"hp": "120",
 		"atk": "18",
 		"def": "10",
@@ -29,17 +29,17 @@ func _init() -> void:
 		"skill_ult": "skill_mech_01_ult",
 		"portrait_id": "portrait_mech_01",
 		"sprite_id": "sprite_mech_01",
-		"background": "机律联邦观测员，靠天心印记守护营地",  # T2.9 新增
+		"background": "大秦帝国观测员，靠天心印记守护营地",  # T2.9 新增
 	})
 	print("[1] 角色正常行: ", c)
 	_check(c.id == "awakened_mech_01")
 	_check(c.name != "" and c.name != "待定")  # T2.7 A2 防回退
-	_check(c.faction == "机律联邦" and c.system == "机律")
+	_check(c.faction == "大秦帝国" and c.system == "科技")
 	_check(c.hp == 120 and c.atk == 18 and c.def == 10 and c.spd == 9)
 	_check(c.skill_small == "skill_mech_01_s1" and c.skill_ult == "skill_mech_01_ult")
 	_check(c.portrait_id == "portrait_mech_01" and c.sprite_id == "sprite_mech_01")
-	_check(c.system_name() == "机律")
-	_check(c.faction_name() == "机律联邦")
+	_check(c.system_name() == "科技")
+	_check(c.faction_name() == "大秦帝国")
 	_check(c.background != "")  # T2.9 background 非空断言
 
 	# [2] CharacterData：空值/缺键/非法值 → 默认（数值 0、字符串 ""），警告但不中断
@@ -85,7 +85,7 @@ func _init() -> void:
 	# [3c] 技能三字段逐值对照（§5 其他角色）
 	# 艾蕾雅 ult：ally+all+amp，power=30
 	var s_arc_ult := DM.SkillData.from_csv_row({
-		"id": "skill_arcane_01_ult", "name": "大源回响·辉映", "type": "ult",
+		"id": "skill_arcane_01_ult", "name": "银月辉映", "type": "ult",
 		"power": "30", "cutscene_id": "cut_arcane_ult",
 		"target_side": "ally", "target_scope": "all", "effect": "amp",
 	})
@@ -113,7 +113,7 @@ func _init() -> void:
 
 	# [4] EnemyData（T2.8：扩 skill_small/skill_ult 双技能字段，关联 skills.csv enemy_ 前缀行）
 	var e := DM.EnemyData.from_csv_row({
-		"id": "corrosion_beast", "name": "灾蚀兽", "hp": "150", "atk": "10",
+		"id": "corrosion_beast", "name": "蚀兽", "hp": "150", "atk": "10",
 		"def": "6", "spd": "8", "ai_pattern": "simple", "drop_sand": "30",
 		"skill_small": "enemy_beast_small", "skill_ult": "enemy_beast_ult",
 	})
