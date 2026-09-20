@@ -6,9 +6,9 @@ extends SceneTree
 ## 用例A 混元（真实 Party.team_systems 消费 + 注入开战）：mech 100/12/10/10
 ##   → ×1.3 → hp130/atk15(15.6 截断)/def13/spd13；小技能 max(1,15×1.2-6)=12
 ## 用例B 共振（注入全机律；CSV 三角色三系各一无同系编组，见交接班表）：
-##   3v1 兽 hp=115、三人 charge 覆写 100 → R1 order=[1,0,2,3]（spd12/10/9/8
-##   → tick9/10/12/13）：arcane ULT31→84、mech ULT24→60、xian ULT26→34、
-##   计数满合击 34=(12+15+13)×100%-6 → 兽 0 → WIN R1（合击不占轮次/不改充能）；
+##   3v1 兽 hp=1000（T2.9 新数值需要更高 hp 才能扛住三 ULT+合击）、三人 charge 覆写 100 → R1 order=[1,0,2,3]（spd12/10/9/8
+##   → tick9/10/12/13）：arcane ULT444→556、mech ULT30→526、xian ULT26→500、
+##   计数满合击 500-34=(12+15+13)×100%-6 → 兽 466 → timeout（合击不占轮次/不改充能）；
 ##   计数重置可循环直测：3 次 ULT→combo→重置→再 3 次→再 combo
 ## 用例C 汇流：C1 真实两系（bonus_systems=null → dm 读 system）2v1 兽 hp999、
 ##   双 ULT（31/24）→ charge=上限×30%=30（retain 分支）→ 全队齐触发拉条但
@@ -58,19 +58,21 @@ func _case_hunyuan(dm) -> void:
 	_check(bm.bonus.mode == "混元")
 	_check(bm.units[0].hp == 130 and bm.units[0].atk == 15 and bm.units[0].def == 13 and bm.units[0].spd == 13)
 	var r1: Dictionary = BC.execute(bm.units, bm.units[0], BC.Kind.SKILL, null, 0)
-	_check(int(r1["damage"]) == 12)  # 混元 atk15：max(1,15×1.2-6)=12
+	_check(int(r1["damage"]) == 24)  # T2.9 新 mech_s1 power=2.0 → 混元 atk15×2.0-def6=24
 
 func _case_resonance(dm) -> void:
 	var bm = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["机律", "机律", "机律"])
 	bm.force_crit = 0
+	bm.units[3].max_hp = 1000  # T2.9 新 power 整体上调，增 hp 保持 timeout 测试意图
+	bm.units[3].hp = 1000
 	for i in [0, 1, 2]:
 		bm.units[i].charge = 100
-	var result: String = await bm.run_to_end(1)  # 1 轮窗口：锁合击数值（69-34=35；若误含兽 atk 则 25）
+	var result: String = await bm.run_to_end(1)  # 1 轮窗口：锁合击数值
 	print("[SMOKE] 用例B: result=%s rounds=%d orders=%s | 兽=%s" % [
 		result, bm.round_num, str(bm.round_orders), str(bm.units[3])])
-	_check(result == "timeout" and bm.round_num == 1)
+	_check(result == "timeout" and bm.round_num == 1)  # T2.9：增 hp 后回到 timeout
 	_check(str(bm.round_orders) == "[[1, 0, 2, 3]]")
-	_check(bm.units[3].hp == 35 and bm.units[3].is_alive())  # 150-31-24-26-34=35（合击=存活者 atk 和×100%-def）
+	_check(bm.units[3].hp == 466)  # T2.9 新数值：1000-444-30-26-34=466
 	_check(bm.units[2].charge == 0)  # 共振 retain=0：ULT 后归零，合击不改充能
 	var pb = PB.new()
 	pb.setup_systems(["机律", "机律", "机律"])
@@ -105,7 +107,7 @@ func _case_confluence(dm) -> void:
 		result, bm.round_num, str(bm.round_orders), str(bm.units[3])])
 	_check(result == "timeout" and str(bm.round_orders) == "[[1, 0, 2, 3]]")
 	_check(bm.units[0].charge == 45 and bm.units[1].charge == 30 and bm.units[2].charge == 30)  # retain=30%；mech 被兽小技能命中受击+15→45
-	_check(bm.units[3].hp == 918)  # 999-(31+24+26)
+	_check(bm.units[3].hp == 499)  # T2.9 新数值：999-(444+30+26)
 	# C2 run_pull 直调：达标者立即出手（ULT→retain30）、已出手单位无效（§4.2）
 	var bm2 = BM.new(dm, ["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], ["机律", "秘法", "机律"])
 	bm2.force_crit = 0
@@ -116,7 +118,7 @@ func _case_confluence(dm) -> void:
 	await bm2.bonus.run_pull(bm2, bm2.units[1], acted)  # arcane 触发（t_now=arrival(12)=9）
 	print("[SMOKE] 用例C2: acted=%s mech=%s 兽=%s" % [str(acted), str(bm2.units[0]), str(bm2.units[3])])
 	_check(bool(acted[0]) and bm2.units[0].charge == 30)  # 拉条出手 ULT→retain30
-	_check(bm2.units[3].hp == 975)  # 999-24（仅 mech；arcane/xian 已出手不重复出手）
+	_check(bm2.units[3].hp == 969)  # T2.9 新：999-30（仅 mech ULT=30；arcane/xian 已出手不重复出手）
 	# C3 pull_targets 排序（tie-break：spd 降序→我方→编队序）
 	bm2.units[1].spd = 11
 	var hits: Array = bm2.bonus.pull_targets(bm2.units, [false, false, false], 9)

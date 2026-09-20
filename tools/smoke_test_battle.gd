@@ -71,7 +71,7 @@ func _case_lose(dm) -> void:
 	_check(result == "lose" and bm.round_num == 5)
 	_check(str(bm.round_orders) == "[[0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]")
 	_check(bm.units[0].hp == 0 and bm.units[0].is_alive() == false)
-	_check(bm.units[1].hp == 94)  # R5 末兽 102-8，充能轨迹偏差会破坏此值
+	_check(bm.units[1].hp == 48)  # T2.9 新数值：mech s1=18/ult=30，兽 s1=1/ult=8
 
 func _case_timeout(dm) -> void:
 	var bm = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"])
@@ -98,7 +98,7 @@ func _case_command_charge(dm) -> void:  # 用例四：指令校验+大招归零+
 	_check(BC.validate(u, BC.Kind.ULT) == "")  # 充满可释放
 	var res: Dictionary = BC.execute(bm.units, u, BC.Kind.ULT, null, 0)
 	print("[SMOKE] 用例四: 大招 dmg=%d charge_after=%d" % [int(res["damage"]), int(u.charge)])
-	_check(bool(res["ok"]) and int(u.charge) == 0 and int(res["damage"]) == 24)
+	_check(bool(res["ok"]) and int(u.charge) == 0 and int(res["damage"]) == 30)  # T2.9 新 power=3.0
 	u.charge_free = true  # 机制预留（§3）：charge_free 豁免充能校验
 	_check(BC.validate(u, BC.Kind.ULT) == "" and bool(BC.execute(bm.units, u, BC.Kind.ULT, null, 0)["ok"]))
 	u.charge_free = false
@@ -121,7 +121,7 @@ func _case_dead_target(dm) -> void:  # 用例五：死亡目标跳过 → 自动
 	print("[SMOKE] 用例五: r1.target_hp=%d r2.target_hp=%d charge=%d" % [
 		int(r1["target_hp"]), int(r2["target_hp"]), int(bm.units[0].charge)])
 	_check(bool(r1["ok"]) and bm.units[1].is_alive() == false)
-	_check(bool(r2["ok"]) and r2["target"] == bm.units[2] and int(bm.units[2].hp) == 142)
+	_check(bool(r2["ok"]) and r2["target"] == bm.units[2] and int(bm.units[2].hp) == 132)  # T2.9 新 power=2.0 伤害=18
 	_check(int(bm.units[0].charge) == 40)  # 小命中 +20 ×2
 
 func _case_wipeout_win(dm) -> void:  # 用例六：人工指令路径 + 敌方全灭进 win

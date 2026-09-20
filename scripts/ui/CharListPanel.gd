@@ -163,15 +163,15 @@ func _refresh_char_page() -> void:
 	_portrait.texture = art.get_portrait(_char_id)
 	var col: Color = art.get_system_color(_char_id)
 	var stats := "%s：生命 %d   攻击 %d   防御 %d   速度 %d" % [ch.name, ch.hp, ch.atk, ch.def, ch.spd]
-	_info_label.text = "%s\n阵营：%s    体系：%s    等级：Lv.1（占位）\n\n%s" % [
-		ch.name, ch.faction_name(), ch.system_name(), stats]
+	_info_label.text = "%s\n阵营：%s    体系：%s    等级：Lv.1（占位）\n\n%s\n\n背景：%s" % [
+		ch.name, ch.faction_name(), ch.system_name(), stats, ch.background]
 	var lines: Array[String] = []
 	for sid: String in [ch.skill_small, ch.skill_ult]:
 		var sk = dm.get_skill(sid)
 		if sk == null:
 			continue
 		var type_name := "小技能" if sk.type == "small" else "大招"
-		lines.append("%s｜%s（倍率 %.1f）" % [type_name, sk.name, sk.power])
+		lines.append("%s｜%s（%.1f｜%s→%s %s）" % [type_name, sk.name, sk.power, sk.target_side, sk.target_scope, sk.effect])
 	_skill_label.text = "技能：\n  " + "\n  ".join(lines)
 	_refresh_party_btn()
 

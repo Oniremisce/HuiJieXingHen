@@ -29,6 +29,7 @@ func _init() -> void:
 		"skill_ult": "skill_mech_ult",
 		"portrait_id": "portrait_mech_01",
 		"sprite_id": "sprite_mech_01",
+		"background": "机律联邦观测员，靠天心印记守护营地",  # T2.9 新增
 	})
 	print("[1] 角色正常行: ", c)
 	_check(c.id == "awakened_mech_01")
@@ -39,6 +40,7 @@ func _init() -> void:
 	_check(c.portrait_id == "portrait_mech_01" and c.sprite_id == "sprite_mech_01")
 	_check(c.system_name() == "机律")
 	_check(c.faction_name() == "机律联邦")
+	_check(c.background != "")  # T2.9 background 非空断言
 
 	# [2] CharacterData：空值/缺键/非法值 → 默认（数值 0、字符串 ""），警告但不中断
 	var c2 := DM.CharacterData.from_csv_row({
@@ -54,16 +56,60 @@ func _init() -> void:
 	_check(c2.hp == 0 and c2.atk == 0 and c2.def == 0)
 	_check(c2.spd == 7)
 	_check(c2.skill_small == "" and c2.skill_ult == "" and c2.portrait_id == "" and c2.sprite_id == "")
+	_check(c2.background == "")  # T2.9 background 缺列→""
 
-	# [3] SkillData（T2.8：大招充能制，无 energy_cost 字段；power=倍率）
+	# [3] SkillData（T2.9：大招充能制，无 energy_cost；T2.9 新增三字段 target_side/scope/effect）
+	# 逐值对照角色系统.md §5 诺菈 s1（ally+single+heal，power=2.0）
 	var s := DM.SkillData.from_csv_row({
-		"id": "skill_mech_s1", "name": "脉冲斩", "type": "small",
-		"power": "1.2", "cutscene_id": "",
+		"id": "skill_mech_s1", "name": "应急修复协议", "type": "small",
+		"power": "2.0", "cutscene_id": "",
+		"target_side": "ally", "target_scope": "single", "effect": "heal",
 	})
-	print("[3] 技能: ", s)
-	_check(s.id == "skill_mech_s1" and s.name == "脉冲斩" and s.type == "small")
-	_check(s.power == 1.2 and s.cutscene_id == "")
+	print("[3] 技能诺菈s1: ", s)
+	_check(s.id == "skill_mech_s1" and s.name == "应急修复协议" and s.type == "small")
+	_check(s.power == 2.0 and s.cutscene_id == "")
+	_check(s.target_side == "ally" and s.target_scope == "single" and s.effect == "heal")
 	_check(not ("energy_cost" in s))
+
+	# [3b] SkillData：缺省值容错——三字段空/缺列时自动回退规则缺省（enemy/single/damage）
+	var s_default := DM.SkillData.from_csv_row({
+		"id": "skill_default", "name": "默认技能", "type": "small",
+		"power": "1.0",
+		# target_side/scope/effect 全部缺列 → 自动回退
+	})
+	print("[3b] 技能缺省容错: ", s_default)
+	_check(s_default.target_side == "enemy")   # 规则缺省
+	_check(s_default.target_scope == "single")  # 规则缺省
+	_check(s_default.effect == "damage")         # 规则缺省
+
+	# [3c] 技能三字段逐值对照（§5 其他角色）
+	# 艾蕾雅 ult：ally+all+amp，power=30
+	var s_arc_ult := DM.SkillData.from_csv_row({
+		"id": "skill_arcane_ult", "name": "大源回响·辉映", "type": "ult",
+		"power": "30", "cutscene_id": "cut_arcane_ult",
+		"target_side": "ally", "target_scope": "all", "effect": "amp",
+	})
+	print("[3c] 艾蕾雅ult: ", s_arc_ult)
+	_check(s_arc_ult.target_side == "ally" and s_arc_ult.target_scope == "all" and s_arc_ult.effect == "amp")
+	_check(s_arc_ult.power == 30.0)
+
+	# 洛清弦 s1：enemy+column+damage，power=1.2
+	var s_xian_s1 := DM.SkillData.from_csv_row({
+		"id": "skill_xian_s1", "name": "流云剑诀", "type": "small",
+		"power": "1.2", "cutscene_id": "",
+		"target_side": "enemy", "target_scope": "column", "effect": "damage",
+	})
+	print("[3c] 洛清弦s1: ", s_xian_s1)
+	_check(s_xian_s1.target_side == "enemy" and s_xian_s1.target_scope == "column" and s_xian_s1.effect == "damage")
+
+	# 敌人小技能：显式填 enemy/single/damage（制作人04 预裁定）
+	var s_enemy := DM.SkillData.from_csv_row({
+		"id": "enemy_beast_small", "name": "蚀骨撕咬", "type": "small",
+		"power": "1.0", "cutscene_id": "",
+		"target_side": "enemy", "target_scope": "single", "effect": "damage",
+	})
+	print("[3c] 敌人小技能: ", s_enemy)
+	_check(s_enemy.target_side == "enemy" and s_enemy.target_scope == "single" and s_enemy.effect == "damage")
 
 	# [4] EnemyData（T2.8：扩 skill_small/skill_ult 双技能字段，关联 skills.csv enemy_ 前缀行）
 	var e := DM.EnemyData.from_csv_row({

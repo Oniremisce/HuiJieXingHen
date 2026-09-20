@@ -64,6 +64,7 @@ class BaseRow extends RefCounted:
 ## ------------------------------------------------------------
 ## 觉醒者数据（characters.csv 一行）
 ## faction ∈ 机律联邦·秘法评议会·太微仙盟；system ∈ 机律|秘法|玄门
+## background = 一句话背景（角色系统.md §2；缺列/空值→""）
 ## ------------------------------------------------------------
 class CharacterData extends BaseRow:
 
@@ -88,6 +89,7 @@ class CharacterData extends BaseRow:
 	var skill_ult: String = ""
 	var portrait_id: String = ""
 	var sprite_id: String = ""
+	var background: String = ""  # T2.9 新增
 
 	static func from_csv_row(row: Dictionary) -> CharacterData:
 		var d := CharacterData.new()
@@ -103,6 +105,7 @@ class CharacterData extends BaseRow:
 		d.skill_ult = BaseRow.field_str(row, "skill_ult")
 		d.portrait_id = BaseRow.field_str(row, "portrait_id")
 		d.sprite_id = BaseRow.field_str(row, "sprite_id")
+		d.background = BaseRow.field_str(row, "background")  # T2.9 缺列→""
 		return d
 
 	## 体系中文名：机律/秘法/玄门（兼容代码输入，未知值原样返回并警告）
@@ -122,8 +125,8 @@ class CharacterData extends BaseRow:
 		return key
 
 	func _to_string() -> String:
-		return "CharacterData{id=%s, name=%s, faction=%s, system=%s, hp=%d, atk=%d, def=%d, spd=%d, skill_small=%s, skill_ult=%s, portrait_id=%s, sprite_id=%s}" % [
-			id, name, faction, system, hp, atk, def, spd, skill_small, skill_ult, portrait_id, sprite_id,
+		return "CharacterData{id=%s, name=%s, faction=%s, system=%s, hp=%d, atk=%d, def=%d, spd=%d, skill_small=%s, skill_ult=%s, portrait_id=%s, sprite_id=%s, background=%s}" % [
+			id, name, faction, system, hp, atk, def, spd, skill_small, skill_ult, portrait_id, sprite_id, background,
 		]
 
 
@@ -131,6 +134,11 @@ class CharacterData extends BaseRow:
 ## 技能数据（skills.csv 一行）；type ∈ small|ult
 ## 战斗为大招充能制（战斗系统 §3：小技能无消耗、大招需充能满），
 ## 无耗能字段；power = 倍率（damage = max(1, atk*power - def)）
+## T2.9 新增三字段（角色系统.md §3）：
+##   target_side  目标阵营 enemy(缺省)|ally
+##   target_scope 目标范围 single(缺省)|column|all
+##   effect       效果 damage(缺省)|heal|shield|amp
+## 缺列/空值 → 规则缺省回退，不崩
 ## ------------------------------------------------------------
 class SkillData extends BaseRow:
 
@@ -139,6 +147,9 @@ class SkillData extends BaseRow:
 	var type: String = ""
 	var power: float = 0.0
 	var cutscene_id: String = ""
+	var target_side: String = ""   # T2.9 新增：enemy|ally；空→"enemy"
+	var target_scope: String = ""  # T2.9 新增：single|column|all；空→"single"
+	var effect: String = ""        # T2.9 新增：damage|heal|shield|amp；空→"damage"
 
 	static func from_csv_row(row: Dictionary) -> SkillData:
 		var d := SkillData.new()
@@ -147,11 +158,21 @@ class SkillData extends BaseRow:
 		d.type = BaseRow.field_str(row, "type")
 		d.power = BaseRow.field_float(row, "power")
 		d.cutscene_id = BaseRow.field_str(row, "cutscene_id")
+		# T2.9 三字段：缺列→""，空值→规则缺省回退（角色系统.md §3）
+		d.target_side = BaseRow.field_str(row, "target_side")
+		if d.target_side == "":
+			d.target_side = "enemy"
+		d.target_scope = BaseRow.field_str(row, "target_scope")
+		if d.target_scope == "":
+			d.target_scope = "single"
+		d.effect = BaseRow.field_str(row, "effect")
+		if d.effect == "":
+			d.effect = "damage"
 		return d
 
 	func _to_string() -> String:
-		return "SkillData{id=%s, name=%s, type=%s, power=%.2f, cutscene_id=%s}" % [
-			id, name, type, power, cutscene_id,
+		return "SkillData{id=%s, name=%s, type=%s, power=%.2f, cutscene_id=%s, target_side=%s, target_scope=%s, effect=%s}" % [
+			id, name, type, power, cutscene_id, target_side, target_scope, effect,
 		]
 
 

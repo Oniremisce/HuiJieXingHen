@@ -3,12 +3,13 @@ extends SceneTree
 ## T3.4 DamageCalc 手算验算（常驻回归；headless：先设 GODOT_MCP_RUNTIME_PORT='abc'
 ## 再 godot --headless --path . --script res://tools/smoke_test_damage_calc.gd）
 ## 手算预计算（force_crit 控制暴击、bonus_override 注入星髓；数值全部来自 CSV）：
-## 组1 普通：mech(atk12, 小技能 power1.2) vs 兽(def6) → max(1,14.4-6)=8.4 ×(1+0) → int 8
-## 组2 暴击：8.4×1.5=12.6 → 12（基础 crit_rate=0.10 / crit_mult=1.5 占位常量）
-## 组3a 条件增伤 >70%（套装1 三件套 bonus0.5）：兽满血 ratio=1.0>0.7 → 8.4×1.5=12.6 → 12
-## 组3b/3c 严格边界：兽 hp74/150→ratio0.4933 → >70% 不满足=8、<50% 满足=12；
-##   兽 hp75 → ratio=0.5，<50% 严格小于不满足 → 8
-## 组4 下限：mech atk 覆写 2 → max(1,2.4-6)=1 → 1
+## T2.9 新技能 power：mech_s1=2.0 → 伤害=max(1,12×2.0-6)=18
+## 组1 普通：18 ×(1+0) → int 18
+## 组2 暴击：18×1.5=27（基础 crit_rate=0.10 / crit_mult=1.5 占位常量）
+## 组3a 条件增伤 >70%（套装1 三件套 bonus0.5）：兽满血 ratio=1.0>0.7 → 18×1.5=27
+## 组3b/3c 严格边界：兽 hp74/150→ratio0.4933 → >70% 不满足=18、<50% 满足=27；
+##   兽 hp75 → ratio=0.5，<50% 严格小于不满足 → 18
+## 组4 下限：mech atk 覆写 2 → max(1,4-6)=1 → 1
 ## 组5 合击（mech12+arcane15+xian13=40 ×100% -def6）：34；专用暴击率=(0.1×3)÷3.0=0.1；
 ##   暴击 34×300% 固定=102（注入爆伤词条 0.5 仍 102=不吃词条证明）
 ## 组5b 死亡剔除：xian hp0 → atk 和 27-6=21、alive_count=2（§4.1 死亡不计入求和）
@@ -29,16 +30,16 @@ func _init() -> void:
 	print("=== T3.4 DamageCalc 手算验算开始 ===")
 	var r1: Dictionary = DC.calc(mech, skill, beast, 0)
 	print("[SMOKE] 组1 普通: dmg=%d crit=%s" % [int(r1["damage"]), str(r1["crit"])])
-	_check(int(r1["damage"]) == 8 and not bool(r1["crit"]))
+	_check(int(r1["damage"]) == 18 and not bool(r1["crit"]))  # T2.9 新 power=2.0 → 12×2.0-6=18
 	var r2: Dictionary = DC.calc(mech, skill, beast, 1)
 	print("[SMOKE] 组2 暴击: dmg=%d crit=%s rate=%.2f mult=%.1f" % [int(r2["damage"]), str(r2["crit"]), float(r2["crit_rate"]), float(r2["crit_mult"])])
-	_check(int(r2["damage"]) == 12 and bool(r2["crit"]))
+	_check(int(r2["damage"]) == 27 and bool(r2["crit"]))  # T2.9 新：18×1.5=27
 	_check(absf(float(r2["crit_rate"]) - 0.10) < 0.0001 and absf(float(r2["crit_mult"]) - 1.5) < 0.0001)
 	var spec1 := {"crit": 0.0, "crit_dmg": 0.0, "cond_specs": [{"op": ">", "threshold": 0.7, "bonus": 0.5}]}
 	var spec2 := {"crit": 0.0, "crit_dmg": 0.0, "cond_specs": [{"op": "<", "threshold": 0.5, "bonus": 0.5}]}
 	var r3a: Dictionary = DC.calc(mech, skill, beast, 0, spec1)
 	print("[SMOKE] 组3a 条件增伤>70%%(满血): dmg=%d cond=%.1f" % [int(r3a["damage"]), float(r3a["cond"])])
-	_check(int(r3a["damage"]) == 12 and absf(float(r3a["cond"]) - 0.5) < 0.0001)
+	_check(int(r3a["damage"]) == 27 and absf(float(r3a["cond"]) - 0.5) < 0.0001)  # T2.9 新：18×1.5=27
 	beast.hp = 74
 	var r3b: Dictionary = DC.calc(mech, skill, beast, 0, spec1)
 	var r3c: Dictionary = DC.calc(mech, skill, beast, 0, spec2)
@@ -46,7 +47,7 @@ func _init() -> void:
 	var r3d: Dictionary = DC.calc(mech, skill, beast, 0, spec2)
 	beast.hp = beast.max_hp
 	print("[SMOKE] 组3b/c/d 边界: hp74>=%d <=%d；hp75<=%d（严格边界）" % [int(r3b["damage"]), int(r3c["damage"]), int(r3d["damage"])])
-	_check(int(r3b["damage"]) == 8 and int(r3c["damage"]) == 12 and int(r3d["damage"]) == 8)
+	_check(int(r3b["damage"]) == 18 and int(r3c["damage"]) == 27 and int(r3d["damage"]) == 18)  # T2.9 新数值
 	mech.atk = 2
 	var r4: Dictionary = DC.calc(mech, skill, beast, 0)
 	mech.atk = 12
