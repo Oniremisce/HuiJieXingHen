@@ -277,6 +277,7 @@ collision_layer = 0
 collision_mask = 2
 monitorable = false
 script = ExtResource("8_bt")
+metadata/enemy_ids = PackedStringArray("corrosion_beast", "corrosion_beast", "corrosion_beast", "corrosion_beast", "corrosion_beast", "corrosion_beast")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BattleTrigger"]
 shape = SubResource("RectangleShape2D_battle")

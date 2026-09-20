@@ -19,6 +19,8 @@ const BAR_W := 40.0
 const BAR_H := 4.0
 const ICON_S := 12.0                 # 我方体系图标（体系色方块）
 const COL_HP_ENEMY := Color(0.70196, 0.29020, 0.23529)  # #B34A3C 敌方红血条
+## 站位锚点编辑基准分辨率（FormationAnchors 下标量坐标系；运行时按视口宽等比缩放）
+const DESIGN_SIZE := Vector2(1152, 648)
 const COL_HP_BG := Color(0.0, 0.0, 0.0, 0.55)
 const DEAD_DIM := 0.35
 const NAME_SIZE := 11
@@ -96,9 +98,11 @@ func setup_stances(party_ids: Array, enemy_ids: Array) -> void:
 	# 锚点=视口空间（屏幕坐标）；本层挂在地图场景下受地图相机 canvas 变换，
 	# 须逆映射到世界坐标落位，否则站位被相机拖偏、压左下角 UI（T3.9 返工修正）
 	var inv: Transform2D = get_viewport().get_canvas_transform().affine_inverse()
-	var ally_pts: Array = form["ally"]
-	var front: Array = form["enemy_front"]
-	var back: Array = form["enemy_back"]
+	# 站位锚点（T3.10 后）：Battle.tscn 的 FormationAnchors/* Marker2D 可在编辑器
+	# 2D 视口直接拖拽微调；节点缺失则回退 battle_form_layout 数学生成（默认一致）
+	var ally_pts: Array = _anchors(["Ally0", "Ally1", "Ally2"], form["ally"])
+	var front: Array = _anchors(["EnemyFront0", "EnemyFront1", "EnemyFront2"], form["enemy_front"])
+	var back: Array = _anchors(["EnemyBack0", "EnemyBack1", "EnemyBack2"], form["enemy_back"])
 	var n_ally := mini(party_ids.size(), ally_pts.size())
 	for i in n_ally:
 		_spawn_unit(_allies, String(party_ids[i]), true, inv * (ally_pts[i] as Vector2), i)
@@ -109,6 +113,25 @@ func setup_stances(party_ids: Array, enemy_ids: Array) -> void:
 	for i in n_back:
 		_spawn_unit(_enemies, String(enemy_ids[n_front + i]), false, inv * (back[i] as Vector2),
 			party_ids.size() + n_front + i)
+
+## 读站位锚点（FormationAnchors/<name> Marker2D）。锚点坐标语义=**1152×648 设计
+## 基准视口坐标**（与 battle_form_layout 输出同域，与项目设计分辨率一致），
+## 运行时按 `视口宽/1152` 等比映射到实际窗口——真机 1920×1080 下缩放 1.667 后
+## 与"按视口比例自适应"的原数学结果逐值相同（视觉零变化）。
+## 锚点可在 Godot 编辑器 2D 视口直接拖拽微调；节点缺失/类型不符则用 fallback
+## （数学生成值，与锚点默认值一致）。落位仍走相机逆映射（站位与相机解耦）。
+## 返回 Array[Vector2]，顺序与 names 一致（下标即编队序）。
+func _anchors(names: Array, fallback: Array) -> Array:
+	var out: Array = []
+	var base := global_position  # 锚点相对本层的坐标（含 FormationAnchors 容器偏移）
+	var sc := get_viewport_rect().size.x / DESIGN_SIZE.x  # 设计基准等比缩放
+	for i in names.size():
+		var p: Vector2 = fallback[i]
+		var n := get_node_or_null("FormationAnchors/" + str(names[i]))
+		if n is Node2D:
+			p = ((n as Node2D).global_position - base) * sc
+		out.append(p)
+	return out
 
 ## 生成单个战场单位：Q 版小人（ArtProvider.get_character_sprite，与地图同规格）
 ## + 名字 Label（模型下方）+ 头顶血条小组件（我方体系图标+体系色血条 / 敌方红血条）

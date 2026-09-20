@@ -37,6 +37,7 @@ func _run() -> void:
 	_test_stances(arena, 1)
 	_test_stances(arena, 3)
 	_test_stances(arena, 6)
+	_test_anchors(arena)
 	await _test_battle_flow(dm)
 	arena.queue_free()
 	if _failed:
@@ -117,6 +118,35 @@ func _test_stances(arena, enemy_n: int) -> void:
 		for i in 3:
 			_check(enemies[i].position.x < enemies[3 + i].position.x)
 	print("[SMOKE] B 站位 n=%d: allies=%d enemies=%d" % [enemy_n, allies.size(), enemies.size()])
+
+## B2. 站位锚点（Battle.tscn FormationAnchors/*，编辑器 2D 视口可拖拽）断言：
+##     9 个 Marker2D 存在 + 默认值与数学生成一致（未拖拽时视觉零变化）+
+##     拖拽生效（移动 Ally0 → setup_stances 后我方第 0 个单位跟随）
+func _test_anchors(arena) -> void:
+	var form: Dictionary = FORM.take_param(Vector2(1152, 648), 3, 4)
+	var names: Array = ["Ally0", "Ally1", "Ally2",
+		"EnemyFront0", "EnemyFront1", "EnemyFront2",
+		"EnemyBack0", "EnemyBack1", "EnemyBack2"]
+	var fb: Array = form["ally"] + form["enemy_front"] + form["enemy_back"]
+	var same_default := true
+	for i in names.size():
+		var n: Node = arena.get_node_or_null("FormationAnchors/" + str(names[i]))
+		_check(n is Node2D)
+		if n is Node2D:
+			var fp: Vector2 = fb[i]
+			if (n as Node2D).position.distance_to(fp) > 0.01:
+				same_default = false
+	_check(same_default)
+	var a0: Node2D = arena.get_node("FormationAnchors/Ally0")
+	var orig := a0.position
+	a0.position = Vector2(300.0, 400.0)
+	arena.setup_stances(PARTY, ["corrosion_beast"])
+	var unit0: Node2D = arena._allies.get_children()[0]
+	var vp: Vector2 = arena.get_viewport_rect().size
+	var sc := vp.x / 1152.0  # 设计基准等比缩放（锚点=1152 基准坐标）
+	_check(unit0.position.distance_to(Vector2(300.0, 400.0) * sc) < 0.01)  # headless 无相机=逆映射恒等
+	a0.position = orig
+	print("[SMOKE] B2 锚点: 9 个 Marker2D 存在、默认值与数学一致、拖拽 Ally0→(300,400) 单位跟随")
 
 func _no_grid_nodes(unit_root: Node) -> bool:
 	for c in unit_root.get_children():

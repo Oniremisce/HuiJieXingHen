@@ -11,6 +11,44 @@ script = ExtResource("1_arena")
 
 [node name="Enemies" type="Node2D" parent="."]
 
+[node name="FormationAnchors" type="Node2D" parent="."]
+
+[node name="Ally0" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(213.12, 307.8)
+gizmo_extents = 40.0
+
+[node name="Ally1" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(320.8973, 326.804)
+gizmo_extents = 40.0
+
+[node name="Ally2" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(428.6747, 345.8081)
+gizmo_extents = 40.0
+
+[node name="EnemyFront0" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(633.6, 272.16)
+gizmo_extents = 40.0
+
+[node name="EnemyFront1" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(741.3774, 291.1641)
+gizmo_extents = 40.0
+
+[node name="EnemyFront2" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(849.1548, 310.1681)
+gizmo_extents = 40.0
+
+[node name="EnemyBack0" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(645.12, 181.44)
+gizmo_extents = 40.0
+
+[node name="EnemyBack1" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(752.8973, 200.4441)
+gizmo_extents = 40.0
+
+[node name="EnemyBack2" type="Marker2D" parent="FormationAnchors"]
+position = Vector2(860.6747, 219.4481)
+gizmo_extents = 40.0
+
 [node name="BattleUI" type="CanvasLayer" parent="."]
 layer = 40
 
