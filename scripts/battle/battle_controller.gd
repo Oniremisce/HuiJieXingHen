@@ -49,9 +49,10 @@ func _on_battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary)
 		var bm = BM.new(dm, party_ids, enemy_ids)
 		# 演出对象：真演出层（Node，挂树接收跳过输入/显示）或鸭子对象（RefCounted 假演出，不挂树）
 		var cs: Variant = cutscene_factory.call() if cutscene_factory.is_valid() else CUTSCENE_SCENE.instantiate()
-		bm.cutscene = cs
+		bm.cutscene = _layer.make_cutscene_proxy(cs)  # T3.8：转发代理（四方法契约不变，播毕通知跑条放行）
 		if cs is Node:
 			_layer.add_child(cs)
+		_layer.attach_battle(bm)  # T3.8：速度条/参战行绑定（只读表现，每场重绑）
 		outcome = await bm.run_to_end(30)
 		rounds = bm.round_num
 		if cs is Node:

@@ -10,6 +10,17 @@ extends Node2D
 @onready var _enemies: Node2D = $Enemies
 @onready var _result: Label = $BattleUI/ResultLabel
 @onready var _retry: Label = $BattleUI/RetryHint
+@onready var _speed_bar: Control = $BattleUI/SpeedBar
+@onready var _party_row: Control = $BattleUI/PartyRow
+
+## T3.8：绑定战斗状态机（只读表现：速度条跑条动画 + 右下角参战行）
+func attach_battle(bm) -> void:
+	_speed_bar.attach_battle(bm)
+	_party_row.setup(bm, _speed_bar)
+
+## T3.8：演出转发代理（保持 bm.cutscene 既有四方法契约；播毕通知跑条放行）
+func make_cutscene_proxy(real_cutscene) -> RefCounted:
+	return _speed_bar.make_cutscene_proxy(real_cutscene)
 
 ## 布置敌我站位（battle_started 参数直传）
 func setup_stances(party_ids: Array, enemy_ids: Array) -> void:
