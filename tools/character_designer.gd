@@ -17,6 +17,8 @@
 ##      列数 / 枚举 / id 唯一性，cutscene_id 允许空。
 ##   ③ portrait/sprite 资源存在性不做文件名猜测（portrait_mech_01 是逻辑 id 非文件名），
 ##      统一以角色 id 走 ArtProvider 取纹理做非空判定；真实资源接入后同一判定仍成立。
+##   ④ 数值边界（数值策划01 T2.10 协作行口径④）：hp/atk/def/spd 正整数（≥1）；
+##      power>0；effect=amp 时 power 须为正整数百分点（30 即 +30%）。
 ## 报告格式：FAIL 明细恒含「文件:行号 列[列名] 说明」，CI 可直接定位。
 ## 与 tools/smoke_test_data_models.gd 互补：后者断言数据模型结构，本工具断言角色内容合规。
 ## =============================================================
@@ -267,6 +269,24 @@ func _enum_check(file_name: String, line_no: int, col: String, value: String,
 	_fail("%s:%d 列[%s] 非法枚举 \"%s\"（允许：%s）" % [file_name, line_no, col, value, "/".join(whitelist)])
 
 
+func _is_positive_int(s: String) -> bool:
+	return s.is_valid_int() and s.to_int() > 0
+
+
+## power 数值边界（口径④）：>0 浮点；effect=amp 时须正整数百分点
+func _check_power(file_name: String, line_no: int, power_s: String, effect: String) -> void:
+	if not power_s.is_valid_float():
+		_fail("%s:%d 列[power] 非数值 \"%s\"（须 >0：damage/heal/shield=倍率系数，amp=增伤百分点）" % [
+			file_name, line_no, power_s])
+	elif power_s.to_float() <= 0.0:
+		_fail("%s:%d 列[power] 须 >0，实为 \"%s\"" % [file_name, line_no, power_s])
+	elif effect == "amp" and not _is_positive_int(power_s):
+		_fail("%s:%d 列[power] effect=amp 时须为正整数百分点（如 30 即 +30%%），实为 \"%s\"" % [
+			file_name, line_no, power_s])
+	else:
+		_pass_count += 1
+
+
 # ---------------------------------------------------------------
 # skills.csv 校验；返回 id -> {line, row, header}（供角色引用检查与冒烟回读）
 # ---------------------------------------------------------------
@@ -302,6 +322,8 @@ func _validate_skills(parsed: Dictionary) -> Dictionary:
 			_fail("%s:%d 列[target_scope] ally 侧不适用 column（§3：column 仅敌方、上限 3）" % [SKILLS_FILE, line_no])
 		else:
 			_pass_count += 1
+		_check_power(SKILLS_FILE, line_no, _field(row, header, "power"),
+			_skill_effective(row, header, "effect", EFFECT_DEFAULT))
 		if sid.begins_with(ENEMY_SKILL_PREFIX):
 			_pass_count += 1  # 预裁定②：enemy_ 前缀行豁免 id 命名/type 配对/cutscene 约定
 		else:
@@ -378,6 +400,13 @@ func _validate_characters(parsed: Dictionary, skill_map: Dictionary) -> void:
 			_fail("%s:%d 列[system] 非法体系 \"%s\"（中文三值白名单：%s；预裁定①：与 id 英文段各自校验）" % [
 				CHARS_FILE, line_no, sys_cn, "/".join(SYSTEM_CN)])
 		var en := str(SYSTEM_CN_TO_EN.get(sys_cn, ""))
+		# 四维数值边界（口径④）：正整数 ≥1
+		for stat in ["hp", "atk", "def", "spd"]:
+			var v := _field(row, header, stat)
+			if _is_positive_int(v):
+				_pass_count += 1
+			else:
+				_fail("%s:%d 列[%s] 须为正整数（≥1），实为 \"%s\"" % [CHARS_FILE, line_no, stat, v])
 		_check_skill_ref(row, header, line_no, cid, en, "skill_small", "s1", "small", skill_map)
 		_check_skill_ref(row, header, line_no, cid, en, "skill_ult", "ult", "ult", skill_map)
 		_check_art(row, header, line_no, cid, art, "portrait_id", true)
