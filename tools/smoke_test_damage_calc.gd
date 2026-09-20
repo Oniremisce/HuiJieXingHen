@@ -26,7 +26,7 @@ func _init() -> void:
 	dm._load_all()  # headless --script 手动同步加载
 	var mech = _unit(dm, "awakened_mech_01", true)
 	var beast = _unit(dm, "corrosion_beast", false)
-	var skill = dm.get_skill("skill_mech_s1")
+	var skill = dm.get_skill("skill_mech_01_s1")
 	print("=== T3.4 DamageCalc 手算验算开始 ===")
 	var r1: Dictionary = DC.calc(mech, skill, beast, 0)
 	print("[SMOKE] 组1 普通: dmg=%d crit=%s" % [int(r1["damage"]), str(r1["crit"])])

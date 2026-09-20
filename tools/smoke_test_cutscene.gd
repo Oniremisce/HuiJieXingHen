@@ -68,11 +68,11 @@ func _case_sequence(dm) -> void:
 	bm.units[1].hp = 100
 	var result: String = await bm.run_to_end(3)
 	# 占位口径⑧：敌方出手同走演出（§7 未分敌我；若裁定仅我方演出，BM._take_turn 演出分流加 is_ally 过滤一处）
-	var expect := ["active:awakened_mech_01", "ult:skill_mech_ult",
+	var expect := ["active:awakened_mech_01", "ult:skill_mech_01_ult",
 		"active:corrosion_beast", "skill:enemy_beast_small",
-		"active:awakened_mech_01", "skill:skill_mech_s1",
+		"active:awakened_mech_01", "skill:skill_mech_01_s1",
 		"active:corrosion_beast", "skill:enemy_beast_small",
-		"active:awakened_mech_01", "skill:skill_mech_s1",
+		"active:awakened_mech_01", "skill:skill_mech_01_s1",
 		"active:corrosion_beast", "ult:enemy_beast_ult"]
 	print("[SMOKE] 场景1: result=%s calls=%s" % [result, str(fake.calls)])
 	_check(result == "timeout" and str(fake.calls) == str(expect))
@@ -108,7 +108,7 @@ func _case_skip() -> void:
 	var got_finished := [false]
 	scn.finished.connect(func(): got_finished[0] = true)
 	var t0 := Time.get_ticks_msec()
-	scn.play_ult("awakened_mech_01", "skill_mech_ult")  # 后台 coroutine（2s 或跳过）
+	scn.play_ult("awakened_mech_01", "skill_mech_01_ult")  # 后台 coroutine（2s 或跳过）
 	await create_timer(0.5).timeout
 	scn._skip = true
 	await scn.finished

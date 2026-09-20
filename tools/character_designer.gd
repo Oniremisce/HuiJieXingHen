@@ -9,17 +9,26 @@
 ## 可选环境变量 CHAR_DESIGNER_CSV_DIR（res:// 或绝对路径）：
 ##   仅替换「校验」读取的 CSV 目录（坏数据注入 / CI 回归用，不改仓库数据）；
 ##   覆盖模式下冒烟段跳过（DataManager 恒读 res://data/csv，两份数据非同一源）。
-## 校验口径（与制作人04 预裁定一致）：
+## 校验口径（与制作人04 预裁定、角色系统.md §3/§7 一致）：
 ##   ① 体系映射 机律=mech / 秘法=arcane / 玄门=xian：id 只认英文体系段
 ##      awakened_<mech|arcane|xian>_<两位序号>；characters.system 列按中文三值
 ##      白名单单独校验，两者不通兑（不可用英文校验中文列，反之亦然）。
-##   ② skills.csv 中 enemy_ 前缀行不套 skill_<体系>_<s1|ult> 规则：仅校验
+##   ② skills.csv 中 enemy_ 前缀行不套 skill_<体系>_<序号>_<s1|ult> 规则：仅校验
 ##      列数 / 枚举 / id 唯一性，cutscene_id 允许空。
 ##   ③ portrait/sprite 资源存在性不做文件名猜测（portrait_mech_01 是逻辑 id 非文件名），
 ##      统一以角色 id 走 ArtProvider 取纹理做非空判定；真实资源接入后同一判定仍成立。
 ##   ④ 数值边界（数值策划01 T2.10 协作行口径④）：hp/atk/def/spd 正整数（≥1）；
 ##      power>0；effect=amp 时 power 须为正整数百分点（30 即 +30%）。
-## 报告格式：FAIL 明细恒含「文件:行号 列[列名] 说明」，CI 可直接定位。
+##   ⑤ 技能 id 按角色（角色系统.md §3 制作人04 裁定①）：skill_<体系>_<两位序号>_<s1|ult>，
+##      体系段与序号段须与持有角色 id 对应段一致（awakened_mech_01 ↔ skill_mech_01_s1/_ult），
+##      一角色 = 2 行专属技能、不跨角色复用。
+## 报告分档：
+##   PASS 逐项打印；FAIL 明细恒含「文件:行号 列[列名] 说明」，EXIT=1；
+##   WARN（§7 提示级，不改 EXIT 码、不计入失败数）：① target_side 与 effect 语义错配
+##   （enemy 配 heal/shield/amp，或 ally 配 damage）② background 为空（文案可后补）；
+##   FAIL 档含：name 为空（§2 必填，角色列表与战斗直显此列）+ 列数/枚举/id 规则/
+##   引用完整性/数值边界任一不符。
+##   尾行恒为「通过 N 项，失败 M 项，警告 K 项」+ EXIT=0|1（CI 可 grep `^FAIL `/`^WARN `/`^EXIT=`）。
 ## 与 tools/smoke_test_data_models.gd 互补：后者断言数据模型结构，本工具断言角色内容合规。
 ## =============================================================
 extends SceneTree
@@ -54,6 +63,7 @@ const ENEMY_SKILL_PREFIX := "enemy_"
 var _csv_dir := DEFAULT_CSV_DIR
 var _override := false
 var _pass_count := 0
+var _warn_count := 0
 var _fail_list: Array[String] = []
 var _re_char_id: RegEx
 var _re_skill_id: RegEx
@@ -66,9 +76,9 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_re_char_id = RegEx.new()
-	_re_char_id.compile("^awakened_(mech|arcane|xian)_\\d{2}$")
+	_re_char_id.compile("^awakened_(mech|arcane|xian)_(\\d{2})$")
 	_re_skill_id = RegEx.new()
-	_re_skill_id.compile("^skill_(mech|arcane|xian)_(s1|ult)$")
+	_re_skill_id.compile("^skill_(mech|arcane|xian)_\\d{2}_(s1|ult)$")
 
 	_csv_dir = OS.get_environment("CHAR_DESIGNER_CSV_DIR").strip_edges()
 	if _csv_dir.is_empty():
@@ -100,11 +110,12 @@ func _run() -> void:
 	for line in _fail_list:
 		print(line)
 	if _fail_list.is_empty():
-		print("[PASS] 通过 %d 项，失败 0 项" % _pass_count)
+		print("[PASS] 通过 %d 项，失败 0 项，警告 %d 项" % [_pass_count, _warn_count])
 		print("EXIT=0")
 		quit(0)
 	else:
-		print("[FAIL] 通过 %d 项，失败 %d 项（明细见上，格式 文件:行号 列[列名]）" % [_pass_count, _fail_list.size()])
+		print("[FAIL] 通过 %d 项，失败 %d 项，警告 %d 项（明细见上，格式 文件:行号 列[列名]）" % [
+			_pass_count, _fail_list.size(), _warn_count])
 		print("EXIT=1")
 		quit(1)
 
@@ -125,6 +136,22 @@ func _pass(text: String) -> void:
 func _fail(detail: String) -> void:
 	_fail_list.append("FAIL " + detail)
 	print("[FAIL] %s" % detail)
+
+
+## WARN 档（§7 提示级）：仅提示，不改 EXIT 码、不计入失败数
+func _warn(detail: String) -> void:
+	_warn_count += 1
+	print("[WARN] %s" % detail)
+
+
+## §7 WARN①：target_side 与 effect 语义错配（提示级，非契约违例，不改 EXIT 码）
+func _check_side_effect_warn(line_no: int, side: String, effect: String) -> void:
+	if side == "enemy" and effect in ["heal", "shield", "amp"]:
+		_warn("%s:%d 列[effect] target_side=enemy 配 effect=%s（语义错配：治疗/护盾/增伤一般作用于友方，§7 WARN 档）" % [
+			SKILLS_FILE, line_no, effect])
+	elif side == "ally" and effect == "damage":
+		_warn("%s:%d 列[effect] target_side=ally 配 effect=damage（语义错配：伤害一般作用于敌方，§7 WARN 档）" % [
+			SKILLS_FILE, line_no])
 
 
 # ---------------------------------------------------------------
@@ -318,12 +345,13 @@ func _validate_skills(parsed: Dictionary) -> Dictionary:
 		# §3：column（整列）仅敌方，ally 侧只用 single/all
 		var side := _skill_effective(row, header, "target_side", SIDE_DEFAULT)
 		var scope := _skill_effective(row, header, "target_scope", SCOPE_DEFAULT)
+		var effect := _skill_effective(row, header, "effect", EFFECT_DEFAULT)
 		if side == "ally" and scope == "column":
 			_fail("%s:%d 列[target_scope] ally 侧不适用 column（§3：column 仅敌方、上限 3）" % [SKILLS_FILE, line_no])
 		else:
 			_pass_count += 1
-		_check_power(SKILLS_FILE, line_no, _field(row, header, "power"),
-			_skill_effective(row, header, "effect", EFFECT_DEFAULT))
+		_check_side_effect_warn(line_no, side, effect)  # §7 WARN①（不改 EXIT 码）
+		_check_power(SKILLS_FILE, line_no, _field(row, header, "power"), effect)
 		if sid.begins_with(ENEMY_SKILL_PREFIX):
 			_pass_count += 1  # 预裁定②：enemy_ 前缀行豁免 id 命名/type 配对/cutscene 约定
 		else:
@@ -338,15 +366,18 @@ func _validate_skills(parsed: Dictionary) -> Dictionary:
 func _validate_character_skill_id(row: Dictionary, header: Array, sid: String, line_no: int) -> void:
 	var m := _re_skill_id.search(sid)
 	if m == null:
-		_fail("%s:%d 列[id] 非法角色技能 id \"%s\"（契约 skill_<mech|arcane|xian>_<s1|ult>；敌人技能用 enemy_ 前缀）" % [
+		_fail("%s:%d 列[id] 非法角色技能 id \"%s\"（契约 skill_<mech|arcane|xian>_<两位序号>_<s1|ult>，如 skill_mech_01_s1；敌人技能用 enemy_ 前缀）" % [
 			SKILLS_FILE, line_no, sid])
 		return
+	_pass_count += 1
 	var en := m.get_string(1)
 	var suffix := m.get_string(2)
 	var expect_type := "small" if suffix == "s1" else "ult"
 	var type_value := _field(row, header, "type")
 	if type_value != expect_type:
 		_fail("%s:%d 列[type] id 段 \"%s\" 要求 type=%s，实为 \"%s\"" % [SKILLS_FILE, line_no, suffix, expect_type, type_value])
+	else:
+		_pass_count += 1
 	var cut := _field(row, header, "cutscene_id")
 	if suffix == "s1":
 		if not cut.is_empty():
@@ -400,6 +431,16 @@ func _validate_characters(parsed: Dictionary, skill_map: Dictionary) -> void:
 			_fail("%s:%d 列[system] 非法体系 \"%s\"（中文三值白名单：%s；预裁定①：与 id 英文段各自校验）" % [
 				CHARS_FILE, line_no, sys_cn, "/".join(SYSTEM_CN)])
 		var en := str(SYSTEM_CN_TO_EN.get(sys_cn, ""))
+		# §2：name 必填（角色列表与战斗直显此列）→ FAIL 档
+		if _field(row, header, "name").is_empty():
+			_fail("%s:%d 列[name] 为空（§2 必填：角色列表与战斗直显此列）" % [CHARS_FILE, line_no])
+		else:
+			_pass_count += 1
+		# §7 WARN②：background 为空允许（文案可后补），不改 EXIT 码
+		if _field(row, header, "background").is_empty():
+			_warn("%s:%d 列[background] 为空（文案可后补，§7 WARN 档；§2 缺省空容错）" % [CHARS_FILE, line_no])
+		else:
+			_pass_count += 1
 		# 四维数值边界（口径④）：正整数 ≥1
 		for stat in ["hp", "atk", "def", "spd"]:
 			var v := _field(row, header, stat)
@@ -415,18 +456,22 @@ func _validate_characters(parsed: Dictionary, skill_map: Dictionary) -> void:
 	_pass("%s 数据行 %d 行：id 规则/system 枚举/技能引用/占位资源逐行检查完成" % [CHARS_FILE, checked])
 
 
-## 技能引用存在性 + 命名与体系一致 + type 配对
+## 技能引用存在性 + id 体系/序号段与持有角色一致（§3）+ type 配对
 func _check_skill_ref(row: Dictionary, header: Array, line_no: int, cid: String, en: String,
 		col: String, suffix: String, expect_type: String, skill_map: Dictionary) -> void:
 	var sid := _field(row, header, col)
 	if sid.is_empty():
 		_fail("%s:%d 列[%s] 引用为空（角色须挂小技能 + 大招，§3）" % [CHARS_FILE, line_no, col])
 		return
-	if not en.is_empty():
-		var expect_id := "skill_%s_%s" % [en, suffix]
+	var cm := _re_char_id.search(cid)
+	var seq := "" if cm == null else cm.get_string(2)  # 序号段（id 正则已捕获）
+	if en.is_empty() or seq.is_empty():
+		pass  # system 或 id 本身已判 FAIL，此处不叠加引用命名 FAIL（避免误导性重复）
+	else:
+		var expect_id := "skill_%s_%s_%s" % [en, seq, suffix]
 		if sid != expect_id:
-			_fail("%s:%d 列[%s] 技能 id \"%s\" 与角色体系（system→%s）不符，契约 \"%s\"" % [
-				CHARS_FILE, line_no, col, sid, en, expect_id])
+			_fail("%s:%d 列[%s] 技能 id \"%s\" 与持有角色 %s 不符，契约 \"%s\"（§3：体系段与序号段须与角色 id 对应段一致）" % [
+				CHARS_FILE, line_no, col, sid, cid, expect_id])
 		else:
 			_pass_count += 1
 	if not skill_map.has(sid):

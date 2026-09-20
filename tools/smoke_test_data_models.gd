@@ -25,8 +25,8 @@ func _init() -> void:
 		"atk": "18",
 		"def": "10",
 		"spd": "9",
-		"skill_small": "skill_mech_s1",
-		"skill_ult": "skill_mech_ult",
+		"skill_small": "skill_mech_01_s1",
+		"skill_ult": "skill_mech_01_ult",
 		"portrait_id": "portrait_mech_01",
 		"sprite_id": "sprite_mech_01",
 		"background": "机律联邦观测员，靠天心印记守护营地",  # T2.9 新增
@@ -36,7 +36,7 @@ func _init() -> void:
 	_check(c.name != "" and c.name != "待定")  # T2.7 A2 防回退
 	_check(c.faction == "机律联邦" and c.system == "机律")
 	_check(c.hp == 120 and c.atk == 18 and c.def == 10 and c.spd == 9)
-	_check(c.skill_small == "skill_mech_s1" and c.skill_ult == "skill_mech_ult")
+	_check(c.skill_small == "skill_mech_01_s1" and c.skill_ult == "skill_mech_01_ult")
 	_check(c.portrait_id == "portrait_mech_01" and c.sprite_id == "sprite_mech_01")
 	_check(c.system_name() == "机律")
 	_check(c.faction_name() == "机律联邦")
@@ -61,12 +61,12 @@ func _init() -> void:
 	# [3] SkillData（T2.9：大招充能制，无 energy_cost；T2.9 新增三字段 target_side/scope/effect）
 	# 逐值对照角色系统.md §5 诺菈 s1（ally+single+heal，power=2.0）
 	var s := DM.SkillData.from_csv_row({
-		"id": "skill_mech_s1", "name": "应急修复协议", "type": "small",
+		"id": "skill_mech_01_s1", "name": "应急修复协议", "type": "small",
 		"power": "2.0", "cutscene_id": "",
 		"target_side": "ally", "target_scope": "single", "effect": "heal",
 	})
 	print("[3] 技能诺菈s1: ", s)
-	_check(s.id == "skill_mech_s1" and s.name == "应急修复协议" and s.type == "small")
+	_check(s.id == "skill_mech_01_s1" and s.name == "应急修复协议" and s.type == "small")
 	_check(s.power == 2.0 and s.cutscene_id == "")
 	_check(s.target_side == "ally" and s.target_scope == "single" and s.effect == "heal")
 	_check(not ("energy_cost" in s))
@@ -85,7 +85,7 @@ func _init() -> void:
 	# [3c] 技能三字段逐值对照（§5 其他角色）
 	# 艾蕾雅 ult：ally+all+amp，power=30
 	var s_arc_ult := DM.SkillData.from_csv_row({
-		"id": "skill_arcane_ult", "name": "大源回响·辉映", "type": "ult",
+		"id": "skill_arcane_01_ult", "name": "大源回响·辉映", "type": "ult",
 		"power": "30", "cutscene_id": "cut_arcane_ult",
 		"target_side": "ally", "target_scope": "all", "effect": "amp",
 	})
@@ -95,7 +95,7 @@ func _init() -> void:
 
 	# 洛清弦 s1：enemy+column+damage，power=1.2
 	var s_xian_s1 := DM.SkillData.from_csv_row({
-		"id": "skill_xian_s1", "name": "流云剑诀", "type": "small",
+		"id": "skill_xian_01_s1", "name": "流云剑诀", "type": "small",
 		"power": "1.2", "cutscene_id": "",
 		"target_side": "enemy", "target_scope": "column", "effect": "damage",
 	})

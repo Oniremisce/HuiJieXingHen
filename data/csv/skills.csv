@@ -1,9 +1,9 @@
 id,name,type,power,cutscene_id,target_side,target_scope,effect
-skill_mech_s1,应急修复协议,small,2.0,,ally,single,heal
-skill_mech_ult,协议·护盾阵列,ult,3.0,cut_mech_ult,ally,single,shield
-skill_arcane_s1,元素箭,small,1.2,,enemy,all,damage
-skill_arcane_ult,大源回响·辉映,ult,30,cut_arcane_ult,ally,all,amp
-skill_xian_s1,流云剑诀,small,1.2,,enemy,column,damage
-skill_xian_ult,天道·万剑归宗,ult,2.5,cut_xian_ult,enemy,all,damage
+skill_mech_01_s1,应急修复协议,small,2.0,,ally,single,heal
+skill_mech_01_ult,协议·护盾阵列,ult,3.0,cut_mech_ult,ally,single,shield
+skill_arcane_01_s1,元素箭,small,1.2,,enemy,all,damage
+skill_arcane_01_ult,大源回响·辉映,ult,30,cut_arcane_ult,ally,all,amp
+skill_xian_01_s1,流云剑诀,small,1.2,,enemy,column,damage
+skill_xian_01_ult,天道·万剑归宗,ult,2.5,cut_xian_ult,enemy,all,damage
 enemy_beast_small,蚀骨撕咬,small,1.0,,enemy,single,damage
 enemy_beast_ult,灾蚀洪流,ult,1.8,,enemy,single,damage
