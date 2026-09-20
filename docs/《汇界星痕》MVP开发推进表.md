@@ -8,18 +8,18 @@
 
 ## 1. MVP 范围与验收目标
 
-| # | 交付项 | 验收目标（MVP 级） |
-| --- | --- | --- |
-| 1 | 等距 2.5D Q 版地图 ×1（营地+首关） | 可自由漫游、Y 轴遮挡正确、被遮挡白描边生效、NPC 交互提示生效 |
-| 2 | 觉醒者 ×3 | CSV 数据可加载、地图占位 + Dialogic 立绘占位可显示、头顶名牌读 CSV |
-| 3 | 主线剧情 ×1 | 地图触发 Dialogic 演出（暂停世界），完成 3 名觉醒者的剧情邂逅 |
-| 4 | 心契任务 ×1 | 同行→互动→满阶状态机完整（quests.csv 驱动）；NPC 头顶粉色 ？/！ 标记 |
-| 5 | 三人回合制战斗 ×1 | 三人小队 vs 灾蚀兽，混元机制可触发，友方技能（治疗/护盾/增伤）生效，战斗演出占位，走 Transition 层 |
-| 6 | 唤星模拟 ×1 | 星砂单抽 100 / 十连 1000 + 保底（pity_counter）→星缘令→（心契满阶后）招募入队闭环；全屏唤星界面（右上星砂数量/主体角色展示图/右下单抽+十连按钮）+抽卡动画（十连竖排结果/星缘令特殊动画/CG 播放一次） |
-| 7 | 视觉框架与地图 UI | 8 向动画接口、遮挡描边、Transition 层、M 键箱庭图、世界大地图区块解锁、常驻 HUD |
-| 8 | 神像与存档 | 神像恢复/点亮/传送/存档；自动档+手动档（1 覆盖+3 回滚）；坏档不崩溃 |
-| 9 | UI 面板体系 | B/C/G/J/M/Esc 快捷键、主页菜单（暂停世界）、角色列表+详情分页（含星髓面板骨架）、任务面板三色分组、设置三页、主角自定义命名 |
-| 10 | 星髓体系 | 6 槽装备、2 件套数值/3 件套效果（体系无关）、面板三区、养成骨架 |
+| #  | 交付项                     | 验收目标（MVP 级）                                                                                                            |
+| -- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1  | 等距 2.5D Q 版地图 ×1（营地+首关） | 可自由漫游、Y 轴遮挡正确、被遮挡白描边生效、NPC 交互提示生效                                                                                      |
+| 2  | 觉醒者 ×3                  | CSV 数据可加载、地图占位 + Dialogic 立绘占位可显示、头顶名牌读 CSV                                                                            |
+| 3  | 主线剧情 ×1                 | 地图触发 Dialogic 演出（暂停世界），完成 3 名觉醒者的剧情邂逅                                                                                  |
+| 4  | 心契任务 ×1                 | 同行→互动→满阶状态机完整（quests.csv 驱动）；NPC 头顶粉色 ？/！ 标记                                                                           |
+| 5  | 三人回合制战斗 ×1              | 三人小队 vs 灾蚀兽，混元机制可触发，友方技能（治疗/护盾/增伤）生效，战斗演出占位，走 Transition 层                                                             |
+| 6  | 唤星模拟 ×1                 | 星砂单抽 100 / 十连 1000 + 保底（pity\_counter）→星缘令→（心契满阶后）招募入队闭环；全屏唤星界面（右上星砂数量/主体角色展示图/右下单抽+十连按钮）+抽卡动画（十连竖排结果/星缘令特殊动画/CG 播放一次） |
+| 7  | 视觉框架与地图 UI              | 8 向动画接口、遮挡描边、Transition 层、M 键箱庭图、世界大地图区块解锁、常驻 HUD                                                                      |
+| 8  | 神像与存档                   | 神像恢复/点亮/传送/存档；自动档+手动档（1 覆盖+3 回滚）；坏档不崩溃                                                                                 |
+| 9  | UI 面板体系                 | B/C/G/J/M/Esc 快捷键、主页菜单（暂停世界）、角色列表+详情分页（含星髓面板骨架）、任务面板三色分组、设置三页、主角自定义命名                                                  |
+| 10 | 星髓体系                    | 6 槽装备、2 件套数值/3 件套效果（体系无关）、面板三区、养成骨架                                                                                    |
 
 **硬约束**：无真实美术资源（占位色块）；离线单机；所有资源可肝；唤星不跳过剧情（招募前置 = 邂逅 + 心契满阶）；无内购；地图仅主角移动。
 
@@ -29,50 +29,50 @@
 
 ### 2.1 权威分工
 
-| 主题 | 权威出处 |
-| --- | --- |
+| 主题                   | 权威出处                                            |
+| -------------------- | ----------------------------------------------- |
 | 系统规格（渲染/玩法/UI/数据/美术） | `docs/系统设计架构/底层系统设计架构_v0.1.md`（下称「架构文档」，制作人修订版） |
-| 设计规则（体系/心契/唤星/混元） | `docs/《汇界星痕》初期设定.md` |
-| 任务卡定义与验收 | 本表 §4 |
+| 设计规则（体系/心契/唤星/混元）    | `docs/《汇界星痕》初期设定.md`                            |
+| 任务卡定义与验收             | 本表 §4                                           |
 
-### 2.2 已交付底座（T0.1~T2.1 已交付，勿重做）
+### 2.2 已交付底座（T0.1\~T2.1 已交付，勿重做）
 
 - **Autoload 顺序**：Dialogic→DataManager→EventBus→GameState（勿调整；新增单例追加在尾部）。
-- **数据模型**：`scripts/core/data_models.gd` 内部类，引用统一 `const DM := preload("res://scripts/core/data_models.gd")`（不依赖全局 class_name）。
-- **EventBus 已注册 8 信号**：interact_requested / dialogue_started / dialogue_finished / battle_started / battle_finished / quest_updated / summon_completed / character_recruited；GameState：star_sand/starlink_tokens/flags + dialogue_signal_bridge 骨架。
-- **地图**：TestMap（24×24 等距 DIAMOND_RIGHT，tile 64×32）、CampMap（主场景）；玩家 Player.tscn（八方向 + Camera2D 平滑跟随 + limit 钳制）；Interactable 组件（Area2D r=60、action `interact`=E+空格、R3 最近者仲裁、`interact_requested(self)`）。
-- **数值口径**：power=倍率制（float）；战斗为大招充能制（无耗能字段，见 docs/系统规则/战斗系统.md §3，skills.csv 的 energy_cost 列由 T2.8 移除）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
+- **数据模型**：`scripts/core/data_models.gd` 内部类，引用统一 `const DM := preload("res://scripts/core/data_models.gd")`（不依赖全局 class\_name）。
+- **EventBus 已注册 8 信号**：interact\_requested / dialogue\_started / dialogue\_finished / battle\_started / battle\_finished / quest\_updated / summon\_completed / character\_recruited；GameState：star\_sand/starlink\_tokens/flags + dialogue\_signal\_bridge 骨架。
+- **地图**：TestMap（24×24 等距 DIAMOND\_RIGHT，tile 64×32）、CampMap（主场景）；玩家 Player.tscn（八方向 + Camera2D 平滑跟随 + limit 钳制）；Interactable 组件（Area2D r=60、action `interact`=E+空格、R3 最近者仲裁、`interact_requested(self)`）。
+- **数值口径**：power=倍率制（float）；战斗为大招充能制（无耗能字段，见 docs/系统规则/战斗系统.md §3，skills.csv 的 energy\_cost 列由 T2.8 移除）；三觉醒者已命名（诺菈·星枢/艾蕾雅/洛清弦）。
 
 ### 2.3 技术选型与规范
 
-| 项 | 方案 |
-| --- | --- |
-| 引擎 | Godot 4.7 稳定版，GDScript（project.godot 锁定） |
-| 对话 | Dialogic 2，timeline `.dtl` 由 `tools/csv_to_dialogic.gd` 从台词 CSV 生成（T4.2） |
-| 配表 | CSV（UTF-8），CSVParser 容错解析；坏行报错含文件+行号不崩溃 |
-| 等距 | TileMapLayer + isometric tileset（TILE_LAYOUT_DIAMOND_RIGHT，tile 64×32），Y-sort 链式遮挡，实体 origin=脚底 |
-| 输入绑定 | 统一 physical_keycode；action 由代码兜底注册（`_ensure_input_action()` 先例，防编辑器覆写回滚） |
-| MCP 验证 | 每卡验收含「MCP 运行证据」（日志/截图/execute_code 断言）；execute_code 为纯表达式、不支持 lambda；访问 Autoload 用 `get_node("/root/名")` |
-| Git | 每卡一 commit（`Tx.x: 描述`）→ push origin master；交接班表按 9 列模板追加 |
+| 项      | 方案                                                                                                         |
+| ------ | ---------------------------------------------------------------------------------------------------------- |
+| 引擎     | Godot 4.7 稳定版，GDScript（project.godot 锁定）                                                                   |
+| 对话     | Dialogic 2，timeline `.dtl` 由 `tools/csv_to_dialogic.gd` 从台词 CSV 生成（T4.2）                                   |
+| 配表     | CSV（UTF-8），CSVParser 容错解析；坏行报错含文件+行号不崩溃                                                                    |
+| 等距     | TileMapLayer + isometric tileset（TILE\_LAYOUT\_DIAMOND\_RIGHT，tile 64×32），Y-sort 链式遮挡，实体 origin=脚底         |
+| 输入绑定   | 统一 physical\_keycode；action 由代码兜底注册（`_ensure_input_action()` 先例，防编辑器覆写回滚）                                  |
+| MCP 验证 | 每卡验收含「MCP 运行证据」（日志/截图/execute\_code 断言）；execute\_code 为纯表达式、不支持 lambda；访问 Autoload 用 `get_node("/root/名")` |
+| Git    | 每卡一 commit（`Tx.x: 描述`）→ push origin master；交接班表按 9 列模板追加                                                   |
 
 ### 2.4 核心数据模型
 
 - **CharacterData**：`id/name/faction/system/hp/atk/def/spd/skill_small/skill_ult/portrait_id/sprite_id/background`（background=T2.9 新增，缺省空；字段契约见 `docs/系统规则/角色系统.md` §2；预留 `starmarrow_slots`=6、`sprite_idle_8dir`/`sprite_walk_8dir`）
-- **SkillData**：`id/name/type/power(float)/target_side/target_scope/effect/cutscene_id`（target_side 缺省 enemy、effect 缺省 damage、三列与技能数据=T2.9 落位；power 语义按 effect 复用，口径=`docs/系统规则/角色系统.md` §3；无 energy_cost 字段；cutscene_id 沿用 cut_mech_ult/cut_arcane_ult/cut_xian_ult）
+- **SkillData**：`id/name/type/power(float)/target_side/target_scope/effect/cutscene_id`（target\_side 缺省 enemy、effect 缺省 damage、三列与技能数据=T2.9 落位；power 语义按 effect 复用，口径=`docs/系统规则/角色系统.md` §3；无 energy\_cost 字段；cutscene\_id 沿用 cut\_mech\_ult/cut\_arcane\_ult/cut\_xian\_ult）
 - **EnemyData**：`id/name/hp/atk/def/spd/skill_small/skill_ult/ai_pattern/drop_sand`（双技能列 T3.1 执行）
-- **StelliumData**：`id/name/set_id/set_name/slot(1-6)/main_stat/main_base/main_max/set_2_bonus/set_3_bonus`（无稀有度；实例字段 lv/sub_unlocked/equipped_by 在 Inventory.starmarrow 逐枚实例，T2.8 执行）
+- **StelliumData**：`id/name/set_id/set_name/slot(1-6)/main_stat/main_base/main_max/set_2_bonus/set_3_bonus`（无稀有度；实例字段 lv/sub\_unlocked/equipped\_by 在 Inventory.starmarrow 逐枚实例，T2.8 执行）
 - **SummonEntryData**：`entry_id/name/kind/gold/weight`
 - **QuestData**：`quest_id/step/step_name/requirement/target/reward/next_step`（quests.csv 预留 `quest_type`=main/side/bond、`priority`、`mark_color`）
 
 ### 2.5 新增全局单例
 
-| 单例 | 关键接口 |
-| --- | --- |
-| ArtProvider | get_character_sprite(id) / get_portrait(id, emotion) / get_tile_texture / get_cg / get_skill_fx / get_ui_icon / get_bgm / get_sfx |
-| Transition | transition_scene(from_path, to_path, duration=0.4) / transition_portal(target_id, duration=0.4) / transition_fade_out / transition_fade_in |
-| PauseManager | pause_game(reason) / resume_game(reason) / is_paused() |
-| SaveManager | save_game(slot_id, is_auto=false)->bool / load_game(slot_id)->Dictionary / rollback_auto()->bool / has_save(slot_id)->bool |
-| MapSystem | unlock_region(region_id) / is_region_unlocked(region_id)->bool / get_region_by_shrine(shrine_id)->String |
+| 单例           | 关键接口                                                                                                                                                |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ArtProvider  | get\_character\_sprite(id) / get\_portrait(id, emotion) / get\_tile\_texture / get\_cg / get\_skill\_fx / get\_ui\_icon / get\_bgm / get\_sfx       |
+| Transition   | transition\_scene(from\_path, to\_path, duration=0.4) / transition\_portal(target\_id, duration=0.4) / transition\_fade\_out / transition\_fade\_in |
+| PauseManager | pause\_game(reason) / resume\_game(reason) / is\_paused()                                                                                           |
+| SaveManager  | save\_game(slot\_id, is\_auto=false)->bool / load\_game(slot\_id)->Dictionary / rollback\_auto()->bool / has\_save(slot\_id)->bool                  |
+| MapSystem    | unlock\_region(region\_id) / is\_region\_unlocked(region\_id)->bool / get\_region\_by\_shrine(shrine\_id)->String                                   |
 
 **EventBus 新增信号**（先注册再使用，禁止散写 emit）：`shrine_lit(shrine_id)`、`shrine_entered_radius(shrine_id)`、`map_region_unlocked(region_id)`、`party_changed(party_list)`、`starmarrow_changed(character_id, before, after)`、`ui_open(panel_name)`、`ui_closed(panel_name)`。
 
@@ -82,16 +82,16 @@
 
 ## 3. 阶段总览与依赖关系
 
-| 阶段 | 名称 | 任务卡 | 状态 | 依赖 |
-| --- | --- | --- | --- | --- |
-| P0 | 项目骨架与工具链 | T0.1~T0.4 | ✅ 完成 | — |
-| P1 | 等距地图与移动 | T1.1~T1.6 | ✅ 完成 | P0 |
-| P2 | 角色数据、队伍与底层系统框架 | T2.1~T2.10 全部 ✅（含角色系统补充卡 T2.9→T2.10） | ✅ 完成 | P0（与 P1 并行） |
-| P3 | 战斗系统 | T3.1~T3.7 ✅；返工卡 T3.8→T3.9→T3.10→T3.11（战斗系统修订） | 返工待启动 | P2（T2.1/T2.2） |
-| P4 | Dialogic 剧情演出 | T4.1~T4.3 ✅、T4.4 待放行评估 | 进行中 | P1、P2 |
-| P5 | 心契任务 | T5.1~T5.4 | 待启动 | P3、P4 |
-| P6 | 唤星模拟 | T6.1~T6.5 | 待启动 | P5 |
-| P7 | 整合与验收 | T7.1~T7.4 | 待启动 | 全部 |
+| 阶段 | 名称             | 任务卡                                            | 状态    | 依赖            |
+| -- | -------------- | ---------------------------------------------- | ----- | ------------- |
+| P0 | 项目骨架与工具链       | T0.1\~T0.4                                     | ✅ 完成  | —             |
+| P1 | 等距地图与移动        | T1.1\~T1.6                                     | ✅ 完成  | P0            |
+| P2 | 角色数据、队伍与底层系统框架 | T2.1\~T2.10 全部 ✅（含角色系统补充卡 T2.9→T2.10）          | ✅ 完成  | P0（与 P1 并行）   |
+| P3 | 战斗系统           | T3.1\~T3.8 ✅；返工卡 T3.12→T3.9→T3.10→T3.11（战斗系统修订） | 返工进行中 | P2（T2.1/T2.2） |
+| P4 | Dialogic 剧情演出  | T4.1\~T4.3 ✅、T4.4 待放行评估                        | 进行中   | P1、P2         |
+| P5 | 心契任务           | T5.1\~T5.4                                     | 待启动   | P3、P4         |
+| P6 | 唤星模拟           | T6.1\~T6.5                                     | 待启动   | P5            |
+| P7 | 整合与验收          | T7.1\~T7.4                                     | 待启动   | 全部            |
 
 ```
 graph TD
@@ -109,7 +109,7 @@ graph TD
     T2.4 --> P6
 ```
 
-**并行建议**：T0.1~T3.7、T4.1~T4.3、T2.9、T2.10 已交付（见 §4 已完成卡一览）；**待启动**：战斗系统修订返工卡 T3.8→T3.9→T3.10→T3.11（战斗程序01 主责，口径=docs/系统规则/战斗系统.md）。**并行约束**：T2.9 已验收、T2.10 设计器已交付，T3.10/T3.11 数据前置（skills.csv 三技能列）封锁已解除；T4.4 待放行评估；P5 启动判定：T5.1 前置（T4.3）已过可启用。**T2.10 遗留待制作人04 裁定**：§3 技能 id「按体系」（skill_<体系>_<s1|ult>）与 §6「新角色=characters.csv 一行+skills.csv 两行」冲突——同体系第 2 个角色无法新增专属技能行（详见系统程序交接班表 T2.10 行）。
+**并行建议**：T0.1\~T3.8、T4.1\~T4.3、T2.9、T2.10 已交付（见 §4 已完成卡一览）；**待启动**：战斗系统修订返工卡 T3.12→T3.9→T3.10→T3.11（战斗程序主责，口径=docs/系统规则/战斗系统.md）。**并行约束**：T2.9 已验收、T2.10 设计器已交付，T3.10/T3.11 数据前置（skills.csv 三技能列）封锁已解除；T4.4 待放行评估；P5 启动判定：T5.1 前置（T4.3）已过可启用。**T2.10 遗留待制作人04 裁定**：§3 技能 id「按体系」（skill\_<体系>\_\<s1|ult>）与 §6「新角色=characters.csv 一行+skills.csv 两行」冲突——同体系第 2 个角色无法新增专属技能行（详见系统程序交接班表 T2.10 行）。
 
 ***
 
@@ -117,53 +117,54 @@ graph TD
 
 > 每张卡「【完整指令】」代码块可整体粘贴给 Agent。公共约定见 §2，不逐卡重复。
 
-### 已完成卡（T0.1~T3.7、T4.1~T4.3）
+### 已完成卡（T0.1\~T3.7、T4.1\~T4.3）
 
-| 卡 | 名称 | 定稿产出与关键决策 | commit |
-| --- | --- | --- | --- |
-| T0.1 | 工程初始化与工具链 | Godot 4.7 工程+目录+Dialogic 2+Git 私有仓库+MCP 连通 | 2398bc8 |
-| T0.2 | 核心数据模型 | 6 数据类+from_csv_row 容错；preload 引用约定 | ac4bf75 |
-| T0.3 | CSV 配表与加载管线 | 7 张 CSV+CSVParser+DataManager；坏行定位不崩溃 | aa839ef |
-| T0.4 | 事件总线与全局状态 | EventBus 8 信号+GameState（货币/flags）+dialogue_signal_bridge 骨架 | 60f0087 |
-| T1.1 | 等距 TileMap 与色块 Tileset | DIAMOND_RIGHT 64×32、24×24、障碍碰撞层 | 79fa17f |
-| T1.2 | Y-sort 遮挡 | 链式 y_sort_enabled、origin=脚底规则 | b675b65 |
-| T1.3 | 玩家八方向移动 | Player.tscn+PlayerController（SPEED=200、physical_keycode、兜底注册） | 7aafd7a |
-| T1.4 | 相机平滑跟随 | Camera2D smoothing 7.0、zoom 0.9、limit 四缘贴合 | c68cc9c |
-| T1.5 | 交互系统 | 规则文档 87812b1（系统策划01）；Interactable 组件+双测试 NPC f00cec0（系统程序03） | 87812b1 / f00cec0 |
-| T1.6 | 营地地图成品与布置 | CampMap.tscn（主场景）+TriggerZone+拾取骨架+3 NPC+名牌 | b8721c2 |
-| T2.1 | 三名觉醒者数据 | 数值口径 energy_cost=1/3、power 倍率 float（de32e43，数值策划01）；命名诺菈·星枢/艾蕾雅/洛清弦（b40cd66，剧情文案策划01） | de32e43 / b40cd66 |
-| T2.2 | 队伍系统 | Party Autoload：3 人编队+同行槽+team_systems() 三态判定（混元→共振→汇流）、API 返回 bool、party_changed 统一信号（规则 f6979a9，系统策划01） | f6979a9 / 5933d91 |
-| T2.3 | 视觉框架与地图 UI | ArtProvider/PauseManager/Transition/MapSystem 四 Autoload+遮挡描边+箱庭图/世界大地图+常驻 HUD（修复 97eec2c、MCP 验收 534c29f） | 42adb70 |
-| T2.4 | 神像与存档 | 神像四行为+SaveManager 手动/自动档+坏档回滚（顺带清偿传送落点/地图点击坐标两 bug） | da18d96 |
-| T2.5 | UI 面板落地 | UIPanel 基类+UISystem 面板栈+主页菜单/角色列表详情分页/星髓三区骨架/任务三色/唤星占位/背包/设置三页/主角命名；面板名清单锁死供 T5.4/T6.x | a36a19c |
-| T2.6 | 美术视觉规范（占位升级） | 视觉规范文档+占位资源包+哨兵资源；8 向帧条契约锁死供 T3.6/T7.3（验证回填 5dd5f62） | 98775fb |
-| T2.7 | 遗留修补（名牌+冒烟断言） | 名牌读 CSV（quest_npc 组遍历，npc_id 唯一真相）+冒烟断言防回退 | 938a7b2 |
-| T2.8 | 星髓槽位制数据修订 | stellium.csv 重构 12 行槽位制+skills.csv 删 energy_cost+EnemyData 扩双技能列（跨岗登记 data_models.gd） | bad246c |
-| T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省 enemy/single/damage 容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal 2.0/shield 3.0、艾蕾雅 enemy+all 1.2/ally+all amp 30、洛清弦 enemy+column 1.2/enemy+all 2.5）+ enemy 两技能显式 enemy+single+damage；CharListPanel 展示 background+三字段；6 冒烟回归 EXIT=0（验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
-| T2.10 | 角色设计器 | tools/character_designer.gd（headless）：characters.csv/skills.csv 全行校验（列数/枚举/id 规则/引用/占位资源）+ DataManager·ArtProvider 冒烟 + 逐项报告 `EXIT=0\|1`；端到端实测新角色零代码入角色列表（列表截图 + 数据用后删）；三类坏数据（缺列/坏枚举/坏引用）FAIL 定位到行；口径冲突（§3 技能 id 按体系 vs §6 新角色两行技能）报制作人04；**收口小修**：技能 id 迁为按角色 `skill_<体系>_<两位序号>_<s1\|ult>` + 设计器 id 规则/序号段一致性/WARN·FAIL 档 | 58438b1、385e3bf |
-| T3.1 | 敌人占位数据（灾蚀兽） | 四维 150/10/6/8+ai_pattern=simple+drop_sand=30+skill_small/skill_ult 双技能列 | ad2a25d |
-| T3.2 | 战斗状态机（跑速条制） | SpeedBarSimulator 跑速条模拟器替代 spd 排序+回合边界+tie-break（spd→我方→编队序） | 8a9ec4b / 48e9978 |
-| T3.3 | 指令系统（充能制） | charge 充能条 0~100+图标三态+charge_free 预留+指令校验 | 495723f |
-| T3.4 | 伤害与数值结算 | 增伤乘区+合击伤害入口；暴击乘区连乘/一次 int 截断/max(1,·)/合击条件增伤求和四口径裁定 | 1c397dd |
-| T3.5 | 队伍机制 | 共振合击/汇流充能拉条/混元增幅 30%（四维）；拉条大招不计计数窗口；combo_calc 阵营过滤修复 | dfe5f2d |
-| T3.6 | 战斗演出占位 | 立绘常驻+切换（激活/小技能）+大招/合击全屏 CG 层+跳过+敌方同规格演出 | 9481ea4 |
-| T3.7 | 战斗场景接入与奖励 | Battle.tscn 复用地图地板+battle_started/finished 链+星砂结算+Transition 进出；协作：CampMap 触发区跨岗登记与回归 | 34f4e24 |
-| T4.1 | Dialogic 2 集成与冒烟验证 | Dialogic 2 集成+测试 dch/dtl+播放/结束信号冒烟 | b0ea063 |
-| T4.2 | CSV→Dialogic 转换管线 | csv_to_dialogic.gd 幂等管线+DialogicBridge 桥接+set_flag/flag_condition 列约定 | c15a809 |
-| T4.3 | 主线剧情 1 段（邂逅 3 人） | 正式台词 CSV+触发区分发+flag 清单（收尾 403f5ca 重跑管线） | 338d8d3 |
+| 卡     | 名称                     | 定稿产出与关键决策                                                                                                                                                                                                                                                                                                                                | commit                      |
+| ----- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| T0.1  | 工程初始化与工具链              | Godot 4.7 工程+目录+Dialogic 2+Git 私有仓库+MCP 连通                                                                                                                                                                                                                                                                                               | 2398bc8                     |
+| T0.2  | 核心数据模型                 | 6 数据类+from\_csv\_row 容错；preload 引用约定                                                                                                                                                                                                                                                                                                     | ac4bf75                     |
+| T0.3  | CSV 配表与加载管线            | 7 张 CSV+CSVParser+DataManager；坏行定位不崩溃                                                                                                                                                                                                                                                                                                    | aa839ef                     |
+| T0.4  | 事件总线与全局状态              | EventBus 8 信号+GameState（货币/flags）+dialogue\_signal\_bridge 骨架                                                                                                                                                                                                                                                                            | 60f0087                     |
+| T1.1  | 等距 TileMap 与色块 Tileset | DIAMOND\_RIGHT 64×32、24×24、障碍碰撞层                                                                                                                                                                                                                                                                                                         | 79fa17f                     |
+| T1.2  | Y-sort 遮挡              | 链式 y\_sort\_enabled、origin=脚底规则                                                                                                                                                                                                                                                                                                          | b675b65                     |
+| T1.3  | 玩家八方向移动                | Player.tscn+PlayerController（SPEED=200、physical\_keycode、兜底注册）                                                                                                                                                                                                                                                                           | 7aafd7a                     |
+| T1.4  | 相机平滑跟随                 | Camera2D smoothing 7.0、zoom 0.9、limit 四缘贴合                                                                                                                                                                                                                                                                                               | c68cc9c                     |
+| T1.5  | 交互系统                   | 规则文档 87812b1（系统策划01）；Interactable 组件+双测试 NPC f00cec0（系统程序03）                                                                                                                                                                                                                                                                             | 87812b1 / f00cec0           |
+| T1.6  | 营地地图成品与布置              | CampMap.tscn（主场景）+TriggerZone+拾取骨架+3 NPC+名牌                                                                                                                                                                                                                                                                                              | b8721c2                     |
+| T2.1  | 三名觉醒者数据                | 数值口径 energy\_cost=1/3、power 倍率 float（de32e43，数值策划01）；命名诺菈·星枢/艾蕾雅/洛清弦（b40cd66，剧情文案策划01）                                                                                                                                                                                                                                                   | de32e43 / b40cd66           |
+| T2.2  | 队伍系统                   | Party Autoload：3 人编队+同行槽+team\_systems() 三态判定（混元→共振→汇流）、API 返回 bool、party\_changed 统一信号（规则 f6979a9，系统策划01）                                                                                                                                                                                                                               | f6979a9 / 5933d91           |
+| T2.3  | 视觉框架与地图 UI             | ArtProvider/PauseManager/Transition/MapSystem 四 Autoload+遮挡描边+箱庭图/世界大地图+常驻 HUD（修复 97eec2c、MCP 验收 534c29f）                                                                                                                                                                                                                                | 42adb70                     |
+| T2.4  | 神像与存档                  | 神像四行为+SaveManager 手动/自动档+坏档回滚（顺带清偿传送落点/地图点击坐标两 bug）                                                                                                                                                                                                                                                                                      | da18d96                     |
+| T2.5  | UI 面板落地                | UIPanel 基类+UISystem 面板栈+主页菜单/角色列表详情分页/星髓三区骨架/任务三色/唤星占位/背包/设置三页/主角命名；面板名清单锁死供 T5.4/T6.x                                                                                                                                                                                                                                                   | a36a19c                     |
+| T2.6  | 美术视觉规范（占位升级）           | 视觉规范文档+占位资源包+哨兵资源；8 向帧条契约锁死供 T3.6/T7.3（验证回填 5dd5f62）                                                                                                                                                                                                                                                                                     | 98775fb                     |
+| T2.7  | 遗留修补（名牌+冒烟断言）          | 名牌读 CSV（quest\_npc 组遍历，npc\_id 唯一真相）+冒烟断言防回退                                                                                                                                                                                                                                                                                             | 938a7b2                     |
+| T2.8  | 星髓槽位制数据修订              | stellium.csv 重构 12 行槽位制+skills.csv 删 energy\_cost+EnemyData 扩双技能列（跨岗登记 data\_models.gd）                                                                                                                                                                                                                                                  | bad246c                     |
+| T2.9  | 角色系统数据落地与三角色迁移         | SkillData 扩 target\_side/target\_scope/effect 三字段（缺省 enemy/single/damage 容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal 2.0/shield 3.0、艾蕾雅 enemy+all 1.2/ally+all amp 30、洛清弦 enemy+column 1.2/enemy+all 2.5）+ enemy 两技能显式 enemy+single+damage；CharListPanel 展示 background+三字段；6 冒烟回归 EXIT=0（验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
+| T2.10 | 角色设计器                  | tools/character\_designer.gd（headless）：characters.csv/skills.csv 全行校验（列数/枚举/id 规则/引用/占位资源）+ DataManager·ArtProvider 冒烟 + 逐项报告 `EXIT=0\|1`；端到端实测新角色零代码入角色列表（列表截图 + 数据用后删）；三类坏数据（缺列/坏枚举/坏引用）FAIL 定位到行；口径冲突（§3 技能 id 按体系 vs §6 新角色两行技能）报制作人04；**收口小修**：技能 id 迁为按角色 `skill_<体系>_<两位序号>_<s1\|ult>` + 设计器 id 规则/序号段一致性/WARN·FAIL 档             | 58438b1、385e3bf             |
+| T3.1  | 敌人占位数据（灾蚀兽）            | 四维 150/10/6/8+ai\_pattern=simple+drop\_sand=30+skill\_small/skill\_ult 双技能列                                                                                                                                                                                                                                                              | ad2a25d                     |
+| T3.2  | 战斗状态机（跑速条制）            | SpeedBarSimulator 跑速条模拟器替代 spd 排序+回合边界+tie-break（spd→我方→编队序）                                                                                                                                                                                                                                                                             | 8a9ec4b / 48e9978           |
+| T3.3  | 指令系统（充能制）              | charge 充能条 0\~100+图标三态+charge\_free 预留+指令校验                                                                                                                                                                                                                                                                                              | 495723f                     |
+| T3.4  | 伤害与数值结算                | 增伤乘区+合击伤害入口；暴击乘区连乘/一次 int 截断/max(1,·)/合击条件增伤求和四口径裁定                                                                                                                                                                                                                                                                                      | 1c397dd                     |
+| T3.5  | 队伍机制                   | 共振合击/汇流充能拉条/混元增幅 30%（四维）；拉条大招不计计数窗口；combo\_calc 阵营过滤修复                                                                                                                                                                                                                                                                                   | dfe5f2d                     |
+| T3.6  | 战斗演出占位                 | 立绘常驻+切换（激活/小技能）+大招/合击全屏 CG 层+跳过+敌方同规格演出                                                                                                                                                                                                                                                                                                  | 9481ea4                     |
+| T3.7  | 战斗场景接入与奖励              | Battle.tscn 复用地图地板+battle\_started/finished 链+星砂结算+Transition 进出；协作：CampMap 触发区跨岗登记与回归                                                                                                                                                                                                                                                   | 34f4e24                     |
+| T3.8  | 跑条动画与速度条 UI 重构         | 左侧竖向速度条+条上圆头像跑条动画（RUNBAR\_FULL\_TIME=1s 可调）+右下角头像血条行；后台/表现解耦（SpeedBarSimulator 口径未动）；**验收修订=T3.12**（纯进度条化+头像区迁左下角）                                                                                                                                                                                                                        | 626dd21                     |
+| T4.1  | Dialogic 2 集成与冒烟验证     | Dialogic 2 集成+测试 dch/dtl+播放/结束信号冒烟                                                                                                                                                                                                                                                                                                       | b0ea063                     |
+| T4.2  | CSV→Dialogic 转换管线      | csv\_to\_dialogic.gd 幂等管线+DialogicBridge 桥接+set\_flag/flag\_condition 列约定                                                                                                                                                                                                                                                                | c15a809                     |
+| T4.3  | 主线剧情 1 段（邂逅 3 人）       | 正式台词 CSV+触发区分发+flag 清单（收尾 403f5ca 重跑管线）                                                                                                                                                                                                                                                                                                  | 338d8d3                     |
 
 > T2.1 遗留修补已由 T2.7（A1 名牌 / A2 冒烟断言）、T2.8（A4 套装制）清偿完毕。
-> **战斗系统修订返工卡=T3.8/T3.9/T3.10（见 P3 返工卡段）。**
+> **战斗系统修订返工卡=T3.12/T3.9/T3.10/T3.11（见 P3 返工卡段）。**
 
 ### T2.2 队伍系统（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 3 人编队 + 同行临时槽位 + 体系组合判定 + party_changed 信号 |
-| 产出 | `scripts/core/Party.gd`（Autoload） |
-| 依赖 | T2.1 |
-| 主责 | 系统程序◎、系统策划○（队伍规则确认） |
-| 预估 | 1~2 轮 |
+| 字段 | 内容                                          |
+| -- | ------------------------------------------- |
+| 目标 | 3 人编队 + 同行临时槽位 + 体系组合判定 + party\_changed 信号 |
+| 产出 | `scripts/core/Party.gd`（Autoload）           |
+| 依赖 | T2.1                                        |
+| 主责 | 系统程序◎、系统策划○（队伍规则确认）                         |
+| 预估 | 1\~2 轮                                      |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -195,13 +196,13 @@ graph TD
 
 #### T2.3 视觉框架与地图 UI（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 架构 §1 渲染层 + §2.3 地图系统 + §2.6 HUD 落地 |
+| 字段 | 内容                                                                                          |
+| -- | ------------------------------------------------------------------------------------------- |
+| 目标 | 架构 §1 渲染层 + §2.3 地图系统 + §2.6 HUD 落地                                                         |
 | 产出 | ArtProvider/PauseManager/Transition/MapSystem 四 Autoload + 描边 shader + 箱庭图 + 世界大地图 + 常驻 HUD |
-| 依赖 | T2.1（已过）；建议 T2.2 验收后启动（消费 party_changed） |
-| 主责 | 系统程序◎、美术○（描边/线框视觉验证） |
-| 预估 | 3~4 轮（内部分四步交付，每步 MCP 可验） |
+| 依赖 | T2.1（已过）；建议 T2.2 验收后启动（消费 party\_changed）                                                   |
+| 主责 | 系统程序◎、美术○（描边/线框视觉验证）                                                                        |
+| 预估 | 3\~4 轮（内部分四步交付，每步 MCP 可验）                                                                   |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -247,13 +248,13 @@ graph TD
 
 #### T2.4 神像与存档（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 架构 §2.2 神像机制 + §2.4 存档系统落地 |
+| 字段 | 内容                                                      |
+| -- | ------------------------------------------------------- |
+| 目标 | 架构 §2.2 神像机制 + §2.4 存档系统落地                              |
 | 产出 | Shrine.tscn/gd、ShrineSystem、SaveManager、CampMap 接入神像 ×1 |
-| 依赖 | T2.3（Transition/MapSystem/PauseManager） |
-| 主责 | 系统程序◎ |
-| 预估 | 2~3 轮 |
+| 依赖 | T2.3（Transition/MapSystem/PauseManager）                 |
+| 主责 | 系统程序◎                                                   |
+| 预估 | 2\~3 轮                                                  |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -289,13 +290,13 @@ graph TD
 
 #### T2.5 UI 面板落地（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 架构 §3 UI 层全部面板骨架与快捷键体系 |
+| 字段 | 内容                                 |
+| -- | ---------------------------------- |
+| 目标 | 架构 §3 UI 层全部面板骨架与快捷键体系             |
 | 产出 | scenes/ui/ 下九个面板 + Esc 层级导航 + 主角命名 |
-| 依赖 | T2.3、T2.4 |
-| 主责 | 系统程序◎、系统策划○（面板需求核对） |
-| 预估 | 3~4 轮（分三步） |
+| 依赖 | T2.3、T2.4                          |
+| 主责 | 系统程序◎、系统策划○（面板需求核对）                |
+| 预估 | 3\~4 轮（分三步）                        |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -342,13 +343,13 @@ graph TD
 
 #### T2.6 美术视觉规范（占位升级）（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                    |
+| -- | --------------------- |
 | 目标 | 架构 §五 美术资源规格的占位态落地与验证 |
-| 产出 | 视觉规范文档 + 占位资源包 |
-| 依赖 | T2.3（描边/线框可用后） |
-| 主责 | 美术◎、系统程序○ |
-| 预估 | 1~2 轮 |
+| 产出 | 视觉规范文档 + 占位资源包        |
+| 依赖 | T2.3（描边/线框可用后）        |
+| 主责 | 美术◎、系统程序○             |
+| 预估 | 1\~2 轮                |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -376,13 +377,13 @@ graph TD
 
 #### T2.7 遗留修补（名牌 + 冒烟断言）（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 清偿 T2.1 登记的 A1/A2 两项遗留 |
+| 字段 | 内容                       |
+| -- | ------------------------ |
+| 目标 | 清偿 T2.1 登记的 A1/A2 两项遗留   |
 | 产出 | CampMap 名牌读 CSV；冒烟测试断言修正 |
-| 依赖 | 无（随时可做，建议与 T2.3 并行插空） |
-| 主责 | 系统程序◎ |
-| 预估 | 半轮~1 轮 |
+| 依赖 | 无（随时可做，建议与 T2.3 并行插空）    |
+| 主责 | 系统程序◎                    |
+| 预估 | 半轮\~1 轮                  |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -406,13 +407,13 @@ graph TD
 
 #### T2.8 星髓套装制数据修订（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 架构 §2.5 星髓体系无关化的数据落地（A4） |
+| 字段 | 内容                                           |
+| -- | -------------------------------------------- |
+| 目标 | 架构 §2.5 星髓体系无关化的数据落地（A4）                     |
 | 产出 | stellium.csv 新列结构 + StelliumData 适配 + 占位套装数据 |
-| 依赖 | 无（T0.3 管线即可） |
-| 主责 | 数值策划01◎（跨岗改 data_models.gd 需台账登记知会系统程序） |
-| 预估 | 1 轮 |
+| 依赖 | 无（T0.3 管线即可）                                 |
+| 主责 | 数值策划01◎（跨岗改 data\_models.gd 需台账登记知会系统程序）     |
+| 预估 | 1 轮                                          |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -447,13 +448,13 @@ graph TD
 
 #### T2.9 角色系统数据落地与三角色迁移 ✅
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 角色系统.md §2/§3 数据契约落地：characters.csv 增 background 列、skills.csv 增 target_side/target_scope/effect 三列、三角色技能按 §5 重定义迁移 |
-| 产出 | 数据契约扩字段 + 三角色迁移（背景+技能重定义） |
-| 依赖 | T2.8（已过） |
-| 主责 | 系统程序◎、数值策划○（技能数据）、剧情文案策划○（background 文案、技能占位名复核） |
-| 预估 | 1 轮 |
+| 字段 | 内容                                                                                                                   |
+| -- | -------------------------------------------------------------------------------------------------------------------- |
+| 目标 | 角色系统.md §2/§3 数据契约落地：characters.csv 增 background 列、skills.csv 增 target\_side/target\_scope/effect 三列、三角色技能按 §5 重定义迁移 |
+| 产出 | 数据契约扩字段 + 三角色迁移（背景+技能重定义）                                                                                            |
+| 依赖 | T2.8（已过）                                                                                                             |
+| 主责 | 系统程序◎、数值策划○（技能数据）、剧情文案策划○（background 文案、技能占位名复核）                                                                     |
+| 预估 | 1 轮                                                                                                                  |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -487,13 +488,13 @@ graph TD
 
 #### T2.10 角色设计器 ✅ 完成（系统程序06 主责；收口小修已落地）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 角色系统.md §7：tools/character_designer.gd（校验+冒烟+报告），支撑按 §6 接口零代码新增角色 |
-| 产出 | character_designer.gd |
-| 依赖 | T2.9（已过） |
-| 主责 | 系统程序◎、数值策划○（校验规则确认） |
-| 预估 | 1 轮 |
+| 字段 | 内容                                                                 |
+| -- | ------------------------------------------------------------------ |
+| 目标 | 角色系统.md §7：tools/character\_designer.gd（校验+冒烟+报告），支撑按 §6 接口零代码新增角色 |
+| 产出 | character\_designer.gd                                             |
+| 依赖 | T2.9（已过）                                                           |
+| 主责 | 系统程序◎、数值策划○（校验规则确认）                                                |
+| 预估 | 1 轮                                                                |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -543,12 +544,12 @@ graph TD
 
 #### T3.1 敌人占位数据（灾蚀兽 · CSV）（✅ 已完成）
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标/产出/依赖 | enemies.csv 正式内容（corrosion_beast，hp≈150/atk≈10/def≈6/spd≈8，ai_pattern=simple，drop_sand=30） |
-| 依赖 | T0.3（已过，可立即并行） |
-| 主责 | 数值策划◎ |
-| 预估 | 1 轮 |
+| 字段       | 内容                                                                                            |
+| -------- | --------------------------------------------------------------------------------------------- |
+| 目标/产出/依赖 | enemies.csv 正式内容（corrosion\_beast，hp≈150/atk≈10/def≈6/spd≈8，ai\_pattern=simple，drop\_sand=30） |
+| 依赖       | T0.3（已过，可立即并行）                                                                                |
+| 主责       | 数值策划◎                                                                                         |
+| 预估       | 1 轮                                                                                           |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -721,17 +722,17 @@ graph TD
 
 ### P3 返工卡（战斗系统修订）
 
-> 承接 `docs/系统规则/战斗系统.md` 现行修订（规格→卡映射见其 §10）。开工前必读该文档（唯一规则口径）；既有战斗冒烟（tools/smoke_test_battle*.gd）为回归底线，每卡收工必须复跑不劣化。**执行顺序 T3.8→T3.9→T3.10→T3.11；T3.10/T3.11 以 T2.9（角色系统技能数据）为前置。**
+> 承接 `docs/系统规则/战斗系统.md` 现行修订（规格→卡映射见其 §10）。开工前必读该文档（唯一规则口径）；既有战斗冒烟（tools/smoke\_test\_battle\*.gd）为回归底线，每卡收工必须复跑不劣化。**执行顺序 T3.12→T3.9→T3.10→T3.11（T3.8 ✅ 已交付）；T3.10/T3.11 以 T2.9（角色系统技能数据）为前置。**
 
-#### T3.8 跑条动画与速度条 UI 重构（含右下角头像修复）
+#### T3.8 跑条动画与速度条 UI 重构（✅ 已完成；UI 口径以 T3.12 修订为准）
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                                                  |
+| -- | --------------------------------------------------- |
 | 目标 | 战斗系统.md §2+§6：速度条改屏幕左侧竖向细长条+圆形头像+跑条动画；修复右下角参战头像血条缺失 |
-| 产出 | 速度条 UI 重构 + 跑条动画 + 头像血条修复 |
-| 依赖 | T3.7（已过）；规则依据=战斗系统.md §2/§6 |
-| 主责 | 战斗程序◎、美术○（视觉核对） |
-| 预估 | 1~2 轮 |
+| 产出 | 速度条 UI 重构 + 跑条动画 + 头像血条修复                           |
+| 依赖 | T3.7（已过）；规则依据=战斗系统.md §2/§6                         |
+| 主责 | 战斗程序◎、美术○（视觉核对）                                     |
+| 预估 | 1\~2 轮                                              |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -760,22 +761,60 @@ graph TD
 提交：git commit -m "T3.8: 跑条动画与速度条UI重构" 并 push。
 ```
 
-#### T3.9 对阵阵型与多敌编组
+#### T3.12 速度条与参战头像区修订（T3.8 验收返工）
 
 | 字段 | 内容 |
-| --- | --- |
+| -- | -- |
+| 目标 | 战斗系统.md §2+§6 修订口径：速度条纯进度条化（高度=屏幕竖向×1/3、自上而下、条上无头像）+参战头像区迁屏幕左下角（头像/名字/血条一体）+清理战场占位色块 |
+| 产出 | 速度条/头像区 UI 修订 + 战场占位清理 |
+| 依赖 | T3.8 已交付（626dd21）；规则依据=战斗系统.md §2/§6/§10 |
+| 主责 | 战斗程序◎、美术○（视觉核对） |
+| 预估 | 1 轮 |
+
+【完整指令 · 粘贴给 Agent】
+
+```
+任务：T3.12 速度条与参战头像区修订（T3.8 验收返工）
+目标：按 docs/系统规则/战斗系统.md §2/§6 修订速度条与参战角色显示，清理战场占位色块（部署者实测反馈）。
+前置：T3.8 已交付；必读战斗系统.md §2/§6/§10。
+
+执行步骤：
+1. 速度条纯条化：速度条改为**纯进度条**——条上**移除全部单位头像**（敌我都移除）；**高度改为屏幕竖向高度 × 1/3**；水平/垂直锚点沿用现行（距左 16/距顶 32，美术可微调）。
+2. 跑条方向：进度**自上而下**推进（顶端=0、底端=100；现实现自下而上 → 反向）。跑条动画语义同步修正：进度条自顶端向下填满=一个行动周期（RUNBAR_FULL_TIME=1s 基准不变、常量可调）；后台判定最先到达 100 的瞬间条暂停+出手，演出播毕后进度重置回顶端进入下一周期；禁止无动画瞬切。后台结算仍走 SpeedBarSimulator（口径零改动，硬底线）。
+3. 参战头像区（屏幕左下角，必显项）：全体参战角色**横向排列**，每组**头像在上、角色名在下（上下对齐）**，名字下方**血条**（与头像同宽；<30% 闪烁/死亡置灰/激活金描边高亮等 T3.8 既有口径沿用）；战斗全程常显（含结算/重试态）。
+4. 移除右下角参战头像行：头像/名字/血条并入左下角组件后，右下角仅保留当前激活角色立绘（PortraitRect）与 E/Q 指令按钮位（T3.10）。
+5. 战场占位清理：移除 battle_arena 旧占位渲染——我方横向一排方框色块+名字（实机出现在屏幕左下）、敌方色块+名字（实机出现在屏幕下方居中）；战场单位表现由 §9 对阵阵型承载（T3.9 交付，本卡收工后战场短暂无单位属预期）。
+6. headless 冒烟：既有 tools/smoke_test_battle*.gd 复跑 EXIT=0（后台结算零变化）；smoke_test_speed_bar.gd 断言更新（头像条位断言改为进度条填充方向/周期断言，RUNBAR_FULL_TIME=1.0 保留；血条断言迁至左下角组件口径）。
+7. MCP：进战斗截图——左侧 1/3 高纯进度条（无头像）、左下角头像/名字/血条横排（激活高亮）、屏幕左下与下方居中无色块占位；连续两出手截图证明进度条自上而下推进（非跳变）。
+
+产出：速度条纯条化+方向修正、左下角参战头像区、右下角头像行移除、战场占位清理。
+
+验收（全部通过）：
+- [ ] 速度条高度=屏幕竖向×1/3、条上无任何头像（截图）
+- [ ] 跑条方向自上而下、动画连续无瞬切（截图×2 时序）
+- [ ] 左下角参战角色横排：头像/名字上下对齐+血条，激活高亮，全程常显（截图）
+- [ ] 右下角仅立绘（无头像行）；屏幕左下角与下方居中无色块占位/怪物名称（截图）
+- [ ] 后台结算与 T3.8 交付零差异（既有冒烟复跑 EXIT=0）
+
+提交：git commit -m "T3.12: 速度条与参战头像区修订" 并 push。
+```
+
+#### T3.9 对阵阵型与多敌编组
+
+| 字段 | 内容                                          |
+| -- | ------------------------------------------- |
 | 目标 | 战斗系统.md §9：4×3 斜向格子对阵布置（多敌上限 6），为目标选择提供格位基础 |
-| 产出 | 阵型生成器 + 多敌编组支持 |
-| 依赖 | T3.8 已通过 |
-| 主责 | 战斗程序◎ |
-| 预估 | 1~2 轮 |
+| 产出 | 阵型生成器 + 多敌编组支持                              |
+| 依赖 | T3.12 已通过                                    |
+| 主责 | 战斗程序◎                                       |
+| 预估 | 1\~2 轮                                      |
 
 【完整指令 · 粘贴给 Agent】
 
 ```
 任务：T3.9 对阵阵型与多敌编组
-目标：按 docs/系统规则/战斗系统.md §9 落地对阵阵型与多敌编组，替换既有「我左敌右」旧站位。
-前置：T3.8 已通过；必读战斗系统.md §9。
+目标：按 docs/系统规则/战斗系统.md §9 落地对阵阵型与多敌编组，重建战场单位显示（旧占位渲染已由 T3.12 移除）。
+前置：T3.12 已通过；必读战斗系统.md §9。
 
 执行步骤：
 1. 阵型生成器：4 列 × 3 行格子区域，矩形**斜向摆放**（区域右边缘向上斜 45°、左边缘向下斜 45°）；**第一列（1×3）=我方**（屏幕中间左下角同排排列）、**第二列=空白分界线**、**第三/四列×3 行=敌方阵地**（屏幕中间右上角排列）；我方按实际出战人数站位、敌方按 battle_started 的 enemy_ids 数量站位（1~6，空位允许）。
@@ -797,13 +836,13 @@ graph TD
 
 #### T3.10 手动模式与目标选择（含伤害/效果飘字）
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                                                          |
+| -- | ----------------------------------------------------------- |
 | 目标 | 战斗系统.md §8：自动/手动切换、手动指令按钮+E/Q、目标选择状态（敌我箭头+移动键）、目标三字段驱动、飘字组件 |
-| 产出 | 手动模式+目标选择（敌/友）+飘字组件 |
-| 依赖 | T3.9 已通过；**T2.9 已通过（技能三列数据前置）** |
-| 主责 | 战斗程序◎ |
-| 预估 | 2 轮 |
+| 产出 | 手动模式+目标选择（敌/友）+飘字组件                                         |
+| 依赖 | T3.9 已通过；**T2.9 已通过（技能三列数据前置）**                             |
+| 主责 | 战斗程序◎                                                       |
+| 预估 | 2 轮                                                         |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -836,13 +875,13 @@ graph TD
 
 #### T3.11 友方技能效果实现
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                                                                      |
+| -- | ----------------------------------------------------------------------- |
 | 目标 | 战斗系统.md §3.1 effect 结算：heal/shield/amp 生命周期+自动模式友方 AI+效果飘字触发，接通诺菈/艾蕾雅技能 |
-| 产出 | 友方技能结算+buff 生命周期+友方 AI |
-| 依赖 | T3.10 已通过（含 T2.9 数据前置） |
-| 主责 | 战斗程序◎、数值策划○（占位数值复核） |
-| 预估 | 1~2 轮 |
+| 产出 | 友方技能结算+buff 生命周期+友方 AI                                                  |
+| 依赖 | T3.10 已通过（含 T2.9 数据前置）                                                  |
+| 主责 | 战斗程序◎、数值策划○（占位数值复核）                                                     |
+| 预估 | 1\~2 轮                                                                  |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -1058,13 +1097,13 @@ graph TD
 
 #### T5.4 任务面板数据接入
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 任务面板接入真实任务数据 + HUD 追踪联动 |
+| 字段 | 内容                       |
+| -- | ------------------------ |
+| 目标 | 任务面板接入真实任务数据 + HUD 追踪联动  |
 | 产出 | QuestPanel 数据填充、HUD 任务追踪 |
-| 依赖 | T5.3、T2.5（面板壳已建） |
-| 主责 | 系统策划○（需求）、系统程序◎ |
-| 预估 | 1 轮 |
+| 依赖 | T5.3、T2.5（面板壳已建）         |
+| 主责 | 系统策划○（需求）、系统程序◎          |
+| 预估 | 1 轮                      |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -1119,13 +1158,13 @@ graph TD
 
 #### T6.2 唤星抽卡逻辑
 
-| 字段 | 内容 |
-| --- | --- |
-| 目标 | 通用池概率可配置、保底生效、可验证 |
+| 字段 | 内容                                     |
+| -- | -------------------------------------- |
+| 目标 | 通用池概率可配置、保底生效、可验证                      |
 | 产出 | `scripts/star_summon/SummonManager.gd` |
-| 依赖 | T6.1 |
-| 主责 | 数值策划◎（权重/保底数值）、系统程序◎（实现） |
-| 预估 | 1~2 轮 |
+| 依赖 | T6.1                                   |
+| 主责 | 数值策划◎（权重/保底数值）、系统程序◎（实现）               |
+| 预估 | 1\~2 轮                                 |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -1205,13 +1244,13 @@ graph TD
 
 #### T6.5 星髓装备与养成
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                                      |
+| -- | --------------------------------------- |
 | 目标 | 架构 §2.5 + §3.1 星髓面板三区落地（装备 6 槽/筛选/养成骨架） |
-| 产出 | 星髓装备逻辑 + 属性并入 + 养成骨架 |
-| 依赖 | T2.8（数据）、T2.5（面板壳）、T6.1（持有数据） |
-| 主责 | 系统程序◎、数值策划○（养成数值与效果数值） |
-| 预估 | 2 轮 |
+| 产出 | 星髓装备逻辑 + 属性并入 + 养成骨架                    |
+| 依赖 | T2.8（数据）、T2.5（面板壳）、T6.1（持有数据）           |
+| 主责 | 系统程序◎、数值策划○（养成数值与效果数值）                  |
+| 预估 | 2 轮                                     |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -1273,13 +1312,13 @@ graph TD
 
 #### T7.2 存档回归与全量回归测试
 
-| 字段 | 内容 |
-| --- | --- |
+| 字段 | 内容                              |
+| -- | ------------------------------- |
 | 目标 | 存档系统已在 T2.4 交付，本卡做全档位回归 + 全系统回归 |
-| 产出 | 回归记录（交接班表） |
-| 依赖 | T7.1 |
-| 主责 | 系统程序◎ |
-| 预估 | 1~2 轮 |
+| 产出 | 回归记录（交接班表）                      |
+| 依赖 | T7.1                            |
+| 主责 | 系统程序◎                           |
+| 预估 | 1\~2 轮                          |
 
 【完整指令 · 粘贴给 Agent】
 
@@ -1366,15 +1405,15 @@ graph TD
 
 ### 5.1 唯一资源入口 ArtProvider
 
-| 接口 | 用途 | 当前占位实现 | 后期替换（AI 资源） |
-| --- | --- | --- | --- |
-| `get_character_sprite(id)` | 地图角色外观 | 色块 + 名字 | `assets/sprites/characters/<char_id>_<idle|walk>_<dir>.png` 8 方向帧条（dir ∈ n/ne/e/se/s/sw/w/nw） |
-| `get_portrait(id, emotion)` | 对话/战斗立绘 | 色块 + 情绪文字 | `assets/portraits/<id>_<emotion>.png`（AI 生成立绘，竖版 3:4） |
-| `get_tile_texture(map_id, layer)` | 等距砖块 | 纯色菱形 | `assets/maps/tilesets/<map_id>.tres` |
-| `get_cg(id)` | 星痕绘卷 CG | 色块 + 标题 | `assets/cg/<chapter>_<node>.png` |
-| `get_skill_fx(skill_id)` | 战斗特效 | 色块动画 | `assets/skills/<skill_id>_fx.*` |
-| `get_ui_icon(id)` | UI 图标 | 纯色方块 | `assets/ui/icons/<id>.png` |
-| `get_bgm(scene_id)` / `get_sfx(event_id)` | 音频 | 静音占位 | `assets/audio/bgm_<scene>.ogg` / `sfx_<event>.ogg` |
+| 接口                                        | 用途      | 当前占位实现    | 后期替换（AI 资源）                                           | <br />                                               |
+| ----------------------------------------- | ------- | --------- | ----------------------------------------------------- | :--------------------------------------------------- |
+| `get_character_sprite(id)`                | 地图角色外观  | 色块 + 名字   | \`assets/sprites/characters/\<char\_id>\_\<idle       | walk>\_<dir>.png\` 8 方向帧条（dir ∈ n/ne/e/se/s/sw/w/nw） |
+| `get_portrait(id, emotion)`               | 对话/战斗立绘 | 色块 + 情绪文字 | `assets/portraits/<id>_<emotion>.png`（AI 生成立绘，竖版 3:4） | <br />                                               |
+| `get_tile_texture(map_id, layer)`         | 等距砖块    | 纯色菱形      | `assets/maps/tilesets/<map_id>.tres`                  | <br />                                               |
+| `get_cg(id)`                              | 星痕绘卷 CG | 色块 + 标题   | `assets/cg/<chapter>_<node>.png`                      | <br />                                               |
+| `get_skill_fx(skill_id)`                  | 战斗特效    | 色块动画      | `assets/skills/<skill_id>_fx.*`                       | <br />                                               |
+| `get_ui_icon(id)`                         | UI 图标   | 纯色方块      | `assets/ui/icons/<id>.png`                            | <br />                                               |
+| `get_bgm(scene_id)` / `get_sfx(event_id)` | 音频      | 静音占位      | `assets/audio/bgm_<scene>.ogg` / `sfx_<event>.ogg`    | <br />                                               |
 
 ### 5.2 资源目录与命名规范
 
@@ -1403,28 +1442,28 @@ assets/
 
 ### 5.5 补充规范
 
-- **8 向帧条**：屏幕空间 8 方向（斜向独立资源非左右翻转）、idle 4 帧（~3s）、walk 6~8 帧（~0.6s）；命名 `<char_id>_<idle|walk>_<dir>.png`（dir ∈ n/ne/e/se/s/sw/w/nw）。
+- **8 向帧条**：屏幕空间 8 方向（斜向独立资源非左右翻转）、idle 4 帧（\~3s）、walk 6\~8 帧（\~0.6s）；命名 `<char_id>_<idle|walk>_<dir>.png`（dir ∈ n/ne/e/se/s/sw/w/nw）。
 - **立绘规格**：竖版 3:4、高清、背景柔化；角色详情与主页菜单背景共用。
 - **神像视觉**：光柱（竖向渐变色块）+ 粒子（CPUParticles2D 占位）+ 光环 96px 圈（半透明描边圆）。
-- **遮挡描边**：纯白 1.5~2px 外描边，CanvasItem.material，触发条件=前景元素 origin 全局 y > 角色脚部 y 且投影重叠；随遮挡面积淡入淡出。
+- **遮挡描边**：纯白 1.5\~2px 外描边，CanvasItem.material，触发条件=前景元素 origin 全局 y > 角色脚部 y 且投影重叠；随遮挡面积淡入淡出。
 - **AI 资源接入规范**：AI 生成（即梦/豆包/SD 等）→ 统一风格词（等距 2.5D、Q 版三头身、二次元、统一主光源）→ 导出透明底 PNG → 按 §5.2 命名 → 对应 assets/ 目录 → ArtProvider 加载替换，业务代码零改动。AI 工具与风格词记录在 `docs/美术资源接入清单.md`。
-- **音乐**：AI 生成（Suno 等）→ assets/audio/：BGM `bgm_<scene>.ogg`（44.1kHz/16bit，建议 60~120s 循环段），音效 `sfx_<event>.ogg`（1~3s）。
+- **音乐**：AI 生成（Suno 等）→ assets/audio/：BGM `bgm_<scene>.ogg`（44.1kHz/16bit，建议 60\~120s 循环段），音效 `sfx_<event>.ogg`（1\~3s）。
 - **合规**：使用自有生成资源，规避版权风险。
 
 ***
 
 ## 6. 排期建议（波次）
 
-| 波次 | 内容 | 卡 | 状态 |
-| --- | --- | --- | --- |
-| 1 | P0 骨架 | T0.1~T0.4 | ✅ 完成 |
-| 2 | P1 地图 ∥ P2 | T1.1~T1.6 ✅；T2.1~T2.10 全部 ✅（含补充卡 T2.9→T2.10；T3.1 提前交付 ✅） | ✅ 完成 |
-| 3 | P3 战斗 ∥ P4 剧情 | T3.1~T3.7 ✅、T4.1~T4.3 ✅；**待启动**：返工卡 T3.8→T3.9→T3.10→T3.11（战斗系统修订）；T4.4 待放行评估 | 进行中（返工待启动） |
-| 4 | P5 心契 | T5.1→T5.2→T5.3→T5.4 | 待启动 |
-| 5 | P6 唤星 | T6.1→T6.2→T6.3/T6.4∥T6.5 | 待启动 |
-| 6 | P7 整合验收 | T7.1→T7.2∥T7.3→T7.4 | 待启动 |
+| 波次 | 内容            | 卡                                                                              | 状态         |
+| -- | ------------- | ------------------------------------------------------------------------------ | ---------- |
+| 1  | P0 骨架         | T0.1\~T0.4                                                                     | ✅ 完成       |
+| 2  | P1 地图 ∥ P2    | T1.1\~T1.6 ✅；T2.1\~T2.10 全部 ✅（含补充卡 T2.9→T2.10；T3.1 提前交付 ✅）                     | ✅ 完成       |
+| 3  | P3 战斗 ∥ P4 剧情 | T3.1\~T3.8 ✅、T4.1\~T4.3 ✅；**待启动**：返工卡 T3.12→T3.9→T3.10→T3.11（战斗系统修订）；T4.4 待放行评估 | 进行中（返工待启动） |
+| 4  | P5 心契         | T5.1→T5.2→T5.3→T5.4                                                            | 待启动        |
+| 5  | P6 唤星         | T6.1→T6.2→T6.3/T6.4∥T6.5                                                       | 待启动        |
+| 6  | P7 整合验收       | T7.1→T7.2∥T7.3→T7.4                                                            | 待启动        |
 
-- 关键路径：P2 框架（T2.3~T2.5）→ P4 → P5 → P6 → P7。
+- 关键路径：P2 框架（T2.3\~T2.5）→ P4 → P5 → P6 → P7。
 - 风险点：① Dialogic 2 API 差异（语法收敛在转换工具）；② T2.3 体量大（四步交付，步间可验收）；③ 星髓战斗加成钩子（T6.5 与 T3.4 的衔接，必要时 T7.1 统一回归）；④ 保底数值 60 抽待数值策划01 复核。
 
 ***
@@ -1443,3 +1482,4 @@ assets/
 - [ ] **星髓体系**：6 槽装备、套装判定、属性并入、养成骨架、存档恢复
 - [ ] **接口预留**：ArtProvider 全覆盖，AI 资源替换演练通过（T7.3）
 - [ ] **设定一致性**：与《初期设定》+架构文档对照无误（架构文档全部规格复核）
+
