@@ -75,6 +75,11 @@ var _map_ui: CanvasLayer = null
 func _ready() -> void:
 	unlocked_regions = ["region_camp"]  # 起始区块默认解锁，不发信号
 	_ensure_ui()
+	# T3.9 修复：HUD 为本单例常驻子节点（跨场景不受场景切换/隐藏数组管理），
+	# 战斗生命周期显隐由本层接管（BattleController 不再跨岗代管）；
+	# 无条件设值——HUD 此前已隐藏（面板切换/旧战斗残留）时变身态也必藏。
+	get_node("/root/EventBus").battle_started.connect(_on_battle_started)
+	get_node("/root/EventBus").battle_finished.connect(_on_battle_finished)
 	print("[MapSystem] ready: regions=%d shrines=%d unlocked=%s" % [REGIONS.size(), SHRINES.size(), str(unlocked_regions)])
 
 
@@ -224,6 +229,19 @@ func _ensure_ui() -> void:
 		_hud = load("res://scenes/ui/HUD.tscn").instantiate()
 		_hud.name = "HUD"
 		add_child(_hud)
+
+
+## T3.9 战斗中隐藏常驻 HUD（无条件设值：无论此前可见与否，变身态必藏）
+func _on_battle_started(_party_ids: Array, _enemy_ids: Array, _context: Dictionary) -> void:
+	if _hud != null:
+		_hud.visible = false
+
+
+## T3.9 战斗结束恢复常驻 HUD（battle_finished 每场各发一次，result 含
+## outcome/rounds/context/star_sand_gained 四字段）
+func _on_battle_finished(_result: Dictionary) -> void:
+	if _hud != null:
+		_hud.visible = true
 
 
 # ---------------------------------------------------------------

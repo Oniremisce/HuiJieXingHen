@@ -1,8 +1,9 @@
 extends Node
 ## =============================================================
 ## T3.7 BattleController（挂地图场景；battle_started 消费链全程驱动）
-## 流程：battle_started → Transition 淡出 → 原地图变身（隐藏非地板探索元素
-## +MapSystem HUD，§1/制作人04 裁决④）→ 叠 Battle 表现层 + BattleCutscene →
+## 流程：battle_started → Transition 淡出 → 原地图变身（隐藏非地板探索元素，
+## §1/制作人04 裁决④；跑图 HUD 显隐自 T3.9 起归 MapSystem 战斗信号监听）→
+## 叠 Battle 表现层 + BattleCutscene →
 ## BM 驱动（失败重试循环：空格重试/Esc 撤离，不卡死）→ 结算星砂（GameState
 ## 暂记，T6.1 迁移 Inventory）+ battle_finished → Transition 淡出还原 → 淡入。
 ## Transition 用 fade_out/in 成对（§1 地板真复用=原地变身，不 change_scene；
@@ -87,7 +88,8 @@ func _on_battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary)
 	_active = false
 	print("[BattleController] 战斗收尾完成，已还原地图（outcome=%s）" % outcome)
 
-## 原地变身：隐藏当前场景非地板探索元素 + MapSystem HUD（裁决④），Ground 保留
+## 原地变身：隐藏当前场景非地板探索元素（Ground 保留；跑图 HUD 显隐自 T3.9 起
+## 归 MapSystem 战斗信号监听）
 func _hide_exploration() -> void:
 	_hidden.clear()
 	var scene := get_tree().current_scene
@@ -97,10 +99,8 @@ func _hide_exploration() -> void:
 		if c is Node2D and c.visible:
 			_hidden.append(c)
 			c.visible = false
-	var ms := get_node_or_null("/root/MapSystem")
-	if ms != null and ms.has_node("HUD") and ms.get_node("HUD").visible:
-		_hidden.append(ms.get_node("HUD"))
-		ms.get_node("HUD").visible = false
+	# T3.9：跑图 HUD 显隐归 MapSystem 战斗信号监听（battle_started/battle_finished），
+	# 本层只藏场景内 Node2D，不再跨岗操作 MapSystem 常驻子节点
 
 ## 还原探索元素与跑图 HUD
 func _restore() -> void:

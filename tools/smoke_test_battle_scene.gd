@@ -2,10 +2,11 @@ extends SceneTree
 ## =============================================================
 ## T3.7 战斗场景接入冒烟（headless：先设 GODOT_MCP_RUNTIME_PORT='abc' 再
 ## godot --headless --path . --script res://tools/smoke_test_battle_scene.gd）
-## 最小环境：root 挂 EventBus/Transition/GameState/DataManager/假MapSystem{HUD} +
-## 假地图（Ground/Decorations/Player(layer2)/BattleController）→ current_scene。
+## 最小环境：root 挂 EventBus/Transition/GameState/DataManager/MapSystem{HUD}
+## （均 headless --script 真实 autoload）+ 假地图（Ground/Decorations/Player(layer2)/
+## BattleController）→ current_scene。
 ## 场景1 win 全链：battle_started(三觉醒者, [corrosion_beast], {quest_id}) →
-##   变身（隐藏 Decorations/Player/HUD，Ground 保留）→ 战斗（假演出）→
+##   变身（Controller 藏 Decorations/Player；HUD 由 MapSystem 战斗信号藏，Ground 保留）→ 战斗（假演出）→
 ##   battle_finished{win, context 透传} → star_sand=30（drop_sand）→ 还原
 ## 场景2 失败链：3v2 双兽 → 6 轮 timeout → battle_finished(timeout) →
 ##   空格重试 → 再 timeout → Esc 撤离 → aborted → 还原、star_sand 不变、不卡死
@@ -15,6 +16,7 @@ const CTRL := preload("res://scripts/battle/battle_controller.gd")
 
 var _failed := false
 var _n := 0
+var _hud_at_finish := false  # T3.9：battle_finished 发出时点的 HUD 可见性快照
 
 class FakeCutscene extends RefCounted:
 	var calls: Array = []
@@ -62,10 +64,16 @@ func _run() -> void:
 	# 场景1：win 全链
 	var results: Array = []
 	eb.battle_finished.connect(func(r): results.append(r))
+	eb.battle_finished.connect(func(_r): _hud_at_finish = hud.visible)  # T3.9：发出时点快照
 	eb.battle_started.emit(["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], ["corrosion_beast"], {"quest_id": "heartbond_01"})
+	_check(not hud.visible)  # T3.9：battle_started 即藏（MapSystem 监听，无条件设值）
 	await create_timer(1.0).timeout
-	print("[SMOKE] 场景1 战斗中: hud.visible=%s deco.visible=%s（变身隐藏态）" % [str(hud.visible), str(deco.visible)])
-	_check(not hud.visible and not deco.visible)  # 战斗中探索元素+跑图 HUD 已隐藏（§1/裁决④）
+	# T3.9：headless 假演出战斗可在 1s 内打完并发出 battle_finished（HUD 即时恢复），
+	# 固定时刻断言 HUD 隐藏已成竞态——HUD 契约改由两端覆盖：发出即藏（上断言）+
+	# battle_finished 时点已恢复（_hud_at_finish 快照）；此处只断言探索元素隐藏态
+	print("[SMOKE] 场景1 发出1s后: hud.visible=%s deco.visible=%s（快战斗可能已收尾）" % [
+		str(hud.visible), str(deco.visible)])
+	_check(not deco.visible)  # 变身隐藏态：探索元素由 Controller 管，收尾还原前恒藏（§1/裁决④）
 	while ctrl._active:
 		await process_frame
 	print("[SMOKE] 场景1: results=%s star_sand=%d deco=%s hud=%s" % [
@@ -74,6 +82,7 @@ func _run() -> void:
 	_check(results[0]["context"] == {"quest_id": "heartbond_01"})  # context 透传（T5.3 消费）
 	_check(gs.star_sand == 30)  # drop_sand=30 入账
 	_check(deco.visible and hud.visible and player.visible and ground.visible)  # 战场隐藏已还原
+	_check(_hud_at_finish)  # T3.9：battle_finished 发出时点 HUD 已恢复（MapSystem 监听）
 	# 场景2：失败链——20 兽（总 hp 3000 / DPS 20）构造我方 30 轮内必败 →
 	# battle_finished(lose) → 空格重试 → 再 lose → Esc 撤离 → 不卡死、无星砂
 	var results2: Array = []
