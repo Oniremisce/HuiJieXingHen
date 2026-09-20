@@ -2,9 +2,9 @@ extends Control
 ## =============================================================
 ## T3.8 速度条 UI + 跑条动画（表现层；口径：战斗系统.md §2/§6 + 美术01 视觉口径）
 ## -------------------------------------------------------------
-## 布局（§2.1/§6 + 美术01 T3.8 ○核对行）：屏幕左侧竖向细长条（条宽 20 /
-## 条长 592 / 距左 16 / 上留白 32 / 下留白 24），我方与敌人圆形小头像
-## （直径 = 条宽 × 2 = 40，§2.1 硬约束）置条上随位置实时移动。
+## 布局（§2.1/§6；T3.12 修订：高度=屏幕竖向高度×1/3、跑条方向自上而下）：
+## 屏幕左侧竖向细长条（条宽 20 / 距左 16 / 上留白 32，条高=视口高×1/3），
+## 我方与敌人圆形小头像（直径 = 条宽 × 2 = 40，§2.1 硬约束）置条上随位置实时移动。
 ## 跑条动画（§2.3）：按当前出战存活单位平均跑条速度换算——平均速度单位
 ## 完整跑完全条 = RUNBAR_FULL_TIME 秒；各头像按自身 spd 呈现相对快慢；
 ## 表现层到达 100（=出手瞬间）跑条暂停并金环脉冲，收到演出播毕通知后
@@ -26,7 +26,6 @@ static var RUNBAR_FULL_TIME := 1.0
 
 # ---- 视觉口径常量（美术01 T3.8 ○核对行，制作人04 预裁定①）----
 const BAR_W := 20.0
-const BAR_LEN := 592.0
 const BAR_LEFT := 16.0
 const BAR_TOP := 32.0
 const COL_BG := Color(0.12549, 0.14118, 0.18039, 0.85)    # #20242E @85%
@@ -39,6 +38,10 @@ const AVATAR_RING_W := 3.0    # 体系色环 3px / 敌方暗红 3px + 1px 白描
 const PULSE_TIME := 0.3       # 出手瞬间金环脉冲 0.3s
 const PAUSE_DIM := 0.45       # 暂停跑条标记：降饱和 60%（占位=压暗调制）
 const DEAD_DIM := 0.30        # 阵亡置灰
+
+## §2.1/§6（T3.12 修订①）：条高 = 屏幕竖向高度 × 1/3（实时读视口，非固定常量）
+func bar_len() -> float:
+	return maxf(1.0, get_viewport_rect().size.y / 3.0)
 
 var bm = null                 # 只读引用：BattleManager 或同构鸭子（冒烟注入）
 var acting_uid := ""          # 当前激活回合单位 id（PartyRow 高亮消费）
@@ -342,15 +345,16 @@ func _pulse_avatar(idx: int) -> void:
 	tw.tween_method(func(c: Color): sb.border_color = c, COL_GOLD, base, PULSE_TIME)
 
 func _apply_positions() -> void:
-	var bottom := BAR_TOP + BAR_LEN
+	var bl := bar_len()
 	for i in _avatars.size():
 		var pos := _bar_pos(i)
 		var av: Dictionary = _avatars[i]
 		var ctrl: Control = av["root"]
 		var d: float = av["d"]
+		# T3.12 修订②：顶端=0、底端=100，头像 y 随条位自上而下
 		ctrl.position = Vector2(
 			BAR_LEFT + BAR_W * 0.5 - d * 0.5,
-			bottom - pos / 100.0 * BAR_LEN - d * 0.5)
+			BAR_TOP + pos / 100.0 * bl - d * 0.5)
 		var dim := 1.0
 		if not _alive(i):
 			dim = DEAD_DIM
@@ -360,16 +364,18 @@ func _apply_positions() -> void:
 	queue_redraw()
 
 ## 条体绘制：深底 + 冷白进度（取最高条位）+ 0/50/100 刻度 + 100 金色终点线
+## T3.12 修订②：进度自顶端（0）向下（100）填充，终点线=底端
 func _draw() -> void:
-	var bottom := BAR_TOP + BAR_LEN
-	draw_rect(Rect2(BAR_LEFT, BAR_TOP, BAR_W, BAR_LEN), COL_BG)
+	var bl := bar_len()
+	var bottom := BAR_TOP + bl
+	draw_rect(Rect2(BAR_LEFT, BAR_TOP, BAR_W, bl), COL_BG)
 	var max_pos := 0.0
 	for i in _avatars.size():
 		max_pos = maxf(max_pos, _bar_pos(i))
-	var fh := BAR_LEN * max_pos / 100.0
+	var fh := bl * max_pos / 100.0
 	if fh > 0.5:
-		draw_rect(Rect2(BAR_LEFT, bottom - fh, BAR_W, fh), COL_FILL)
+		draw_rect(Rect2(BAR_LEFT, BAR_TOP, BAR_W, fh), COL_FILL)
 	for p in [0.0, 50.0, 100.0]:
-		var y: float = bottom - float(p) / 100.0 * BAR_LEN
+		var y: float = BAR_TOP + float(p) / 100.0 * bl
 		draw_rect(Rect2(BAR_LEFT - 2.0, y - 0.5, BAR_W + 4.0, 1.0), COL_TICK)
-	draw_rect(Rect2(BAR_LEFT - 2.0, BAR_TOP - 1.0, BAR_W + 4.0, 2.0), COL_GOLD)
+	draw_rect(Rect2(BAR_LEFT - 2.0, bottom - 1.0, BAR_W + 4.0, 2.0), COL_GOLD)
