@@ -17,8 +17,6 @@ const FORM := preload("res://scripts/battle/battle_form_layout.gd")
 const BAR_W := 40.0
 const BAR_H := 4.0
 const ICON_S := 12.0                 # 我方体系图标（体系色方块）
-const BAR_TOP := -56.0               # 头顶血条 y（模型 64×96 顶 -48，再上 8px）
-const NAME_Y := 52.0                 # 名字 Label（模型底部下方）
 const COL_HP_ENEMY := Color(0.70196, 0.29020, 0.23529)  # #B34A3C 敌方红血条
 const COL_HP_BG := Color(0.0, 0.0, 0.0, 0.55)
 const DEAD_DIM := 0.35
@@ -55,21 +53,26 @@ func setup_stances(party_ids: Array, enemy_ids: Array) -> void:
 	_stand_units.clear()
 	var vp := get_viewport_rect().size
 	var form: Dictionary = FORM.take_param(vp, 3, 4)
+	# 锚点=视口空间（屏幕坐标）；本层挂在地图场景下受地图相机 canvas 变换，
+	# 须逆映射到世界坐标落位，否则站位被相机拖偏、压左下角 UI（T3.9 返工修正）
+	var inv: Transform2D = get_viewport().get_canvas_transform().affine_inverse()
 	var ally_pts: Array = form["ally"]
 	var front: Array = form["enemy_front"]
 	var back: Array = form["enemy_back"]
 	var n_ally := mini(party_ids.size(), ally_pts.size())
 	for i in n_ally:
-		_spawn_unit(_allies, String(party_ids[i]), true, ally_pts[i])
+		_spawn_unit(_allies, String(party_ids[i]), true, inv * (ally_pts[i] as Vector2))
 	var n_front := mini(enemy_ids.size(), front.size())  # 前 3 个放前列（靠我方）
 	for i in n_front:
-		_spawn_unit(_enemies, String(enemy_ids[i]), false, front[i])
+		_spawn_unit(_enemies, String(enemy_ids[i]), false, inv * (front[i] as Vector2))
 	var n_back := enemy_ids.size() - n_front             # 剩余放后列
 	for i in n_back:
-		_spawn_unit(_enemies, String(enemy_ids[n_front + i]), false, back[i])
+		_spawn_unit(_enemies, String(enemy_ids[n_front + i]), false, inv * (back[i] as Vector2))
 
 ## 生成单个战场单位：Q 版小人（ArtProvider.get_character_sprite，与地图同规格）
 ## + 名字 Label（模型下方）+ 头顶血条小组件（我方体系图标+体系色血条 / 敌方红血条）
+## 纹理两态：真实帧条（横向多帧 48×48/帧，ArtProvider 帧条口径）切首帧；
+## 占位色块 64×96 直接贴。头顶组件偏移按模型半高自适应。
 func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) -> void:
 	var root := Node2D.new()
 	root.position = pos
@@ -77,17 +80,28 @@ func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) ->
 	container.add_child(root)
 	var art := get_node_or_null("/root/ArtProvider")
 	var tex: Texture2D = art.get_character_sprite(uid) if art != null else null
+	var half_h := 48.0  # 模型半高（占位 64×96）
 	var sp := Sprite2D.new()
 	sp.name = "Sprite"
 	if tex != null:
-		sp.texture = tex
+		if tex.get_width() > tex.get_height():
+			# 横向帧条（48×48/帧）：切首帧，与地图角色观感同规格
+			half_h = tex.get_height() * 0.5
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = Rect2(0, 0, tex.get_height(), tex.get_height())
+			sp.texture = atlas
+		else:
+			sp.texture = tex
 	sp.z_index = 1
 	root.add_child(sp)
+	var bar_top := -(half_h + 8.0)   # 头顶血条 y（模型顶再上 8px）
+	var name_y := half_h + 4.0       # 名字 Label y（模型底下方）
 	# 名字 Label（模型底部下方，敌我通用；非 §6 禁止的「屏幕下方居中怪物名」占位）
 	var nm := Label.new()
 	nm.name = "NameLabel"
 	nm.text = _display_name(uid, is_ally)
-	nm.position = Vector2(-40, NAME_Y)
+	nm.position = Vector2(-40, name_y)
 	nm.size = Vector2(80, 14)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.add_theme_font_size_override("font_size", NAME_SIZE)
@@ -100,7 +114,7 @@ func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) ->
 	# 头顶血条小组件（不遮挡模型，悬于模型顶部上方）
 	var hp_bg := ColorRect.new()
 	hp_bg.name = "HpBg"
-	hp_bg.position = Vector2(-BAR_W * 0.5, BAR_TOP)
+	hp_bg.position = Vector2(-BAR_W * 0.5, bar_top)
 	hp_bg.size = Vector2(BAR_W, BAR_H)
 	hp_bg.color = COL_HP_BG
 	hp_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -108,7 +122,7 @@ func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) ->
 	root.add_child(hp_bg)
 	var hp_fg := ColorRect.new()
 	hp_fg.name = "HpFg"
-	hp_fg.position = Vector2(-BAR_W * 0.5, BAR_TOP)
+	hp_fg.position = Vector2(-BAR_W * 0.5, bar_top)
 	hp_fg.size = Vector2(BAR_W, BAR_H)
 	hp_fg.color = _hp_color(uid, is_ally)
 	hp_fg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -119,7 +133,7 @@ func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) ->
 		# 我方体系图标：体系色方块并排血条左侧（体系色查 ArtProvider.get_system_color）
 		icon = ColorRect.new()
 		icon.name = "SystemIcon"
-		icon.position = Vector2(-BAR_W * 0.5 - ICON_S - 2.0, BAR_TOP)
+		icon.position = Vector2(-BAR_W * 0.5 - ICON_S - 2.0, bar_top)
 		icon.size = Vector2(ICON_S, ICON_S)
 		icon.color = _system_color(uid)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE

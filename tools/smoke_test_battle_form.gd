@@ -46,37 +46,50 @@ func _run() -> void:
 		print("=== T3.9 阵型冒烟结束：全部通过 ===")
 		quit(0)
 
-## A. 阵型纯数学断言（无场景依赖）
+## A. 阵型纯数学断言（无场景依赖；返工几何：参考图观感 + UI 避让硬约束）
 func _test_form_math() -> void:
-	var form: Dictionary = FORM.take_param(Vector2(1152, 648), 3, 4)
+	var vs := Vector2(1152, 648)
+	var form: Dictionary = FORM.take_param(vs, 3, 4)
 	var ally: Array = form["ally"]
 	var front: Array = form["enemy_front"]
 	var back: Array = form["enemy_back"]
 	_check(ally.size() == 3 and front.size() == 3 and back.size() == 3)
-	# ① 我方第一列沿右下斜向排列（行 r 增大 → x 增、y 增）
-	_check(ally[1].x > ally[0].x and ally[1].y > ally[0].y)
-	_check(ally[2].x > ally[1].x and ally[2].y > ally[1].y)
-	# ② 45° 斜向：front-ally 列向量 Δx>0、Δy<0 且等幅（右边缘上斜 45°）
+	# ① 行方向（列内相邻行）：向右下缓斜 10°（Δx>0、Δy>0、斜率≈tan10°）
+	var tan10 := 0.17633  # tan(10°)
+	for arr in [ally, front, back]:
+		for i in 2:
+			var d: Vector2 = arr[i + 1] - arr[i]
+			_check(d.x > 0.0 and d.y > 0.0)
+			_check(absf(d.y / d.x - tan10) < 0.02)
+			_check(absf(d.x - vs.x * 0.095 * cos(deg_to_rad(10.0))) < 0.5)  # 行距=0.095W
+	# ② 敌方前列比我方更右更上（front-ally 同行向量 Δx>0、Δy<0）
 	for i in 3:
 		var d: Vector2 = front[i] - ally[i]
 		_check(d.x > 0.0 and d.y < 0.0)
-		_check(absf(absf(d.x) - absf(d.y)) < 0.01)
-	# ③ 后列（第四列）比前列（第三列）更右更上（back-front 列向量同向 45°）
+	# ③ 敌方后列比前列更高（back-front Δy<0）且略偏右
 	for i in 3:
 		var d: Vector2 = back[i] - front[i]
-		_check(d.x > 0.0 and d.y < 0.0)
-		_check(absf(absf(d.x) - absf(d.y)) < 0.01)
-	# ④ 我方左下 / 敌右上：ally 平均 x < front 平均 x、ally 平均 y > front 平均 y
-	var ax: float = (ally[0].x + ally[1].x + ally[2].x) / 3.0
+		_check(d.y < 0.0 and d.x > 0.0)
+	# ④ 观感带：我方横排左中（y≈0.475H）、敌前右中（y≈0.420H）、敌后右上（y≈0.280H）
 	var ay: float = (ally[0].y + ally[1].y + ally[2].y) / 3.0
-	var fx: float = (front[0].x + front[1].x + front[2].x) / 3.0
 	var fy: float = (front[0].y + front[1].y + front[2].y) / 3.0
-	var bx: float = (back[0].x + back[1].x + back[2].x) / 3.0
 	var by: float = (back[0].y + back[1].y + back[2].y) / 3.0
-	_check(ax < fx and ax < bx and ay > fy and ay > by)  # 我方整体更左下
-	_check(bx > fx and by < fy)                          # 敌方后列更右上
-	# ⑤ 第二列空白：前列-我方间距 = 2 列 > 后列-前列间距 = 1 列（中间隔一空列）
-	_check((front[0].x - ally[0].x) > (back[0].x - front[0].x))
+	_check(absf(ay - vs.y * 0.475 - vs.x * 0.095 * sin(deg_to_rad(10.0))) < 1.0)
+	_check(absf(fy - vs.y * 0.420 - vs.x * 0.095 * sin(deg_to_rad(10.0))) < 1.0)
+	_check(absf(by - vs.y * 0.280 - vs.x * 0.095 * sin(deg_to_rad(10.0))) < 1.0)
+	_check(ally[0].x < vs.x * 0.25 and front[0].x > vs.x * 0.5)  # 我方左、敌右
+	# ⑤ UI 避让硬断言（模型 64×96 中心锚点 + 头顶血条/名字组件安全盒）：
+	#    左下角角色信息板块区（x 16~652, y 560~632）、左侧速度条区（x≤60）、
+	#    屏幕四缘——全部锚点的安全盒不得进入
+	var all_pts: Array = ally + front + back
+	for p in all_pts:
+		var pt: Vector2 = p
+		_check(pt.y + 48.0 + 16.0 < 560.0)        # 名字标签底 < 板块顶（余量 16）
+		_check(pt.y - 60.0 > 0.0)                  # 头顶血条不出屏顶
+		_check(pt.x - 32.0 > 60.0)                 # 不压左侧速度条区
+		_check(pt.x + 32.0 < vs.x - 16.0)          # 不出右缘
+	# ⑥ 第二列空白：前列-我方水平间距远大于后列-前列间距（分界缓冲带）
+	_check((front[0].x - ally[0].x) > (back[0].x - front[0].x) * 4.0)
 	print("[SMOKE] A 阵型数学: ally=%s front=%s back=%s" % [str(ally), str(front), str(back)])
 
 ## B. 战场站位断言：Battle.tscn 实例调 setup_stances，检查节点数/位置/头顶组件
