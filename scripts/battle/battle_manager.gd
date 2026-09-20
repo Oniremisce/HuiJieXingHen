@@ -24,6 +24,13 @@ const PB := preload("res://scripts/battle/party_bonus.gd")
 
 enum State { INTRO, RUNNING, ACTION, WIN, LOSE }
 
+## 伤害飘字信号（T3.10 §8.3）：每次伤害结算（含多目标逐行）发出；
+## unit_idx=受击单位在 units 编队序中的下标（同 id 多单位——同 id 兽群——
+## 按 id 匹配会全部命中第一个，必须用下标定位表现层节点）。
+## 表现层（battle_arena）连接后 spawn 飘字。演出 await 在结算前=飘字时机随结算，
+## 自动/手动均生效。多目标时逐目标各发一次。
+signal damage_dealt(unit_idx: int, amount: int, crit: bool)
+
 var state := State.INTRO
 var round_num := 0
 var units: Array = []         # BU 实例，编队序（我方在前）
@@ -89,23 +96,30 @@ func run_to_end(max_rounds := 6) -> String:
 	print("[BATTLE] %d 轮上限强制结束（防死锁安全网，未分胜负）" % max_rounds)
 	return "timeout"
 
-## 一次出手：激活充能 → 取指令 → 演出（§7 skill/ult 分流）→ 执行 → 日志；返回结果
+## 一次出手：激活充能 → 取指令（T3.10 起可异步等待手动输入）→ 演出 → 执行 → 日志
 func _take_turn(u) -> Dictionary:
 	u.charge_on_turn_start()  # 自身回合激活开始 +10（§3）
-	var cmd: Array = _resolve_command(u)
+	var cmd: Array = await _resolve_command(u)
 	if cutscene != null:
 		if int(cmd[0]) == BC.Kind.ULT:
 			await cutscene.play_ult(u.id, str(u.skill_ult.id))
 		else:
 			await cutscene.play_skill(u.id, str(u.skill_small.id))
-	var res: Dictionary = BC.execute(units, u, int(cmd[0]), cmd[1], force_crit)
+	var col := str(cmd[2]) if cmd.size() > 2 else "front"
+	var res: Dictionary = BC.execute(units, u, int(cmd[0]), cmd[1], force_crit, col)
 	if not bool(res["ok"]):
 		print("[BATTLE] R%d %s 指令被拒（%s），降级小技能" % [round_num, u.name, str(res["reason"])])
-		res = BC.execute(units, u, BC.Kind.SKILL, null, force_crit)
+		res = BC.execute(units, u, BC.Kind.SKILL, null, force_crit, col)
 	_check_end()
 	if not bool(res["ok"]):
 		print("[BATTLE] R%d %s 出手失败（%s）" % [round_num, u.name, str(res["reason"])])
 		return res
+	# 伤害飘字触发（T3.10 §8.3）：多目标逐个；heal/shield/amp 触发归 T3.11
+	if res.has("targets"):
+		for row in res["targets"]:
+			damage_dealt.emit(units.find(row["target"]), int(row["damage"]), bool(row["crit"]))
+	else:
+		damage_dealt.emit(units.find(res["target"]), int(res["damage"]), bool(res.get("crit", false)))
 	print("[BATTLE] R%d 行动者=%s bar=100 %s[%s power=%.2f] → 目标=%s 伤害=%d%s | %s | %s" % [
 		round_num, u.name, str(res["kind"]), str(res["skill"].id),
 		float(res["skill"].power), str(res["target"].name), int(res["damage"]),
@@ -124,9 +138,15 @@ func _after_action(u, res: Dictionary, acted: Array) -> void:
 		await bonus.run_pull(self, u, acted)  # 达标者立即出手（tie-break 序 §4.2；演出后结算 §4.2）
 	_check_end()
 
+## 指令解析（T3.10：provider 可为协程——手动模式等待玩家输入；同步 lambda 兼容）；
+## 返回 [Kind, target] 或 [Kind, target, col]（col=整列 scope 选定列，缺省 front）
 func _resolve_command(u) -> Array:
 	if command_provider.is_valid():
-		var c: Variant = command_provider.call(u)
+		var c: Variant = await command_provider.call(u)
+		if c == null or c.size() < 2:
+			return [BC.Kind.SKILL, null]
+		if c.size() > 2:
+			return [int(c[0]), c[1], str(c[2])]
 		return [int(c[0]), c[1]]
 	return [BC.Kind.ULT if u.can_use_ult() else BC.Kind.SKILL, null]
 

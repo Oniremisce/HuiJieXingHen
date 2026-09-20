@@ -13,6 +13,7 @@ extends Node
 const BM := preload("res://scripts/battle/battle_manager.gd")
 const BATTLE_SCENE := preload("res://scenes/Battle.tscn")
 const CUTSCENE_SCENE := preload("res://scenes/BattleCutscene.tscn")
+const MANUAL := preload("res://scripts/battle/battle_manual_input.gd")  # T3.10 手动模式
 
 var _active := false
 var _layer: Node2D = null
@@ -21,6 +22,7 @@ var _context := {}
 var _waiting_input := false
 var _retry := false
 var _abort := false
+var _manual = null               # T3.10 手动模式组件（BattleUI 下，首场创建复用）
 var cutscene_factory := Callable()  # 测试注入 func() -> Node（同签名演出对象）；空=真演出场景
 
 func _ready() -> void:
@@ -54,6 +56,11 @@ func _on_battle_started(party_ids: Array, enemy_ids: Array, context: Dictionary)
 		if cs is Node:
 			_layer.add_child(cs)
 		_layer.attach_battle(bm)  # T3.8：速度条/参战行绑定（只读表现，每场重绑）
+		if _manual == null:  # T3.10：手动模式组件（开关+状态机+箭头调度），首场创建复用
+			_manual = MANUAL.new()
+			_manual.name = "ManualInput"
+			_layer.get_node("BattleUI").add_child(_manual)
+		_manual.setup(bm, _layer)  # 每场重绑（command_provider 指向新 bm）
 		outcome = await bm.run_to_end(30)
 		rounds = bm.round_num
 		if cs is Node:

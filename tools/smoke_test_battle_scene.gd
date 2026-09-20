@@ -83,14 +83,16 @@ func _run() -> void:
 	_check(gs.star_sand == 30)  # drop_sand=30 入账
 	_check(deco.visible and hud.visible and player.visible and ground.visible)  # 战场隐藏已还原
 	_check(_hud_at_finish)  # T3.9：battle_finished 发出时点 HUD 已恢复（MapSystem 监听）
-	# 场景2：失败链——20 兽（总 hp 3000 / DPS 20）构造我方 30 轮内必败 →
+	# 场景2：失败链——T3.10 多目标 damage 后群体 DPS 线性于兽数（与总血同阶，
+	# 任何兽数都会在 30 轮内被清完），必败构造改用**单人 party**（诺菈单体
+	# DPS ~29/轮 < 20 兽总血 3000；单体路径不受多目标扩展影响）→
 	# battle_finished(lose) → 空格重试 → 再 lose → Esc 撤离 → 不卡死、无星砂
 	var results2: Array = []
 	eb.battle_finished.connect(func(r): results2.append(r))
 	var horde: Array = []
 	for i in range(20):
 		horde.append("corrosion_beast")
-	eb.battle_started.emit(["awakened_mech_01", "awakened_arcane_01", "awakened_xian_01"], horde, {})
+	eb.battle_started.emit(["awakened_mech_01"], horde, {})
 	await _wait_flag(ctrl, "_waiting_input")
 	_push_key(32)  # 空格：重试
 	await _wait_flag_off(ctrl, "_waiting_input")  # 重试被接受（第一次等待退出）

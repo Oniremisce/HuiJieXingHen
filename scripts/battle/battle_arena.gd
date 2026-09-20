@@ -12,6 +12,7 @@ extends Node2D
 ## =============================================================
 
 const FORM := preload("res://scripts/battle/battle_form_layout.gd")
+const FT := preload("res://scripts/battle/battle_floating_text.gd")  # T3.10 飘字组件
 
 # 头顶血条小组件口径（§6）：血条为头顶小组件、不遮挡模型
 const BAR_W := 40.0
@@ -33,10 +34,49 @@ var bm = null
 var _stand_units: Array = []  # {root, id, is_ally, hp_bg, hp_fg, icon, sprite}
 
 ## T3.8：绑定战斗状态机（只读表现：速度条跑条动画 + 左下角角色信息板块）
+## T3.10：连接 BM.damage_dealt → 飘字（§8.3 自动/手动均生效）
 func attach_battle(b) -> void:
 	bm = b
+	if bm.has_signal("damage_dealt") and not bm.damage_dealt.is_connected(_on_damage_dealt):
+		bm.damage_dealt.connect(_on_damage_dealt)
 	_speed_bar.attach_battle(b)
 	_party_row.setup(b, _speed_bar)
+
+## T3.10 飘字（§8.3）：伤害=白（暴击金）；治疗绿/护盾蓝/amp 黄的触发归 T3.11
+func _on_damage_dealt(uidx: int, amount: int, crit: bool) -> void:
+	var col := Color(1.0, 0.84, 0.3) if crit else Color(1, 1, 1)
+	spawn_floating_text(uidx, str(amount), col)
+
+## 飘字统一入口（T3.11 heal/shield/amp 也走此接口）：挂单位头顶，向上飘动渐隐。
+## uidx=单位编队序下标（同 id 多单位按 id 匹配会全撞第一个，必须下标定位）
+func spawn_floating_text(uidx: int, text: String, color: Color) -> void:
+	for s in _stand_units:
+		if int(s["uidx"]) == uidx:
+			var ft = FT.new()
+			ft.setup(text, color)
+			var half: float = s["half_h"]
+			ft.position = (s["root"] as Node2D).position + Vector2(0, -half - 24.0)
+			add_child(ft)
+			return
+
+## T3.10 目标选择箭头（§8.2）：TARGETING 状态对候选目标显示；down=true=敌方
+## 向下箭头（血条中间上方、不与血条重叠），false=友方向上箭头；确认/Esc 后 hide。
+## uidxs=候选单位的编队序下标（同 id 多单位按 id 匹配会全命中，必须下标定位）
+func show_arrows(uidxs: Array, down: bool) -> void:
+	hide_arrows()
+	for s in _stand_units:
+		if uidxs.has(int(s["uidx"])):
+			var a: Polygon2D = s["arrow"]
+			if a != null:
+				a.visible = true
+				a.polygon = PackedVector2Array([Vector2(-7, -12), Vector2(7, -12), Vector2(0, 0)]) \
+					if down else PackedVector2Array([Vector2(-7, 12), Vector2(7, 12), Vector2(0, 0)])
+
+func hide_arrows() -> void:
+	for s in _stand_units:
+		var a: Polygon2D = s["arrow"]
+		if a != null:
+			a.visible = false
 
 ## T3.8：演出转发代理（保持 bm.cutscene 既有四方法契约；播毕通知跑条放行）
 func make_cutscene_proxy(real_cutscene) -> RefCounted:
@@ -61,19 +101,21 @@ func setup_stances(party_ids: Array, enemy_ids: Array) -> void:
 	var back: Array = form["enemy_back"]
 	var n_ally := mini(party_ids.size(), ally_pts.size())
 	for i in n_ally:
-		_spawn_unit(_allies, String(party_ids[i]), true, inv * (ally_pts[i] as Vector2))
+		_spawn_unit(_allies, String(party_ids[i]), true, inv * (ally_pts[i] as Vector2), i)
 	var n_front := mini(enemy_ids.size(), front.size())  # 前 3 个放前列（靠我方）
 	for i in n_front:
-		_spawn_unit(_enemies, String(enemy_ids[i]), false, inv * (front[i] as Vector2))
-	var n_back := enemy_ids.size() - n_front             # 剩余放后列
+		_spawn_unit(_enemies, String(enemy_ids[i]), false, inv * (front[i] as Vector2), party_ids.size() + i)
+	var n_back := mini(enemy_ids.size() - n_front, back.size())  # 后列≤3；超编敌（§9 上限 6 外）只结算不渲染
 	for i in n_back:
-		_spawn_unit(_enemies, String(enemy_ids[n_front + i]), false, inv * (back[i] as Vector2))
+		_spawn_unit(_enemies, String(enemy_ids[n_front + i]), false, inv * (back[i] as Vector2),
+			party_ids.size() + n_front + i)
 
 ## 生成单个战场单位：Q 版小人（ArtProvider.get_character_sprite，与地图同规格）
 ## + 名字 Label（模型下方）+ 头顶血条小组件（我方体系图标+体系色血条 / 敌方红血条）
 ## 纹理两态：真实帧条（横向多帧 48×48/帧，ArtProvider 帧条口径）切首帧；
 ## 占位色块 64×96 直接贴。头顶组件偏移按模型半高自适应。
-func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) -> void:
+## uidx=单位在 bm.units 编队序中的下标（血条/飘字按此定位，同 id 多单位必需）
+func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2, uidx: int) -> void:
 	var root := Node2D.new()
 	root.position = pos
 	root.z_index = 10
@@ -139,15 +181,29 @@ func _spawn_unit(container: Node2D, uid: String, is_ally: bool, pos: Vector2) ->
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		icon.z_index = 4
 		root.add_child(icon)
-	_stand_units.append({"root": root, "id": uid, "is_ally": is_ally,
-		"hp_bg": hp_bg, "hp_fg": hp_fg, "icon": icon, "sprite": sp})
+	# T3.10 目标选择箭头（§8.2）：默认隐藏，TARGETING 时 show_arrows 点亮；
+	# 位置=血条上方 12px（不与血条重叠）；向下（敌）/向上（友）由 show_arrows 定形
+	var arrow := Polygon2D.new()
+	arrow.name = "Arrow"
+	arrow.visible = false
+	arrow.color = Color(0.94, 0.71, 0.16)  # 金色占位（正式样式归 T7.3）
+	arrow.position = Vector2(0, bar_top - 14.0)
+	arrow.z_index = 5
+	root.add_child(arrow)
+	_stand_units.append({"root": root, "id": uid, "is_ally": is_ally, "uidx": uidx,
+		"hp_bg": hp_bg, "hp_fg": hp_fg, "icon": icon, "sprite": sp,
+		"arrow": arrow, "half_h": half_h})
 
-## 每帧刷新头顶血条比例（只读 bm.units；未绑定/未找到单位=满血）
+## 每帧刷新头顶血条比例（按 uidx 读 bm.units——同 id 多单位按 id 匹配会
+## 全部命中第一个，必须下标定位；未绑定/越界=满血）
 func _process(_delta: float) -> void:
 	if bm == null:
 		return
 	for s in _stand_units:
-		var unit: Variant = _find_unit(String(s["id"]))
+		var unit: Variant = null
+		var idx := int(s["uidx"])
+		if idx >= 0 and idx < bm.units.size():
+			unit = bm.units[idx]
 		var ratio := 1.0
 		var alive := true
 		if unit != null:
@@ -159,12 +215,6 @@ func _process(_delta: float) -> void:
 		var sp: Sprite2D = s["sprite"]
 		if sp != null:
 			sp.modulate = Color(1, 1, 1, DEAD_DIM) if not alive else Color.WHITE
-
-func _find_unit(uid: String) -> Variant:
-	for u in (bm.units if bm != null else []):
-		if str(u.id) == uid:
-			return u
-	return null
 
 func _hp_color(uid: String, is_ally: bool) -> Color:
 	if not is_ally:

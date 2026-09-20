@@ -84,6 +84,7 @@ func _case_timeout(dm) -> void:
 	_check(result == "timeout")  # 6 轮上限强制结束，无死锁（胜负语义待制作人裁定）
 	_check(bm.round_num == 6 and bm.units[0].is_alive() and bm.units[1].is_alive())
 	var bm0 = BM.new(dm, ["awakened_mech_01"], ["corrosion_beast"])  # 用例三b：max_rounds=0=无上限
+	bm0.force_crit = 0  # T3.10 补：此前未设随机暴击通道（flaky，10% 暴击会提前 R2 win）
 	bm0.units[1].max_hp = 40
 	bm0.units[1].hp = 40
 	var r0: String = await bm0.run_to_end(0)
