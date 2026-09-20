@@ -109,7 +109,7 @@ graph TD
     T2.4 --> P6
 ```
 
-**并行建议**：T0.1~T3.7、T4.1~T4.3 已交付（见 §4 已完成卡一览）；**待启动**：角色系统补充卡 T2.9→T2.10（系统程序主责，口径=docs/系统规则/角色系统.md）、战斗系统修订返工卡 T3.8→T3.9→T3.10→T3.11（战斗程序01 主责，口径=docs/系统规则/战斗系统.md）。**并行约束**：T2.9 为 T3.10/T3.11 数据前置（skills.csv 三技能列），未完成不得开工；T2.9/T2.10 与 T3.8/T3.9 无交集可并行。T4.4 待放行评估；P5 启动判定：T5.1 前置（T4.3）已过可启用。
+**并行建议**：T0.1~T3.7、T4.1~T4.3、T2.9 已交付（见 §4 已完成卡一览）；**进行中**：T2.10 角色设计器（系统程序06 主责，口径=docs/系统规则/角色系统.md §7）；**待启动**：战斗系统修订返工卡 T3.8→T3.9→T3.10→T3.11（战斗程序01 主责，口径=docs/系统规则/战斗系统.md）。**并行约束**：T2.9 已验收，T3.10/T3.11 数据前置（skills.csv 三技能列）封锁已解除；T2.10 与 T3.8 无文件交集可并行。T4.4 待放行评估；P5 启动判定：T5.1 前置（T4.3）已过可启用。
 
 ***
 
@@ -139,6 +139,7 @@ graph TD
 | T2.6 | 美术视觉规范（占位升级） | 视觉规范文档+占位资源包+哨兵资源；8 向帧条契约锁死供 T3.6/T7.3（验证回填 5dd5f62） | 98775fb |
 | T2.7 | 遗留修补（名牌+冒烟断言） | 名牌读 CSV（quest_npc 组遍历，npc_id 唯一真相）+冒烟断言防回退 | 938a7b2 |
 | T2.8 | 星髓槽位制数据修订 | stellium.csv 重构 12 行槽位制+skills.csv 删 energy_cost+EnemyData 扩双技能列（跨岗登记 data_models.gd） | bad246c |
+| T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal/shield、艾蕾雅 enemy+damage/ally+amp、洛清弦 enemy+column/all+damage）+ enemy 两技能显式填；CharListPanel 展示三字段+background；6 冒烟回归全过（制作人05 验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
 | T3.1 | 敌人占位数据（灾蚀兽） | 四维 150/10/6/8+ai_pattern=simple+drop_sand=30+skill_small/skill_ult 双技能列 | ad2a25d |
 | T3.2 | 战斗状态机（跑速条制） | SpeedBarSimulator 跑速条模拟器替代 spd 排序+回合边界+tie-break（spd→我方→编队序） | 8a9ec4b / 48e9978 |
 | T3.3 | 指令系统（充能制） | charge 充能条 0~100+图标三态+charge_free 预留+指令校验 | 495723f |
@@ -149,7 +150,6 @@ graph TD
 | T4.1 | Dialogic 2 集成与冒烟验证 | Dialogic 2 集成+测试 dch/dtl+播放/结束信号冒烟 | b0ea063 |
 | T4.2 | CSV→Dialogic 转换管线 | csv_to_dialogic.gd 幂等管线+DialogicBridge 桥接+set_flag/flag_condition 列约定 | c15a809 |
 | T4.3 | 主线剧情 1 段（邂逅 3 人） | 正式台词 CSV+触发区分发+flag 清单（收尾 403f5ca 重跑管线） | 338d8d3 |
-| T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal/shield、艾蕾雅 enemy+damage/ally+amp、洛清弦 enemy+column/all+damage）+ enemy 两技能显式填；CharListPanel 技能列表展示三字段+background 并入详情；6 冒烟回归全过（制作人05 验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
 
 > T2.1 遗留修补已由 T2.7（A1 名牌 / A2 冒烟断言）、T2.8（A4 套装制）清偿完毕。
 > **战斗系统修订返工卡=T3.8/T3.9/T3.10（见 P3 返工卡段）。**
