@@ -86,7 +86,7 @@
 | --- | --- | --- | --- | --- |
 | P0 | 项目骨架与工具链 | T0.1~T0.4 | ✅ 完成 | — |
 | P1 | 等距地图与移动 | T1.1~T1.6 | ✅ 完成 | P0 |
-| P2 | 角色数据、队伍与底层系统框架 | T2.1~T2.8 ✅；T2.9 ✅（验收 2026-09-20，制作人05）；T2.10 进行中（系统程序06 主责） | 补充卡链进行中 | P0（与 P1 并行） |
+| P2 | 角色数据、队伍与底层系统框架 | T2.1~T2.9 ✅；T2.10 进行中（系统程序06 主责） | 补充卡链进行中 | P0（与 P1 并行） |
 | P3 | 战斗系统 | T3.1~T3.7 ✅；返工卡 T3.8→T3.9→T3.10→T3.11（战斗系统修订） | 返工待启动 | P2（T2.1/T2.2） |
 | P4 | Dialogic 剧情演出 | T4.1~T4.3 ✅、T4.4 待放行评估 | 进行中 | P1、P2 |
 | P5 | 心契任务 | T5.1~T5.4 | 待启动 | P3、P4 |
@@ -139,7 +139,7 @@ graph TD
 | T2.6 | 美术视觉规范（占位升级） | 视觉规范文档+占位资源包+哨兵资源；8 向帧条契约锁死供 T3.6/T7.3（验证回填 5dd5f62） | 98775fb |
 | T2.7 | 遗留修补（名牌+冒烟断言） | 名牌读 CSV（quest_npc 组遍历，npc_id 唯一真相）+冒烟断言防回退 | 938a7b2 |
 | T2.8 | 星髓槽位制数据修订 | stellium.csv 重构 12 行槽位制+skills.csv 删 energy_cost+EnemyData 扩双技能列（跨岗登记 data_models.gd） | bad246c |
-| T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal/shield、艾蕾雅 enemy+damage/ally+amp、洛清弦 enemy+column/all+damage）+ enemy 两技能显式填；CharListPanel 展示三字段+background；6 冒烟回归全过（制作人05 验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
+| T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省 enemy/single/damage 容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal 2.0/shield 3.0、艾蕾雅 enemy+all 1.2/ally+all amp 30、洛清弦 enemy+column 1.2/enemy+all 2.5）+ enemy 两技能显式 enemy+single+damage；CharListPanel 展示 background+三字段；6 冒烟回归 EXIT=0（验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
 | T3.1 | 敌人占位数据（灾蚀兽） | 四维 150/10/6/8+ai_pattern=simple+drop_sand=30+skill_small/skill_ult 双技能列 | ad2a25d |
 | T3.2 | 战斗状态机（跑速条制） | SpeedBarSimulator 跑速条模拟器替代 spd 排序+回合边界+tie-break（spd→我方→编队序） | 8a9ec4b / 48e9978 |
 | T3.3 | 指令系统（充能制） | charge 充能条 0~100+图标三态+charge_free 预留+指令校验 | 495723f |
