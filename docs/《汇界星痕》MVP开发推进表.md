@@ -140,7 +140,7 @@ graph TD
 | T2.7 | 遗留修补（名牌+冒烟断言） | 名牌读 CSV（quest_npc 组遍历，npc_id 唯一真相）+冒烟断言防回退 | 938a7b2 |
 | T2.8 | 星髓槽位制数据修订 | stellium.csv 重构 12 行槽位制+skills.csv 删 energy_cost+EnemyData 扩双技能列（跨岗登记 data_models.gd） | bad246c |
 | T2.9 | 角色系统数据落地与三角色迁移 | SkillData 扩 target_side/target_scope/effect 三字段（缺省 enemy/single/damage 容错）+ CharacterData.background；skills.csv 三角色技能按角色系统.md §5 重定义迁移（诺菈 ally+heal 2.0/shield 3.0、艾蕾雅 enemy+all 1.2/ally+all amp 30、洛清弦 enemy+column 1.2/enemy+all 2.5）+ enemy 两技能显式 enemy+single+damage；CharListPanel 展示 background+三字段；6 冒烟回归 EXIT=0（验收 2026-09-20） | 32ccc2b / 81df7cf / 099d575 |
-| T2.10 | 角色设计器 | tools/character_designer.gd（headless）：characters.csv/skills.csv 全行校验（列数/枚举/id 规则/引用/占位资源）+ DataManager·ArtProvider 冒烟 + 逐项报告 `EXIT=0\|1`；端到端实测新角色零代码入角色列表（列表截图 + 数据用后删）；三类坏数据（缺列/坏枚举/坏引用）FAIL 定位到行；口径冲突（§3 技能 id 按体系 vs §6 新角色两行技能）报制作人04 | 58438b1 |
+| T2.10 | 角色设计器 | tools/character_designer.gd（headless）：characters.csv/skills.csv 全行校验（列数/枚举/id 规则/引用/占位资源）+ DataManager·ArtProvider 冒烟 + 逐项报告 `EXIT=0\|1`；端到端实测新角色零代码入角色列表（列表截图 + 数据用后删）；三类坏数据（缺列/坏枚举/坏引用）FAIL 定位到行；口径冲突（§3 技能 id 按体系 vs §6 新角色两行技能）报制作人04；**收口小修**：技能 id 迁为按角色 `skill_<体系>_<两位序号>_<s1\|ult>` + 设计器 id 规则/序号段一致性/WARN·FAIL 档 | 58438b1、385e3bf |
 | T3.1 | 敌人占位数据（灾蚀兽） | 四维 150/10/6/8+ai_pattern=simple+drop_sand=30+skill_small/skill_ult 双技能列 | ad2a25d |
 | T3.2 | 战斗状态机（跑速条制） | SpeedBarSimulator 跑速条模拟器替代 spd 排序+回合边界+tie-break（spd→我方→编队序） | 8a9ec4b / 48e9978 |
 | T3.3 | 指令系统（充能制） | charge 充能条 0~100+图标三态+charge_free 预留+指令校验 | 495723f |
@@ -485,7 +485,7 @@ graph TD
 提交：git commit -m "T2.9: 角色系统数据落地与三角色迁移" 并 push。
 ```
 
-#### T2.10 角色设计器 ✅ 完成（系统程序06 主责；收口小修 🚧）
+#### T2.10 角色设计器 ✅ 完成（系统程序06 主责；收口小修已落地）
 
 | 字段 | 内容 |
 | --- | --- |
@@ -534,9 +534,9 @@ graph TD
 3. tools/character_designer.gd：id 正则改 `^skill_(mech|arcane|xian)_\d{2}_(s1|ult)$`；新增「技能 id 体系段+序号段 == 引用角色 id 段」校验；新增 WARN 档（不改 EXIT）：target_side↔effect 错配、background 空；name 空改判 FAIL。
 4. 冒烟断言字面量同步（只换 id 字面量，不改断言意图）：tools/smoke_test_data_models.gd、tools/smoke_test_damage_calc.gd、tools/smoke_test_cutscene.gd。
 5. headless 验证（GODOT_MCP_RUNTIME_PORT='abc'）：设计器 `通过 N 项，失败 0 项 / EXIT=0`；常驻冒烟 data_models/battle/battle_scene/party_bonus/damage_calc/cutscene 全 EXIT=0；反例验证——enemy+heal 与 background 空各打印 WARN 且 EXIT 仍 0，name 空判 FAIL。
-6. 并行注意：T3.8（战斗程序01）正在复跑冒烟，本小修落地后立即在交接班表公示新 id 清单，避免其假红。
+6. 并行注意：T3.8（战斗程序02）待本小修落地后开工，本小修落地后立即在交接班表公示新 id 清单，避免其假红。
 
-收工：commit "T2.10收口小修: 技能id按角色迁移+设计器WARN档" → push；系统程序_交接班表追加一行（新 id 清单 + WARN/FAIL 档契约）；知会数值策划01 复核、战斗程序01（T3.10/T3.11 引用新 id）。
+收工：commit "T2.10收口小修: 技能id按角色迁移+设计器WARN档" → push；系统程序_交接班表追加一行（新 id 清单 + WARN/FAIL 档契约）；知会数值策划01 复核、战斗程序02（T3.10/T3.11 引用新 id）。
 ```
 
 ### P3 战斗系统
